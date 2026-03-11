@@ -1,0 +1,34 @@
+set shell := ["sh", "-cu"]
+set windows-shell := ["C:/Program Files/Git/bin/bash.exe", "-uc"]
+
+browser_open := if os() == "windows" { "rundll32.exe url.dll,FileProtocolHandler" } else if os() == "macos" { "open" } else { "xdg-open" }
+
+default:
+    @just --list
+
+dev:
+    @pnpm dev
+
+open:
+    @{{ browser_open }} http://localhost:3001
+
+build:
+    @pnpm build
+
+start:
+    @pnpm start
+
+preview:
+    @pnpm preview
+
+test:
+    @pnpm test
+
+format:
+    @pnpm format
+
+lint:
+    @pnpm lint
+
+check:
+    @pnpm check

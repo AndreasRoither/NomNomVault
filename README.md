@@ -31,6 +31,9 @@ The focus of this project is on **self-hosting**. You run it on your own hardwar
 ## Quick Start
 
 ### Prerequisites
+- `just`
+- Docker and Docker Compose
+- Go and Node.js
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -41,6 +44,17 @@ The focus of this project is on **self-hosting**. You run it on your own hardwar
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Development Commands
+Top-level workflows can be used through [`justfile`](./justfile).
+
+```bash
+just
+just dev
+just test
+just lint
+just openapi-check
+just compose-up
+just compose-down
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

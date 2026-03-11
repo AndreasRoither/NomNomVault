@@ -1,0 +1,17 @@
+{
+  "name": "nomnomvault",
+  "private": true,
+  "packageManager": "pnpm@10.12.4",
+  "scripts": {
+    "dev": "just dev",
+    "test": "just test",
+    "lint": "just lint",
+    "openapi-check": "just openapi-check"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lightningcss"
+    ]
+  }
+}
