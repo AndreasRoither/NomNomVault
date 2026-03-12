@@ -7,13 +7,16 @@ default:
     @just --list
 
 dev:
-    @pnpm dev
+    @exec pnpm dev
 
 open:
     @{{ browser_open }} http://localhost:3001
 
 build:
     @pnpm build
+
+clean:
+    @rm -rf dist .output .tanstack
 
 start:
     @pnpm start
