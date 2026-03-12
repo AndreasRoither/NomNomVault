@@ -7,19 +7,91 @@ on:
     tags:
       - "*"
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
 permissions:
   contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.detect.outputs.frontend }}
+      backend: ${{ steps.detect.outputs.backend }}
+      openapi: ${{ steps.detect.outputs.openapi }}
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+      - id: detect
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          IS_TAG: ${{ startsWith(github.ref, 'refs/tags/') }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "$IS_TAG" = "true" ]; then
+            echo "frontend=true" >> "$GITHUB_OUTPUT"
+            echo "backend=true" >> "$GITHUB_OUTPUT"
+            echo "openapi=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -z "${BEFORE_SHA:-}" ] || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            changed_files="$(git ls-tree -r --name-only HEAD)"
+          elif git cat-file -e "${BEFORE_SHA}^{commit}" 2>/dev/null; then
+            changed_files="$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA")"
+          else
+            changed_files="$(git ls-tree -r --name-only HEAD)"
+          fi
+
+          frontend=false
+          backend=false
+          openapi=false
+
+          while IFS= read -r file; do
+            [ -n "$file" ] || continue
+
+            case "$file" in
+              .github/workflows/ci.yml|.npmrc|justfile|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|frontend/*)
+                frontend=true
+                ;;
+            esac
+
+            case "$file" in
+              .github/workflows/ci.yml|justfile|backend/*)
+                backend=true
+                ;;
+            esac
+
+            case "$file" in
+              .github/workflows/ci.yml|justfile|backend/openapi/*|frontend/packages/api-client/src/generated/*)
+                openapi=true
+                ;;
+            esac
+          done <<EOF
+          $changed_files
+          EOF
+
+          echo "frontend=$frontend" >> "$GITHUB_OUTPUT"
+          echo "backend=$backend" >> "$GITHUB_OUTPUT"
+          echo "openapi=$openapi" >> "$GITHUB_OUTPUT"
+
   frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
-      - uses: pnpm/action-setup@v4.3.0
       - uses: actions/setup-node@v6.3.0
         with:
           node-version: 24
           cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: npm install --global pnpm@10.32.1
       - uses: taiki-e/install-action@v2.68.26
         with:
           tool: just
@@ -28,25 +100,24 @@ jobs:
       - run: just frontend-build
 
   backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
       - uses: actions/setup-go@v6.3.0
         with:
           go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
       - uses: taiki-e/install-action@v2.68.26
         with:
           tool: just
       - run: just backend-test
       - run: just backend-build
 
-  containers:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6.0.2
-      - run: docker compose build
-
   openapi:
+    needs: changes
+    if: needs.changes.outputs.openapi == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
