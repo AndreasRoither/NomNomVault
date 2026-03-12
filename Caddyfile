@@ -1,0 +1,11 @@
+recipes.localhost {
+	reverse_proxy recipes-web:3000
+}
+
+grocery.localhost {
+	reverse_proxy grocery-web:3001
+}
+
+api.localhost {
+	reverse_proxy api:8080
+}

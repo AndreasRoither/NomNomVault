@@ -1,0 +1,92 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: nomnomvault
+      POSTGRES_USER: nomnomvault
+      POSTGRES_PASSWORD: nomnomvault
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nomnomvault -d nomnomvault"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: api
+    environment:
+      DATABASE_URL: postgres://nomnomvault:nomnomvault@postgres:5432/nomnomvault?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/healthz >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: worker
+    environment:
+      DATABASE_URL: postgres://nomnomvault:nomnomvault@postgres:5432/nomnomvault?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/healthz >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  recipes-web:
+    build:
+      context: .
+      dockerfile: frontend/apps/recipes-web/Dockerfile
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      NODE_ENV: production
+    depends_on:
+      api:
+        condition: service_started
+
+  grocery-web:
+    build:
+      context: .
+      dockerfile: frontend/apps/grocery-web/Dockerfile
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3001
+      NODE_ENV: production
+    depends_on:
+      api:
+        condition: service_started
+
+  caddy:
+    image: caddy:2.11-alpine
+    depends_on:
+      api:
+        condition: service_started
+      recipes-web:
+        condition: service_started
+      grocery-web:
+        condition: service_started
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+
+volumes:
+  postgres-data:

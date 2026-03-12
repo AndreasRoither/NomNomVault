@@ -8,42 +8,74 @@ default:
 install:
     @pnpm install
 
-# Start both frontend development servers.
+# Start both frontend development servers locally.
 dev:
-    @pnpm -r --parallel --stream --filter @nomnomvault/recipes-web --filter @nomnomvault/grocery-web run dev
+    @exec pnpm -r --parallel --stream --filter @nomnomvault/recipes-web --filter @nomnomvault/grocery-web run dev
 
-# Start the recipes frontend development server.
+# Start only the recipes frontend development server.
 recipes-dev:
     @just --justfile frontend/apps/recipes-web/justfile dev
 
-# Start the grocery frontend development server.
+# Start only the grocery frontend development server.
 grocery-dev:
     @just --justfile frontend/apps/grocery-web/justfile dev
 
-# Open the recipes frontend in the default browser.
-recipes-open:
-    @just --justfile frontend/apps/recipes-web/justfile open
+# Start only the local infrastructure needed for development.
+infra-up:
+    @docker compose up -d postgres
 
-# Open the grocery frontend in the default browser.
-grocery-open:
-    @just --justfile frontend/apps/grocery-web/justfile open
+# Stop the local infrastructure started via infra-up.
+infra-down:
+    @docker compose stop postgres
 
-# Run the current frontend test suites.
+# Build all backend and frontend targets.
+build:
+    @just backend-build
+    @just frontend-build
+
+# Run all backend and frontend tests.
 test:
+    @just backend-test
     @just frontend-test
 
-# Run the current frontend linters.
+# Run all lint and formatting checks.
 lint:
+    @just backend-lint
     @just frontend-lint
 
-# Run the current frontend formatter checks.
+# Run the aggregate validation gate used locally and in CI.
 check:
-    @just frontend-check
+    @just lint
+    @just test
+    @just build
+    @just openapi-check
+
+# Build the backend packages.
+backend-build:
+    @cd backend && go build ./...
+
+# Run backend tests.
+backend-test:
+    @cd backend && go test ./...
+
+# Check backend formatting.
+backend-lint:
+    @files="$(find backend -name '*.go' -type f)"; \
+    output="$(gofmt -l $files)"; \
+    if [ -n "$output" ]; then \
+      echo "$output"; \
+      exit 1; \
+    fi
 
 # Build all frontend apps.
 frontend-build:
     @just recipes-build
     @just grocery-build
+
+# Remove frontend build output and local framework caches for all apps.
+frontend-clean:
+    @just recipes-clean
+    @just grocery-clean
 
 # Run all frontend tests.
 frontend-test:
@@ -64,9 +96,17 @@ frontend-check:
 recipes-build:
     @just --justfile frontend/apps/recipes-web/justfile build
 
+# Remove recipes frontend build output and local caches.
+recipes-clean:
+    @just --justfile frontend/apps/recipes-web/justfile clean
+
 # Build the grocery frontend.
 grocery-build:
     @just --justfile frontend/apps/grocery-web/justfile build
+
+# Remove grocery frontend build output and local caches.
+grocery-clean:
+    @just --justfile frontend/apps/grocery-web/justfile clean
 
 # Test the recipes frontend.
 recipes-test:
@@ -92,14 +132,26 @@ recipes-check:
 grocery-check:
     @just --justfile frontend/apps/grocery-web/justfile check
 
-# Check the OpenAPI spec and generated client for drift.
+# Check the committed OpenAPI artifacts when present.
 openapi-check:
-    @echo "TODO: verify the OpenAPI spec and generated client are in sync"
+    @if [ ! -f backend/openapi/openapi.yaml ]; then \
+      echo "OpenAPI artifacts not present yet; skipping drift check."; \
+      exit 0; \
+    elif [ ! -f frontend/packages/api-client/src/generated/schema.ts ]; then \
+      echo "backend/openapi/openapi.yaml exists but frontend/packages/api-client/src/generated/schema.ts is missing."; \
+      exit 1; \
+    else \
+      echo "OpenAPI artifacts are present. Full drift enforcement lands with the OpenAPI pipeline ticket."; \
+    fi
 
-# Start the local Docker Compose stack.
+# Start the full local Docker Compose stack.
 compose-up:
-    @echo "TODO: start postgres, garage, api, worker, web, and reverse proxy"
+    @docker compose up --build -d postgres api worker recipes-web grocery-web caddy
 
-# Stop the local Docker Compose stack.
+# Stop the full local Docker Compose stack.
 compose-down:
-    @echo "TODO: stop the local Docker Compose stack"
+    @docker compose down --remove-orphans
+
+# Follow logs from the compose stack.
+compose-logs:
+    @docker compose logs -f
