@@ -89,9 +89,13 @@ jobs:
       - uses: actions/setup-node@v6.3.0
         with:
           node-version: 24
+          package-manager-cache: false
+      - run: npm install --global pnpm@10.32.1
+      - uses: actions/setup-node@v6.3.0
+        with:
+          node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - run: npm install --global pnpm@10.32.1
       - uses: taiki-e/install-action@v2.68.26
         with:
           tool: just
