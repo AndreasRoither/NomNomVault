@@ -116,6 +116,9 @@ jobs:
       - uses: taiki-e/install-action@v2.68.26
         with:
           tool: just
+      - run: go install -tags "postgres" github.com/golang-migrate/migrate/v4/cmd/migrate@v4.19.1
+      - run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - run: just db-verify
       - run: just backend-test
       - run: just backend-build
 
@@ -125,7 +128,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-go@v6.3.0
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - uses: actions/setup-node@v6.3.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm install --global pnpm@10.32.1
+      - uses: actions/setup-node@v6.3.0
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
       - uses: taiki-e/install-action@v2.68.26
         with:
           tool: just
+      - run: pnpm install --frozen-lockfile
       - run: just openapi-check
