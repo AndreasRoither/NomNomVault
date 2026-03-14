@@ -13,6 +13,7 @@
     "check": "biome check"
   },
   "dependencies": {
+    "@nomnomvault/api-client": "workspace:*",
     "@t3-oss/env-core": "^0.13.10",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/router-plugin": "^1.133.21",
