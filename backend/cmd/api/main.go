@@ -1,3 +1,7 @@
+// @title NomNomVault API
+// @version 0.1.0
+// @BasePath /api/v1
+// @schemes http https
 package main
 
 import (
@@ -10,6 +14,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
+	authhttpapi "github.com/AndreasRoither/NomNomVault/backend/internal/api/httpapi/auth"
+	recipeshttpapi "github.com/AndreasRoither/NomNomVault/backend/internal/api/httpapi/recipes"
 )
 
 func main() {
@@ -21,6 +28,8 @@ func main() {
 
 	apiV1 := router.Group("/api/v1")
 	apiV1.GET("/healthz", healthz)
+	authhttpapi.RegisterRoutes(apiV1)
+	recipeshttpapi.RegisterRoutes(apiV1)
 
 	server := &http.Server{
 		Addr:              ":8080",

@@ -1,0 +1,345 @@
+openapi: 3.0.0
+info:
+  contact: {}
+  title: NomNomVault API
+  version: 0.1.0
+paths:
+  /auth/login:
+    post:
+      description: Validate the local login contract and return the active session snapshot.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/httpapi.AuthLoginRequest"
+        description: Login payload
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.AuthSessionResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Log in with email and password
+      tags:
+        - auth
+  /auth/logout:
+    post:
+      description: Clear the current session in the cookie-first auth flow.
+      responses:
+        "204":
+          description: No Content
+      summary: Log out the current session
+      tags:
+        - auth
+  /auth/refresh:
+    post:
+      description: Rotate the refresh record and return the current active session snapshot.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.AuthSessionResponse"
+      summary: Refresh the current session
+      tags:
+        - auth
+  /auth/register:
+    post:
+      description: Create a user and bootstrap the default household context.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/httpapi.AuthRegisterRequest"
+        description: Register payload
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.AuthSessionResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Register a local user
+      tags:
+        - auth
+  /auth/session:
+    get:
+      description: Return the authenticated user and active household context.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.AuthSessionResponse"
+      summary: Fetch the active browser session
+      tags:
+        - auth
+  /recipes:
+    get:
+      description: Return the current household recipe list using a cursor pagination
+        envelope.
+      parameters:
+        - description: Cursor token
+          in: query
+          name: cursor
+          schema:
+            type: string
+        - description: Maximum number of recipes to return
+          in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.RecipeListResponse"
+      summary: List recipes
+      tags:
+        - recipes
+  "/recipes/{recipeId}":
+    get:
+      description: Return the detailed recipe payload for the requested recipe ID.
+      parameters:
+        - description: Recipe ID
+          in: path
+          name: recipeId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.RecipeDetailResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Fetch a recipe detail
+      tags:
+        - recipes
+servers:
+  - url: /api/v1
+components:
+  schemas:
+    apicontract.CursorPageInfo:
+      properties:
+        hasMore:
+          type: boolean
+        nextCursor:
+          type: string
+      type: object
+    apicontract.ErrorResponse:
+      properties:
+        code:
+          type: string
+        details:
+          items:
+            $ref: "#/components/schemas/apicontract.ValidationError"
+          type: array
+        message:
+          type: string
+        status:
+          type: integer
+      type: object
+    apicontract.ValidationError:
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+      type: object
+    httpapi.AuthLoginRequest:
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+      type: object
+    httpapi.AuthRegisterRequest:
+      properties:
+        displayName:
+          type: string
+        email:
+          type: string
+        password:
+          minLength: 8
+          type: string
+      required:
+        - displayName
+        - email
+        - password
+      type: object
+    httpapi.AuthSessionResponse:
+      properties:
+        activeHousehold:
+          $ref: "#/components/schemas/httpapi.AuthenticatedHousehold"
+        authenticated:
+          type: boolean
+        user:
+          $ref: "#/components/schemas/httpapi.AuthenticatedUser"
+      type: object
+    httpapi.AuthenticatedHousehold:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+        slug:
+          type: string
+      type: object
+    httpapi.AuthenticatedUser:
+      properties:
+        displayName:
+          type: string
+        email:
+          type: string
+        emailVerified:
+          type: boolean
+        id:
+          type: string
+        lastLoginAt:
+          type: string
+        role:
+          type: string
+      type: object
+    httpapi.RecipeDetailResponse:
+      properties:
+        ingredients:
+          items:
+            $ref: "#/components/schemas/httpapi.RecipeIngredientItem"
+          type: array
+        mediaAssets:
+          items:
+            $ref: "#/components/schemas/httpapi.RecipeMediaItem"
+          type: array
+        recipe:
+          $ref: "#/components/schemas/httpapi.RecipeSummary"
+        steps:
+          items:
+            $ref: "#/components/schemas/httpapi.RecipeStepItem"
+          type: array
+        tags:
+          items:
+            $ref: "#/components/schemas/httpapi.RecipeTagItem"
+          type: array
+      type: object
+    httpapi.RecipeIngredientItem:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        preparation:
+          type: string
+        quantity:
+          type: number
+        sortOrder:
+          type: integer
+        unit:
+          type: string
+      type: object
+    httpapi.RecipeListResponse:
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/httpapi.RecipeSummary"
+          type: array
+        page:
+          $ref: "#/components/schemas/apicontract.CursorPageInfo"
+      type: object
+    httpapi.RecipeMediaItem:
+      properties:
+        checksum:
+          type: string
+        id:
+          type: string
+        mediaType:
+          type: string
+        mimeType:
+          type: string
+        originalFilename:
+          type: string
+        sizeBytes:
+          type: integer
+        storedAt:
+          type: string
+      type: object
+    httpapi.RecipeStepItem:
+      properties:
+        durationMinutes:
+          type: integer
+        id:
+          type: string
+        instruction:
+          type: string
+        sortOrder:
+          type: integer
+        tip:
+          type: string
+      type: object
+    httpapi.RecipeSummary:
+      properties:
+        cookMinutes:
+          type: integer
+        description:
+          type: string
+        id:
+          type: string
+        prepMinutes:
+          type: integer
+        primaryMediaId:
+          type: string
+        servings:
+          type: integer
+        sourceCapturedAt:
+          type: string
+        sourceUrl:
+          type: string
+        title:
+          type: string
+        version:
+          type: integer
+      type: object
+    httpapi.RecipeTagItem:
+      properties:
+        color:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        system:
+          type: boolean
+      type: object
