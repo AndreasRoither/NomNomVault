@@ -1,12 +1,16 @@
 set shell := ["sh", "-cu"]
 set windows-shell := ["C:/Program Files/Git/bin/bash.exe", "-uc"]
 
+migrate_cli := "github.com/golang-migrate/migrate/v4/cmd/migrate@v4.19.1"
+default_database_url := "postgres://nomnomvault:nomnomvault@127.0.0.1:5432/nomnomvault?sslmode=disable"
+
 default:
     @just --list
 
-# Install all workspace dependencies.
+# Install workspace dependencies and required CLIs.
 install:
     @pnpm install
+    @go install -tags 'postgres' {{ migrate_cli }}
 
 # Start both frontend development servers locally.
 dev:
@@ -48,6 +52,7 @@ check:
     @just lint
     @just test
     @just build
+    @just db-verify
     @just openapi-check
 
 # Build the backend packages.
@@ -57,6 +62,22 @@ backend-build:
 # Run backend tests.
 backend-test:
     @cd backend && go test ./...
+
+# Regenerate Ent code from backend/internal/ent/schema into backend/internal/ent/generated.
+ent-generate:
+    @cd backend/internal/ent && go generate ./...
+
+# Generate a new golang-migrate migration pair from the current Ent schema.
+db-diff name:
+    @./scripts/db-diff.sh {{ name }}
+
+# Apply checked-in golang-migrate migrations to the configured database.
+db-apply:
+    @migrate -path backend/db/migrations -database "$${DATABASE_URL:-{{ default_database_url }}}" up
+
+# Verify golang-migrate migrations and Ent schema drift against a disposable Postgres instance.
+db-verify:
+    @./scripts/db-verify.sh
 
 # Check backend formatting.
 backend-lint:
@@ -132,17 +153,13 @@ recipes-check:
 grocery-check:
     @just --justfile frontend/apps/grocery-web/justfile check
 
-# Check the committed OpenAPI artifacts when present.
+# Generate the committed OpenAPI spec and TypeScript schema artifacts.
+openapi-generate:
+    @./scripts/openapi-generate.sh
+
+# Regenerate OpenAPI artifacts and fail on drift.
 openapi-check:
-    @if [ ! -f backend/openapi/openapi.yaml ]; then \
-      echo "OpenAPI artifacts not present yet; skipping drift check."; \
-      exit 0; \
-    elif [ ! -f frontend/packages/api-client/src/generated/schema.ts ]; then \
-      echo "backend/openapi/openapi.yaml exists but frontend/packages/api-client/src/generated/schema.ts is missing."; \
-      exit 1; \
-    else \
-      echo "OpenAPI artifacts are present. Full drift enforcement lands with the OpenAPI pipeline ticket."; \
-    fi
+    @./scripts/openapi-check.sh
 
 # Start the full local Docker Compose stack.
 compose-up:

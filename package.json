@@ -6,7 +6,13 @@
     "dev": "just dev",
     "test": "just test",
     "lint": "just lint",
+    "openapi-generate": "just openapi-generate",
     "openapi-check": "just openapi-check"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.13.0",
+    "sql-formatter": "15.7.2",
+    "swagger2openapi": "7.0.8"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

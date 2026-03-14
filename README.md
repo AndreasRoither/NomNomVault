@@ -36,38 +36,92 @@ The focus of this project is on **self-hosting**. You run it on your own hardwar
 - Go
 - Node.js with `pnpm`
 
-### Development Commands
-Top-level workflows can be used through [`justfile`](./justfile).
+### Frontend Only
 
 ```bash
 just install
 just dev
-just recipes-dev
-just grocery-dev
-just infra-up
-just test
-just lint
-just check
-just openapi-check
+```
+
+- Recipes app: `http://localhost:3000`
+- Grocery app: `http://localhost:3001`
+
+### Full Stack
+
+```bash
+just install
 just compose-up
+```
+
+- Recipes app: `http://recipes.localhost`
+- Grocery app: `http://grocery.localhost`
+- API health check: `http://api.localhost/api/v1/healthz`
+
+### Stop
+
+```bash
 just compose-down
-just compose-logs
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Backend Development
+## Backend
 
-- `just infra-up` starts the local PostgreSQL dependency for backend development.
+### Basics
 
-## Frontend Development
+- Backend code lives in `backend/`.
+- The API listens on `http://localhost:8080`.
+- The worker health endpoint listens on `http://localhost:8081/healthz`.
+- PostgreSQL is provided by `just infra-up` or `just compose-up`.
 
-- `frontend/apps/recipes-web` runs on `http://localhost:3000`.
-- `frontend/apps/grocery-web` runs on `http://localhost:3001`.
-- `just dev` starts both frontend apps.
-- `just recipes-dev` starts only the recipes frontend.
-- `just grocery-dev` starts only the grocery frontend.
-- `just compose-up` exposes the full stack through Caddy on `http://recipes.localhost`, `http://grocery.localhost`, and `http://api.localhost`.
+### Startup
+
+Start only the backend dependencies:
+
+```bash
+just install
+just infra-up
+just db-apply
+```
+
+Run the API locally:
+
+```bash
+cd backend
+go run ./cmd/api
+```
+
+Run the worker locally when needed:
+
+```bash
+cd backend
+go run ./cmd/worker
+```
+
+## Frontend
+
+### Basics
+
+- Frontend apps live in `frontend/apps/recipes-web` and `frontend/apps/grocery-web`.
+- Shared frontend API types live in `frontend/packages/api-client`.
+- The recipes app runs on `http://localhost:3000`.
+- The grocery app runs on `http://localhost:3001`.
+
+### Startup
+
+Start both apps:
+
+```bash
+just install
+just dev
+```
+
+Start one app only:
+
+- `just recipes-dev`
+- `just grocery-dev`
+
+Use `just compose-up` if you want the frontend behind Caddy together with the backend and database.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
