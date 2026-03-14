@@ -4,6 +4,10 @@ import type { RequestContext } from './http'
 export type RecipeListParams = {
   cursor?: string
   limit?: number
+  q?: string
+  mealType?: string
+  region?: string
+  sort?: string
 }
 
 export type RecipeListResponse = components['schemas']['httpapi.RecipeListResponse']

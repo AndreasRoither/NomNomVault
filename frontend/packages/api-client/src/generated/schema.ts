@@ -435,10 +435,14 @@ export interface paths {
                     cursor?: string;
                     /** @description Maximum number of recipes to return */
                     limit?: number;
-                    /** @description Case-insensitive recipe search query */
+                    /** @description Search by title, ingredient, cuisine, or tag */
                     q?: string;
-                    /** @description Repeatable tag slug filters */
-                    tag?: string[];
+                    /** @description Filter by meal type */
+                    mealType?: string;
+                    /** @description Filter by region */
+                    region?: string;
+                    /** @description Sort by recent, quick, popular, or newest */
+                    sort?: string;
                 };
                 header?: never;
                 path?: never;
@@ -1084,6 +1088,7 @@ export interface components {
             ingredients?: components["schemas"]["httpapi.RecipeIngredientItem"][];
             mediaAssets?: components["schemas"]["httpapi.RecipeMediaItem"][];
             nutritionEntries?: components["schemas"]["httpapi.RecipeNutritionItem"][];
+            nutritionEntries?: components["schemas"]["httpapi.RecipeNutritionItem"][];
             recipe?: components["schemas"]["httpapi.RecipeSummary"];
             steps?: components["schemas"]["httpapi.RecipeStepItem"][];
             tags?: components["schemas"]["httpapi.RecipeTagItem"][];
@@ -1102,6 +1107,7 @@ export interface components {
         };
         "httpapi.RecipeMediaItem": {
             altText?: string;
+            altText?: string;
             checksum?: string;
             id?: string;
             mediaType?: string;
@@ -1109,7 +1115,23 @@ export interface components {
             originalFilename?: string;
             sizeBytes?: number;
             sortOrder?: number;
+            sortOrder?: number;
             storedAt?: string;
+            thumbnailUrl?: string;
+            url?: string;
+        };
+        "httpapi.RecipeNutritionItem": {
+            carbohydrates?: number;
+            energyKcal?: number;
+            fat?: number;
+            fiber?: number;
+            id?: string;
+            protein?: number;
+            referenceQuantity?: string;
+            salt?: number;
+            saturatedFat?: number;
+            sodium?: number;
+            sugars?: number;
             thumbnailUrl?: string;
             url?: string;
         };
@@ -1136,15 +1158,22 @@ export interface components {
         "httpapi.RecipeSummary": {
             allergens?: string[];
             caloriesPerServe?: number;
+            allergens?: string[];
+            caloriesPerServe?: number;
             cookMinutes?: number;
+            cuisine?: string;
             cuisine?: string;
             description?: string;
             difficulty?: string;
             galleryMediaIds?: string[];
+            difficulty?: string;
+            galleryMediaIds?: string[];
             id?: string;
+            mealType?: string;
             mealType?: string;
             prepMinutes?: number;
             primaryMediaId?: string;
+            region?: string;
             region?: string;
             servings?: number;
             sourceCapturedAt?: string;

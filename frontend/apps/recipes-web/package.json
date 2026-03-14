@@ -7,13 +7,16 @@
     "build": "vite build",
     "start": "node .output/server/index.mjs",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check"
   },
   "dependencies": {
+    "@fontsource-variable/geist": "^5.2.8",
     "@nomnomvault/api-client": "workspace:*",
+    "@nomnomvault/app-shell": "workspace:*",
+    "@nomnomvault/ui": "workspace:*",
     "@t3-oss/env-core": "^0.13.10",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/router-plugin": "^1.133.21",
@@ -29,8 +32,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@solidjs/testing-library": "latest",
     "@biomejs/biome": "2.4.5",
+    "@solidjs/testing-library": "latest",
     "@tanstack/devtools-vite": "latest",
     "jsdom": "latest",
     "nitro": "latest",

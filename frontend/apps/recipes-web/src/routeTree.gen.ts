@@ -9,10 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DemoTanstackQueryRouteImport } from './routes/demo.tanstack-query'
+import { Route as AppAboutRouteImport } from './routes/app.about'
+import { Route as AppRecipesIndexRouteImport } from './routes/app.recipes.index'
+import { Route as AppRecipesRecipeIdRouteImport } from './routes/app.recipes.$recipeId'
 
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -23,44 +31,89 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
-  id: '/demo/tanstack-query',
-  path: '/demo/tanstack-query',
-  getParentRoute: () => rootRouteImport,
+const AppAboutRoute = AppAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRecipesIndexRoute = AppRecipesIndexRouteImport.update({
+  id: '/recipes/',
+  path: '/recipes/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRecipesRecipeIdRoute = AppRecipesRecipeIdRouteImport.update({
+  id: '/recipes/$recipeId',
+  path: '/recipes/$recipeId',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/about': typeof AppAboutRoute
+  '/app/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
+  '/app/recipes/': typeof AppRecipesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/about': typeof AppAboutRoute
+  '/app/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
+  '/app/recipes': typeof AppRecipesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/about': typeof AppAboutRoute
+  '/app/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
+  '/app/recipes/': typeof AppRecipesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/demo/tanstack-query'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/app'
+    | '/app/about'
+    | '/app/recipes/$recipeId'
+    | '/app/recipes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/demo/tanstack-query'
-  id: '__root__' | '/' | '/about' | '/demo/tanstack-query'
+  to:
+    | '/'
+    | '/about'
+    | '/app'
+    | '/app/about'
+    | '/app/recipes/$recipeId'
+    | '/app/recipes'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/app'
+    | '/app/about'
+    | '/app/recipes/$recipeId'
+    | '/app/recipes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/solid-router' {
   interface FileRoutesByPath {
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -75,20 +128,48 @@ declare module '@tanstack/solid-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo/tanstack-query': {
-      id: '/demo/tanstack-query'
-      path: '/demo/tanstack-query'
-      fullPath: '/demo/tanstack-query'
-      preLoaderRoute: typeof DemoTanstackQueryRouteImport
-      parentRoute: typeof rootRouteImport
+    '/app/about': {
+      id: '/app/about'
+      path: '/about'
+      fullPath: '/app/about'
+      preLoaderRoute: typeof AppAboutRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/recipes/': {
+      id: '/app/recipes/'
+      path: '/recipes'
+      fullPath: '/app/recipes/'
+      preLoaderRoute: typeof AppRecipesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/recipes/$recipeId': {
+      id: '/app/recipes/$recipeId'
+      path: '/recipes/$recipeId'
+      fullPath: '/app/recipes/$recipeId'
+      preLoaderRoute: typeof AppRecipesRecipeIdRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
+interface AppRouteChildren {
+  AppAboutRoute: typeof AppAboutRoute
+  AppRecipesRecipeIdRoute: typeof AppRecipesRecipeIdRoute
+  AppRecipesIndexRoute: typeof AppRecipesIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAboutRoute: AppAboutRoute,
+  AppRecipesRecipeIdRoute: AppRecipesRecipeIdRoute,
+  AppRecipesIndexRoute: AppRecipesIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  DemoTanstackQueryRoute: DemoTanstackQueryRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

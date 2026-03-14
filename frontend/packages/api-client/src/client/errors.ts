@@ -1,6 +1,6 @@
 import type { components } from '../generated/schema'
 
-export type ApiValidationError = components['schemas']['apicontract.ValidationError']
+type ApiValidationError = components['schemas']['apicontract.ValidationError']
 export type ApiErrorPayload = components['schemas']['apicontract.ErrorResponse']
 
 export class ApiError extends Error {
@@ -9,10 +9,10 @@ export class ApiError extends Error {
   details?: ApiValidationError[]
 
   constructor(payload: ApiErrorPayload) {
-    super(payload.message)
+    super(payload.message ?? 'Request failed.')
     this.name = 'ApiError'
-    this.status = payload.status
-    this.code = payload.code
+    this.status = payload.status ?? 500
+    this.code = payload.code ?? 'unknown_error'
     this.details = payload.details
   }
 }
