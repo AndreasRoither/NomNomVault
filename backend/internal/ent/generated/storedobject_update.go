@@ -14,6 +14,7 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/sourcerecord"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 )
 
@@ -154,6 +155,21 @@ func (_u *StoredObjectUpdate) AddThumbnailMediaAssets(v ...*MediaAsset) *StoredO
 	return _u.AddThumbnailMediaAssetIDs(ids...)
 }
 
+// AddSourceRecordIDs adds the "source_records" edge to the SourceRecord entity by IDs.
+func (_u *StoredObjectUpdate) AddSourceRecordIDs(ids ...string) *StoredObjectUpdate {
+	_u.mutation.AddSourceRecordIDs(ids...)
+	return _u
+}
+
+// AddSourceRecords adds the "source_records" edges to the SourceRecord entity.
+func (_u *StoredObjectUpdate) AddSourceRecords(v ...*SourceRecord) *StoredObjectUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSourceRecordIDs(ids...)
+}
+
 // Mutation returns the StoredObjectMutation object of the builder.
 func (_u *StoredObjectUpdate) Mutation() *StoredObjectMutation {
 	return _u.mutation
@@ -205,6 +221,27 @@ func (_u *StoredObjectUpdate) RemoveThumbnailMediaAssets(v ...*MediaAsset) *Stor
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveThumbnailMediaAssetIDs(ids...)
+}
+
+// ClearSourceRecords clears all "source_records" edges to the SourceRecord entity.
+func (_u *StoredObjectUpdate) ClearSourceRecords() *StoredObjectUpdate {
+	_u.mutation.ClearSourceRecords()
+	return _u
+}
+
+// RemoveSourceRecordIDs removes the "source_records" edge to SourceRecord entities by IDs.
+func (_u *StoredObjectUpdate) RemoveSourceRecordIDs(ids ...string) *StoredObjectUpdate {
+	_u.mutation.RemoveSourceRecordIDs(ids...)
+	return _u
+}
+
+// RemoveSourceRecords removes "source_records" edges to SourceRecord entities.
+func (_u *StoredObjectUpdate) RemoveSourceRecords(v ...*SourceRecord) *StoredObjectUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSourceRecordIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -418,6 +455,51 @@ func (_u *StoredObjectUpdate) sqlSave(ctx context.Context) (_node int, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.SourceRecordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   storedobject.SourceRecordsTable,
+			Columns: []string{storedobject.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSourceRecordsIDs(); len(nodes) > 0 && !_u.mutation.SourceRecordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   storedobject.SourceRecordsTable,
+			Columns: []string{storedobject.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SourceRecordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   storedobject.SourceRecordsTable,
+			Columns: []string{storedobject.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{storedobject.Label}
@@ -562,6 +644,21 @@ func (_u *StoredObjectUpdateOne) AddThumbnailMediaAssets(v ...*MediaAsset) *Stor
 	return _u.AddThumbnailMediaAssetIDs(ids...)
 }
 
+// AddSourceRecordIDs adds the "source_records" edge to the SourceRecord entity by IDs.
+func (_u *StoredObjectUpdateOne) AddSourceRecordIDs(ids ...string) *StoredObjectUpdateOne {
+	_u.mutation.AddSourceRecordIDs(ids...)
+	return _u
+}
+
+// AddSourceRecords adds the "source_records" edges to the SourceRecord entity.
+func (_u *StoredObjectUpdateOne) AddSourceRecords(v ...*SourceRecord) *StoredObjectUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSourceRecordIDs(ids...)
+}
+
 // Mutation returns the StoredObjectMutation object of the builder.
 func (_u *StoredObjectUpdateOne) Mutation() *StoredObjectMutation {
 	return _u.mutation
@@ -613,6 +710,27 @@ func (_u *StoredObjectUpdateOne) RemoveThumbnailMediaAssets(v ...*MediaAsset) *S
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveThumbnailMediaAssetIDs(ids...)
+}
+
+// ClearSourceRecords clears all "source_records" edges to the SourceRecord entity.
+func (_u *StoredObjectUpdateOne) ClearSourceRecords() *StoredObjectUpdateOne {
+	_u.mutation.ClearSourceRecords()
+	return _u
+}
+
+// RemoveSourceRecordIDs removes the "source_records" edge to SourceRecord entities by IDs.
+func (_u *StoredObjectUpdateOne) RemoveSourceRecordIDs(ids ...string) *StoredObjectUpdateOne {
+	_u.mutation.RemoveSourceRecordIDs(ids...)
+	return _u
+}
+
+// RemoveSourceRecords removes "source_records" edges to SourceRecord entities.
+func (_u *StoredObjectUpdateOne) RemoveSourceRecords(v ...*SourceRecord) *StoredObjectUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSourceRecordIDs(ids...)
 }
 
 // Where appends a list predicates to the StoredObjectUpdate builder.
@@ -849,6 +967,51 @@ func (_u *StoredObjectUpdateOne) sqlSave(ctx context.Context) (_node *StoredObje
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediaasset.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SourceRecordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   storedobject.SourceRecordsTable,
+			Columns: []string{storedobject.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSourceRecordsIDs(); len(nodes) > 0 && !_u.mutation.SourceRecordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   storedobject.SourceRecordsTable,
+			Columns: []string{storedobject.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SourceRecordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   storedobject.SourceRecordsTable,
+			Columns: []string{storedobject.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

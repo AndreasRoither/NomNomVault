@@ -36,6 +36,10 @@ const (
 	EdgeMediaAssets = "media_assets"
 	// EdgeStoredObjects holds the string denoting the stored_objects edge name in mutations.
 	EdgeStoredObjects = "stored_objects"
+	// EdgeSourceRecords holds the string denoting the source_records edge name in mutations.
+	EdgeSourceRecords = "source_records"
+	// EdgeImportJobs holds the string denoting the import_jobs edge name in mutations.
+	EdgeImportJobs = "import_jobs"
 	// EdgeRefreshSessions holds the string denoting the refresh_sessions edge name in mutations.
 	EdgeRefreshSessions = "refresh_sessions"
 	// Table holds the table name of the household in the database.
@@ -75,6 +79,20 @@ const (
 	StoredObjectsInverseTable = "stored_objects"
 	// StoredObjectsColumn is the table column denoting the stored_objects relation/edge.
 	StoredObjectsColumn = "household_id"
+	// SourceRecordsTable is the table that holds the source_records relation/edge.
+	SourceRecordsTable = "source_records"
+	// SourceRecordsInverseTable is the table name for the SourceRecord entity.
+	// It exists in this package in order to avoid circular dependency with the "sourcerecord" package.
+	SourceRecordsInverseTable = "source_records"
+	// SourceRecordsColumn is the table column denoting the source_records relation/edge.
+	SourceRecordsColumn = "household_id"
+	// ImportJobsTable is the table that holds the import_jobs relation/edge.
+	ImportJobsTable = "import_jobs"
+	// ImportJobsInverseTable is the table name for the ImportJob entity.
+	// It exists in this package in order to avoid circular dependency with the "importjob" package.
+	ImportJobsInverseTable = "import_jobs"
+	// ImportJobsColumn is the table column denoting the import_jobs relation/edge.
+	ImportJobsColumn = "household_id"
 	// RefreshSessionsTable is the table that holds the refresh_sessions relation/edge.
 	RefreshSessionsTable = "refresh_sessions"
 	// RefreshSessionsInverseTable is the table name for the RefreshSession entity.
@@ -232,6 +250,34 @@ func ByStoredObjects(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// BySourceRecordsCount orders the results by source_records count.
+func BySourceRecordsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSourceRecordsStep(), opts...)
+	}
+}
+
+// BySourceRecords orders the results by source_records terms.
+func BySourceRecords(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSourceRecordsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByImportJobsCount orders the results by import_jobs count.
+func ByImportJobsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newImportJobsStep(), opts...)
+	}
+}
+
+// ByImportJobs orders the results by import_jobs terms.
+func ByImportJobs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newImportJobsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByRefreshSessionsCount orders the results by refresh_sessions count.
 func ByRefreshSessionsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -278,6 +324,20 @@ func newStoredObjectsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(StoredObjectsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, StoredObjectsTable, StoredObjectsColumn),
+	)
+}
+func newSourceRecordsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SourceRecordsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SourceRecordsTable, SourceRecordsColumn),
+	)
+}
+func newImportJobsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ImportJobsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ImportJobsTable, ImportJobsColumn),
 	)
 }
 func newRefreshSessionsStep() *sqlgraph.Step {

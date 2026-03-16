@@ -217,10 +217,10 @@ func (_u *RecipeShareUpdate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (_u *RecipeShareUpdate) check() error {
 	if _u.mutation.RecipeCleared() && len(_u.mutation.RecipeIDs()) > 0 {
-		return errors.New(`generated_tmp: clearing a required unique edge "RecipeShare.recipe"`)
+		return errors.New(`generated: clearing a required unique edge "RecipeShare.recipe"`)
 	}
 	if _u.mutation.CreatedByCleared() && len(_u.mutation.CreatedByIDs()) > 0 {
-		return errors.New(`generated_tmp: clearing a required unique edge "RecipeShare.created_by"`)
+		return errors.New(`generated: clearing a required unique edge "RecipeShare.created_by"`)
 	}
 	return nil
 }
@@ -542,10 +542,10 @@ func (_u *RecipeShareUpdateOne) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (_u *RecipeShareUpdateOne) check() error {
 	if _u.mutation.RecipeCleared() && len(_u.mutation.RecipeIDs()) > 0 {
-		return errors.New(`generated_tmp: clearing a required unique edge "RecipeShare.recipe"`)
+		return errors.New(`generated: clearing a required unique edge "RecipeShare.recipe"`)
 	}
 	if _u.mutation.CreatedByCleared() && len(_u.mutation.CreatedByIDs()) > 0 {
-		return errors.New(`generated_tmp: clearing a required unique edge "RecipeShare.created_by"`)
+		return errors.New(`generated: clearing a required unique edge "RecipeShare.created_by"`)
 	}
 	return nil
 }
@@ -557,7 +557,7 @@ func (_u *RecipeShareUpdateOne) sqlSave(ctx context.Context) (_node *RecipeShare
 	_spec := sqlgraph.NewUpdateSpec(recipeshare.Table, recipeshare.Columns, sqlgraph.NewFieldSpec(recipeshare.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`generated_tmp: missing "RecipeShare.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`generated: missing "RecipeShare.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
@@ -565,7 +565,7 @@ func (_u *RecipeShareUpdateOne) sqlSave(ctx context.Context) (_node *RecipeShare
 		_spec.Node.Columns = append(_spec.Node.Columns, recipeshare.FieldID)
 		for _, f := range fields {
 			if !recipeshare.ValidColumn(f) {
-				return nil, &ValidationError{Name: f, err: fmt.Errorf("generated_tmp: invalid field %q for query", f)}
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("generated: invalid field %q for query", f)}
 			}
 			if f != recipeshare.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)

@@ -13,10 +13,12 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/householdmember"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/sourcerecord"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 )
@@ -171,6 +173,36 @@ func (_u *HouseholdUpdate) AddStoredObjects(v ...*StoredObject) *HouseholdUpdate
 	return _u.AddStoredObjectIDs(ids...)
 }
 
+// AddSourceRecordIDs adds the "source_records" edge to the SourceRecord entity by IDs.
+func (_u *HouseholdUpdate) AddSourceRecordIDs(ids ...string) *HouseholdUpdate {
+	_u.mutation.AddSourceRecordIDs(ids...)
+	return _u
+}
+
+// AddSourceRecords adds the "source_records" edges to the SourceRecord entity.
+func (_u *HouseholdUpdate) AddSourceRecords(v ...*SourceRecord) *HouseholdUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSourceRecordIDs(ids...)
+}
+
+// AddImportJobIDs adds the "import_jobs" edge to the ImportJob entity by IDs.
+func (_u *HouseholdUpdate) AddImportJobIDs(ids ...string) *HouseholdUpdate {
+	_u.mutation.AddImportJobIDs(ids...)
+	return _u
+}
+
+// AddImportJobs adds the "import_jobs" edges to the ImportJob entity.
+func (_u *HouseholdUpdate) AddImportJobs(v ...*ImportJob) *HouseholdUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddImportJobIDs(ids...)
+}
+
 // AddRefreshSessionIDs adds the "refresh_sessions" edge to the RefreshSession entity by IDs.
 func (_u *HouseholdUpdate) AddRefreshSessionIDs(ids ...string) *HouseholdUpdate {
 	_u.mutation.AddRefreshSessionIDs(ids...)
@@ -294,6 +326,48 @@ func (_u *HouseholdUpdate) RemoveStoredObjects(v ...*StoredObject) *HouseholdUpd
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveStoredObjectIDs(ids...)
+}
+
+// ClearSourceRecords clears all "source_records" edges to the SourceRecord entity.
+func (_u *HouseholdUpdate) ClearSourceRecords() *HouseholdUpdate {
+	_u.mutation.ClearSourceRecords()
+	return _u
+}
+
+// RemoveSourceRecordIDs removes the "source_records" edge to SourceRecord entities by IDs.
+func (_u *HouseholdUpdate) RemoveSourceRecordIDs(ids ...string) *HouseholdUpdate {
+	_u.mutation.RemoveSourceRecordIDs(ids...)
+	return _u
+}
+
+// RemoveSourceRecords removes "source_records" edges to SourceRecord entities.
+func (_u *HouseholdUpdate) RemoveSourceRecords(v ...*SourceRecord) *HouseholdUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSourceRecordIDs(ids...)
+}
+
+// ClearImportJobs clears all "import_jobs" edges to the ImportJob entity.
+func (_u *HouseholdUpdate) ClearImportJobs() *HouseholdUpdate {
+	_u.mutation.ClearImportJobs()
+	return _u
+}
+
+// RemoveImportJobIDs removes the "import_jobs" edge to ImportJob entities by IDs.
+func (_u *HouseholdUpdate) RemoveImportJobIDs(ids ...string) *HouseholdUpdate {
+	_u.mutation.RemoveImportJobIDs(ids...)
+	return _u
+}
+
+// RemoveImportJobs removes "import_jobs" edges to ImportJob entities.
+func (_u *HouseholdUpdate) RemoveImportJobs(v ...*ImportJob) *HouseholdUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveImportJobIDs(ids...)
 }
 
 // ClearRefreshSessions clears all "refresh_sessions" edges to the RefreshSession entity.
@@ -620,6 +694,96 @@ func (_u *HouseholdUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.SourceRecordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.SourceRecordsTable,
+			Columns: []string{household.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSourceRecordsIDs(); len(nodes) > 0 && !_u.mutation.SourceRecordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.SourceRecordsTable,
+			Columns: []string{household.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SourceRecordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.SourceRecordsTable,
+			Columns: []string{household.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.ImportJobsTable,
+			Columns: []string{household.ImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedImportJobsIDs(); len(nodes) > 0 && !_u.mutation.ImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.ImportJobsTable,
+			Columns: []string{household.ImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ImportJobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.ImportJobsTable,
+			Columns: []string{household.ImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _u.mutation.RefreshSessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -822,6 +986,36 @@ func (_u *HouseholdUpdateOne) AddStoredObjects(v ...*StoredObject) *HouseholdUpd
 	return _u.AddStoredObjectIDs(ids...)
 }
 
+// AddSourceRecordIDs adds the "source_records" edge to the SourceRecord entity by IDs.
+func (_u *HouseholdUpdateOne) AddSourceRecordIDs(ids ...string) *HouseholdUpdateOne {
+	_u.mutation.AddSourceRecordIDs(ids...)
+	return _u
+}
+
+// AddSourceRecords adds the "source_records" edges to the SourceRecord entity.
+func (_u *HouseholdUpdateOne) AddSourceRecords(v ...*SourceRecord) *HouseholdUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSourceRecordIDs(ids...)
+}
+
+// AddImportJobIDs adds the "import_jobs" edge to the ImportJob entity by IDs.
+func (_u *HouseholdUpdateOne) AddImportJobIDs(ids ...string) *HouseholdUpdateOne {
+	_u.mutation.AddImportJobIDs(ids...)
+	return _u
+}
+
+// AddImportJobs adds the "import_jobs" edges to the ImportJob entity.
+func (_u *HouseholdUpdateOne) AddImportJobs(v ...*ImportJob) *HouseholdUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddImportJobIDs(ids...)
+}
+
 // AddRefreshSessionIDs adds the "refresh_sessions" edge to the RefreshSession entity by IDs.
 func (_u *HouseholdUpdateOne) AddRefreshSessionIDs(ids ...string) *HouseholdUpdateOne {
 	_u.mutation.AddRefreshSessionIDs(ids...)
@@ -945,6 +1139,48 @@ func (_u *HouseholdUpdateOne) RemoveStoredObjects(v ...*StoredObject) *Household
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveStoredObjectIDs(ids...)
+}
+
+// ClearSourceRecords clears all "source_records" edges to the SourceRecord entity.
+func (_u *HouseholdUpdateOne) ClearSourceRecords() *HouseholdUpdateOne {
+	_u.mutation.ClearSourceRecords()
+	return _u
+}
+
+// RemoveSourceRecordIDs removes the "source_records" edge to SourceRecord entities by IDs.
+func (_u *HouseholdUpdateOne) RemoveSourceRecordIDs(ids ...string) *HouseholdUpdateOne {
+	_u.mutation.RemoveSourceRecordIDs(ids...)
+	return _u
+}
+
+// RemoveSourceRecords removes "source_records" edges to SourceRecord entities.
+func (_u *HouseholdUpdateOne) RemoveSourceRecords(v ...*SourceRecord) *HouseholdUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSourceRecordIDs(ids...)
+}
+
+// ClearImportJobs clears all "import_jobs" edges to the ImportJob entity.
+func (_u *HouseholdUpdateOne) ClearImportJobs() *HouseholdUpdateOne {
+	_u.mutation.ClearImportJobs()
+	return _u
+}
+
+// RemoveImportJobIDs removes the "import_jobs" edge to ImportJob entities by IDs.
+func (_u *HouseholdUpdateOne) RemoveImportJobIDs(ids ...string) *HouseholdUpdateOne {
+	_u.mutation.RemoveImportJobIDs(ids...)
+	return _u
+}
+
+// RemoveImportJobs removes "import_jobs" edges to ImportJob entities.
+func (_u *HouseholdUpdateOne) RemoveImportJobs(v ...*ImportJob) *HouseholdUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveImportJobIDs(ids...)
 }
 
 // ClearRefreshSessions clears all "refresh_sessions" edges to the RefreshSession entity.
@@ -1294,6 +1530,96 @@ func (_u *HouseholdUpdateOne) sqlSave(ctx context.Context) (_node *Household, er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SourceRecordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.SourceRecordsTable,
+			Columns: []string{household.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSourceRecordsIDs(); len(nodes) > 0 && !_u.mutation.SourceRecordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.SourceRecordsTable,
+			Columns: []string{household.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SourceRecordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.SourceRecordsTable,
+			Columns: []string{household.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.ImportJobsTable,
+			Columns: []string{household.ImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedImportJobsIDs(); len(nodes) > 0 && !_u.mutation.ImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.ImportJobsTable,
+			Columns: []string{household.ImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ImportJobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.ImportJobsTable,
+			Columns: []string{household.ImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

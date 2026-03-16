@@ -47,11 +47,15 @@ type HouseholdEdges struct {
 	MediaAssets []*MediaAsset `json:"media_assets,omitempty"`
 	// StoredObjects holds the value of the stored_objects edge.
 	StoredObjects []*StoredObject `json:"stored_objects,omitempty"`
+	// SourceRecords holds the value of the source_records edge.
+	SourceRecords []*SourceRecord `json:"source_records,omitempty"`
+	// ImportJobs holds the value of the import_jobs edge.
+	ImportJobs []*ImportJob `json:"import_jobs,omitempty"`
 	// RefreshSessions holds the value of the refresh_sessions edge.
 	RefreshSessions []*RefreshSession `json:"refresh_sessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [8]bool
 }
 
 // MembersOrErr returns the Members value or an error if the edge
@@ -99,10 +103,28 @@ func (e HouseholdEdges) StoredObjectsOrErr() ([]*StoredObject, error) {
 	return nil, &NotLoadedError{edge: "stored_objects"}
 }
 
+// SourceRecordsOrErr returns the SourceRecords value or an error if the edge
+// was not loaded in eager-loading.
+func (e HouseholdEdges) SourceRecordsOrErr() ([]*SourceRecord, error) {
+	if e.loadedTypes[5] {
+		return e.SourceRecords, nil
+	}
+	return nil, &NotLoadedError{edge: "source_records"}
+}
+
+// ImportJobsOrErr returns the ImportJobs value or an error if the edge
+// was not loaded in eager-loading.
+func (e HouseholdEdges) ImportJobsOrErr() ([]*ImportJob, error) {
+	if e.loadedTypes[6] {
+		return e.ImportJobs, nil
+	}
+	return nil, &NotLoadedError{edge: "import_jobs"}
+}
+
 // RefreshSessionsOrErr returns the RefreshSessions value or an error if the edge
 // was not loaded in eager-loading.
 func (e HouseholdEdges) RefreshSessionsOrErr() ([]*RefreshSession, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[7] {
 		return e.RefreshSessions, nil
 	}
 	return nil, &NotLoadedError{edge: "refresh_sessions"}
@@ -212,6 +234,16 @@ func (_m *Household) QueryMediaAssets() *MediaAssetQuery {
 // QueryStoredObjects queries the "stored_objects" edge of the Household entity.
 func (_m *Household) QueryStoredObjects() *StoredObjectQuery {
 	return NewHouseholdClient(_m.config).QueryStoredObjects(_m)
+}
+
+// QuerySourceRecords queries the "source_records" edge of the Household entity.
+func (_m *Household) QuerySourceRecords() *SourceRecordQuery {
+	return NewHouseholdClient(_m.config).QuerySourceRecords(_m)
+}
+
+// QueryImportJobs queries the "import_jobs" edge of the Household entity.
+func (_m *Household) QueryImportJobs() *ImportJobQuery {
+	return NewHouseholdClient(_m.config).QueryImportJobs(_m)
 }
 
 // QueryRefreshSessions queries the "refresh_sessions" edge of the Household entity.

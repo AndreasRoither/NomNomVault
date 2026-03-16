@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/householdmember"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeshare"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
@@ -153,6 +154,21 @@ func (_c *UserCreate) AddRecipeShares(v ...*RecipeShare) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddRecipeShareIDs(ids...)
+}
+
+// AddRequestedImportJobIDs adds the "requested_import_jobs" edge to the ImportJob entity by IDs.
+func (_c *UserCreate) AddRequestedImportJobIDs(ids ...string) *UserCreate {
+	_c.mutation.AddRequestedImportJobIDs(ids...)
+	return _c
+}
+
+// AddRequestedImportJobs adds the "requested_import_jobs" edges to the ImportJob entity.
+func (_c *UserCreate) AddRequestedImportJobs(v ...*ImportJob) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddRequestedImportJobIDs(ids...)
 }
 
 // AddRefreshSessionIDs adds the "refresh_sessions" edge to the RefreshSession entity by IDs.
@@ -362,6 +378,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(recipeshare.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.RequestedImportJobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestedImportJobsTable,
+			Columns: []string{user.RequestedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

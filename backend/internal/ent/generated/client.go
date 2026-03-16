@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/householdmember"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeingredient"
@@ -24,6 +25,7 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeshare"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipestep"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/sourcerecord"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
@@ -38,6 +40,8 @@ type Client struct {
 	Household *HouseholdClient
 	// HouseholdMember is the client for interacting with the HouseholdMember builders.
 	HouseholdMember *HouseholdMemberClient
+	// ImportJob is the client for interacting with the ImportJob builders.
+	ImportJob *ImportJobClient
 	// MediaAsset is the client for interacting with the MediaAsset builders.
 	MediaAsset *MediaAssetClient
 	// Recipe is the client for interacting with the Recipe builders.
@@ -52,6 +56,8 @@ type Client struct {
 	RecipeStep *RecipeStepClient
 	// RefreshSession is the client for interacting with the RefreshSession builders.
 	RefreshSession *RefreshSessionClient
+	// SourceRecord is the client for interacting with the SourceRecord builders.
+	SourceRecord *SourceRecordClient
 	// StoredObject is the client for interacting with the StoredObject builders.
 	StoredObject *StoredObjectClient
 	// Tag is the client for interacting with the Tag builders.
@@ -71,6 +77,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Household = NewHouseholdClient(c.config)
 	c.HouseholdMember = NewHouseholdMemberClient(c.config)
+	c.ImportJob = NewImportJobClient(c.config)
 	c.MediaAsset = NewMediaAssetClient(c.config)
 	c.Recipe = NewRecipeClient(c.config)
 	c.RecipeIngredient = NewRecipeIngredientClient(c.config)
@@ -78,6 +85,7 @@ func (c *Client) init() {
 	c.RecipeShare = NewRecipeShareClient(c.config)
 	c.RecipeStep = NewRecipeStepClient(c.config)
 	c.RefreshSession = NewRefreshSessionClient(c.config)
+	c.SourceRecord = NewSourceRecordClient(c.config)
 	c.StoredObject = NewStoredObjectClient(c.config)
 	c.Tag = NewTagClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -175,6 +183,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:           cfg,
 		Household:        NewHouseholdClient(cfg),
 		HouseholdMember:  NewHouseholdMemberClient(cfg),
+		ImportJob:        NewImportJobClient(cfg),
 		MediaAsset:       NewMediaAssetClient(cfg),
 		Recipe:           NewRecipeClient(cfg),
 		RecipeIngredient: NewRecipeIngredientClient(cfg),
@@ -182,6 +191,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		RecipeShare:      NewRecipeShareClient(cfg),
 		RecipeStep:       NewRecipeStepClient(cfg),
 		RefreshSession:   NewRefreshSessionClient(cfg),
+		SourceRecord:     NewSourceRecordClient(cfg),
 		StoredObject:     NewStoredObjectClient(cfg),
 		Tag:              NewTagClient(cfg),
 		User:             NewUserClient(cfg),
@@ -206,6 +216,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:           cfg,
 		Household:        NewHouseholdClient(cfg),
 		HouseholdMember:  NewHouseholdMemberClient(cfg),
+		ImportJob:        NewImportJobClient(cfg),
 		MediaAsset:       NewMediaAssetClient(cfg),
 		Recipe:           NewRecipeClient(cfg),
 		RecipeIngredient: NewRecipeIngredientClient(cfg),
@@ -213,6 +224,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		RecipeShare:      NewRecipeShareClient(cfg),
 		RecipeStep:       NewRecipeStepClient(cfg),
 		RefreshSession:   NewRefreshSessionClient(cfg),
+		SourceRecord:     NewSourceRecordClient(cfg),
 		StoredObject:     NewStoredObjectClient(cfg),
 		Tag:              NewTagClient(cfg),
 		User:             NewUserClient(cfg),
@@ -245,9 +257,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Household, c.HouseholdMember, c.MediaAsset, c.Recipe, c.RecipeIngredient,
-		c.RecipeNutrition, c.RecipeShare, c.RecipeStep, c.RefreshSession,
-		c.StoredObject, c.Tag, c.User,
+		c.Household, c.HouseholdMember, c.ImportJob, c.MediaAsset, c.Recipe,
+		c.RecipeIngredient, c.RecipeNutrition, c.RecipeShare, c.RecipeStep,
+		c.RefreshSession, c.SourceRecord, c.StoredObject, c.Tag, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -257,9 +269,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Household, c.HouseholdMember, c.MediaAsset, c.Recipe, c.RecipeIngredient,
-		c.RecipeNutrition, c.RecipeShare, c.RecipeStep, c.RefreshSession,
-		c.StoredObject, c.Tag, c.User,
+		c.Household, c.HouseholdMember, c.ImportJob, c.MediaAsset, c.Recipe,
+		c.RecipeIngredient, c.RecipeNutrition, c.RecipeShare, c.RecipeStep,
+		c.RefreshSession, c.SourceRecord, c.StoredObject, c.Tag, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -272,6 +284,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Household.mutate(ctx, m)
 	case *HouseholdMemberMutation:
 		return c.HouseholdMember.mutate(ctx, m)
+	case *ImportJobMutation:
+		return c.ImportJob.mutate(ctx, m)
 	case *MediaAssetMutation:
 		return c.MediaAsset.mutate(ctx, m)
 	case *RecipeMutation:
@@ -286,6 +300,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.RecipeStep.mutate(ctx, m)
 	case *RefreshSessionMutation:
 		return c.RefreshSession.mutate(ctx, m)
+	case *SourceRecordMutation:
+		return c.SourceRecord.mutate(ctx, m)
 	case *StoredObjectMutation:
 		return c.StoredObject.mutate(ctx, m)
 	case *TagMutation:
@@ -478,6 +494,38 @@ func (c *HouseholdClient) QueryStoredObjects(_m *Household) *StoredObjectQuery {
 			sqlgraph.From(household.Table, household.FieldID, id),
 			sqlgraph.To(storedobject.Table, storedobject.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, household.StoredObjectsTable, household.StoredObjectsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySourceRecords queries the source_records edge of a Household.
+func (c *HouseholdClient) QuerySourceRecords(_m *Household) *SourceRecordQuery {
+	query := (&SourceRecordClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(household.Table, household.FieldID, id),
+			sqlgraph.To(sourcerecord.Table, sourcerecord.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, household.SourceRecordsTable, household.SourceRecordsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryImportJobs queries the import_jobs edge of a Household.
+func (c *HouseholdClient) QueryImportJobs(_m *Household) *ImportJobQuery {
+	query := (&ImportJobClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(household.Table, household.FieldID, id),
+			sqlgraph.To(importjob.Table, importjob.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, household.ImportJobsTable, household.ImportJobsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -688,6 +736,219 @@ func (c *HouseholdMemberClient) mutate(ctx context.Context, m *HouseholdMemberMu
 		return (&HouseholdMemberDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("generated: unknown HouseholdMember mutation op: %q", m.Op())
+	}
+}
+
+// ImportJobClient is a client for the ImportJob schema.
+type ImportJobClient struct {
+	config
+}
+
+// NewImportJobClient returns a client for the ImportJob from the given config.
+func NewImportJobClient(c config) *ImportJobClient {
+	return &ImportJobClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `importjob.Hooks(f(g(h())))`.
+func (c *ImportJobClient) Use(hooks ...Hook) {
+	c.hooks.ImportJob = append(c.hooks.ImportJob, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `importjob.Intercept(f(g(h())))`.
+func (c *ImportJobClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ImportJob = append(c.inters.ImportJob, interceptors...)
+}
+
+// Create returns a builder for creating a ImportJob entity.
+func (c *ImportJobClient) Create() *ImportJobCreate {
+	mutation := newImportJobMutation(c.config, OpCreate)
+	return &ImportJobCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ImportJob entities.
+func (c *ImportJobClient) CreateBulk(builders ...*ImportJobCreate) *ImportJobCreateBulk {
+	return &ImportJobCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ImportJobClient) MapCreateBulk(slice any, setFunc func(*ImportJobCreate, int)) *ImportJobCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ImportJobCreateBulk{err: fmt.Errorf("calling to ImportJobClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ImportJobCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ImportJobCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ImportJob.
+func (c *ImportJobClient) Update() *ImportJobUpdate {
+	mutation := newImportJobMutation(c.config, OpUpdate)
+	return &ImportJobUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ImportJobClient) UpdateOne(_m *ImportJob) *ImportJobUpdateOne {
+	mutation := newImportJobMutation(c.config, OpUpdateOne, withImportJob(_m))
+	return &ImportJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ImportJobClient) UpdateOneID(id string) *ImportJobUpdateOne {
+	mutation := newImportJobMutation(c.config, OpUpdateOne, withImportJobID(id))
+	return &ImportJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ImportJob.
+func (c *ImportJobClient) Delete() *ImportJobDelete {
+	mutation := newImportJobMutation(c.config, OpDelete)
+	return &ImportJobDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ImportJobClient) DeleteOne(_m *ImportJob) *ImportJobDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ImportJobClient) DeleteOneID(id string) *ImportJobDeleteOne {
+	builder := c.Delete().Where(importjob.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ImportJobDeleteOne{builder}
+}
+
+// Query returns a query builder for ImportJob.
+func (c *ImportJobClient) Query() *ImportJobQuery {
+	return &ImportJobQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeImportJob},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ImportJob entity by its id.
+func (c *ImportJobClient) Get(ctx context.Context, id string) (*ImportJob, error) {
+	return c.Query().Where(importjob.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ImportJobClient) GetX(ctx context.Context, id string) *ImportJob {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryHousehold queries the household edge of a ImportJob.
+func (c *ImportJobClient) QueryHousehold(_m *ImportJob) *HouseholdQuery {
+	query := (&HouseholdClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(importjob.Table, importjob.FieldID, id),
+			sqlgraph.To(household.Table, household.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, importjob.HouseholdTable, importjob.HouseholdColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequestedByUser queries the requested_by_user edge of a ImportJob.
+func (c *ImportJobClient) QueryRequestedByUser(_m *ImportJob) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(importjob.Table, importjob.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, importjob.RequestedByUserTable, importjob.RequestedByUserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySourceRecord queries the source_record edge of a ImportJob.
+func (c *ImportJobClient) QuerySourceRecord(_m *ImportJob) *SourceRecordQuery {
+	query := (&SourceRecordClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(importjob.Table, importjob.FieldID, id),
+			sqlgraph.To(sourcerecord.Table, sourcerecord.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, importjob.SourceRecordTable, importjob.SourceRecordColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDraftRecipe queries the draft_recipe edge of a ImportJob.
+func (c *ImportJobClient) QueryDraftRecipe(_m *ImportJob) *RecipeQuery {
+	query := (&RecipeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(importjob.Table, importjob.FieldID, id),
+			sqlgraph.To(recipe.Table, recipe.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, importjob.DraftRecipeTable, importjob.DraftRecipeColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMatchRecipe queries the match_recipe edge of a ImportJob.
+func (c *ImportJobClient) QueryMatchRecipe(_m *ImportJob) *RecipeQuery {
+	query := (&RecipeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(importjob.Table, importjob.FieldID, id),
+			sqlgraph.To(recipe.Table, recipe.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, importjob.MatchRecipeTable, importjob.MatchRecipeColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ImportJobClient) Hooks() []Hook {
+	return c.hooks.ImportJob
+}
+
+// Interceptors returns the client interceptors.
+func (c *ImportJobClient) Interceptors() []Interceptor {
+	return c.inters.ImportJob
+}
+
+func (c *ImportJobClient) mutate(ctx context.Context, m *ImportJobMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ImportJobCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ImportJobUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ImportJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ImportJobDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("generated: unknown ImportJob mutation op: %q", m.Op())
 	}
 }
 
@@ -1101,6 +1362,38 @@ func (c *RecipeClient) QueryMediaAssets(_m *Recipe) *MediaAssetQuery {
 			sqlgraph.From(recipe.Table, recipe.FieldID, id),
 			sqlgraph.To(mediaasset.Table, mediaasset.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, recipe.MediaAssetsTable, recipe.MediaAssetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDraftImportJobs queries the draft_import_jobs edge of a Recipe.
+func (c *RecipeClient) QueryDraftImportJobs(_m *Recipe) *ImportJobQuery {
+	query := (&ImportJobClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(recipe.Table, recipe.FieldID, id),
+			sqlgraph.To(importjob.Table, importjob.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, recipe.DraftImportJobsTable, recipe.DraftImportJobsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMatchedImportJobs queries the matched_import_jobs edge of a Recipe.
+func (c *RecipeClient) QueryMatchedImportJobs(_m *Recipe) *ImportJobQuery {
+	query := (&ImportJobClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(recipe.Table, recipe.FieldID, id),
+			sqlgraph.To(importjob.Table, importjob.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, recipe.MatchedImportJobsTable, recipe.MatchedImportJobsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1910,6 +2203,187 @@ func (c *RefreshSessionClient) mutate(ctx context.Context, m *RefreshSessionMuta
 	}
 }
 
+// SourceRecordClient is a client for the SourceRecord schema.
+type SourceRecordClient struct {
+	config
+}
+
+// NewSourceRecordClient returns a client for the SourceRecord from the given config.
+func NewSourceRecordClient(c config) *SourceRecordClient {
+	return &SourceRecordClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `sourcerecord.Hooks(f(g(h())))`.
+func (c *SourceRecordClient) Use(hooks ...Hook) {
+	c.hooks.SourceRecord = append(c.hooks.SourceRecord, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `sourcerecord.Intercept(f(g(h())))`.
+func (c *SourceRecordClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SourceRecord = append(c.inters.SourceRecord, interceptors...)
+}
+
+// Create returns a builder for creating a SourceRecord entity.
+func (c *SourceRecordClient) Create() *SourceRecordCreate {
+	mutation := newSourceRecordMutation(c.config, OpCreate)
+	return &SourceRecordCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SourceRecord entities.
+func (c *SourceRecordClient) CreateBulk(builders ...*SourceRecordCreate) *SourceRecordCreateBulk {
+	return &SourceRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SourceRecordClient) MapCreateBulk(slice any, setFunc func(*SourceRecordCreate, int)) *SourceRecordCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SourceRecordCreateBulk{err: fmt.Errorf("calling to SourceRecordClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SourceRecordCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SourceRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SourceRecord.
+func (c *SourceRecordClient) Update() *SourceRecordUpdate {
+	mutation := newSourceRecordMutation(c.config, OpUpdate)
+	return &SourceRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SourceRecordClient) UpdateOne(_m *SourceRecord) *SourceRecordUpdateOne {
+	mutation := newSourceRecordMutation(c.config, OpUpdateOne, withSourceRecord(_m))
+	return &SourceRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SourceRecordClient) UpdateOneID(id string) *SourceRecordUpdateOne {
+	mutation := newSourceRecordMutation(c.config, OpUpdateOne, withSourceRecordID(id))
+	return &SourceRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SourceRecord.
+func (c *SourceRecordClient) Delete() *SourceRecordDelete {
+	mutation := newSourceRecordMutation(c.config, OpDelete)
+	return &SourceRecordDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SourceRecordClient) DeleteOne(_m *SourceRecord) *SourceRecordDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SourceRecordClient) DeleteOneID(id string) *SourceRecordDeleteOne {
+	builder := c.Delete().Where(sourcerecord.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SourceRecordDeleteOne{builder}
+}
+
+// Query returns a query builder for SourceRecord.
+func (c *SourceRecordClient) Query() *SourceRecordQuery {
+	return &SourceRecordQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSourceRecord},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SourceRecord entity by its id.
+func (c *SourceRecordClient) Get(ctx context.Context, id string) (*SourceRecord, error) {
+	return c.Query().Where(sourcerecord.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SourceRecordClient) GetX(ctx context.Context, id string) *SourceRecord {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryHousehold queries the household edge of a SourceRecord.
+func (c *SourceRecordClient) QueryHousehold(_m *SourceRecord) *HouseholdQuery {
+	query := (&HouseholdClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcerecord.Table, sourcerecord.FieldID, id),
+			sqlgraph.To(household.Table, household.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, sourcerecord.HouseholdTable, sourcerecord.HouseholdColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRawSnapshotStorageObject queries the raw_snapshot_storage_object edge of a SourceRecord.
+func (c *SourceRecordClient) QueryRawSnapshotStorageObject(_m *SourceRecord) *StoredObjectQuery {
+	query := (&StoredObjectClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcerecord.Table, sourcerecord.FieldID, id),
+			sqlgraph.To(storedobject.Table, storedobject.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, sourcerecord.RawSnapshotStorageObjectTable, sourcerecord.RawSnapshotStorageObjectColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryImportJobs queries the import_jobs edge of a SourceRecord.
+func (c *SourceRecordClient) QueryImportJobs(_m *SourceRecord) *ImportJobQuery {
+	query := (&ImportJobClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(sourcerecord.Table, sourcerecord.FieldID, id),
+			sqlgraph.To(importjob.Table, importjob.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, sourcerecord.ImportJobsTable, sourcerecord.ImportJobsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SourceRecordClient) Hooks() []Hook {
+	return c.hooks.SourceRecord
+}
+
+// Interceptors returns the client interceptors.
+func (c *SourceRecordClient) Interceptors() []Interceptor {
+	return c.inters.SourceRecord
+}
+
+func (c *SourceRecordClient) mutate(ctx context.Context, m *SourceRecordMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SourceRecordCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SourceRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SourceRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SourceRecordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("generated: unknown SourceRecord mutation op: %q", m.Op())
+	}
+}
+
 // StoredObjectClient is a client for the StoredObject schema.
 type StoredObjectClient struct {
 	config
@@ -2059,6 +2533,22 @@ func (c *StoredObjectClient) QueryThumbnailMediaAssets(_m *StoredObject) *MediaA
 			sqlgraph.From(storedobject.Table, storedobject.FieldID, id),
 			sqlgraph.To(mediaasset.Table, mediaasset.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, storedobject.ThumbnailMediaAssetsTable, storedobject.ThumbnailMediaAssetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySourceRecords queries the source_records edge of a StoredObject.
+func (c *StoredObjectClient) QuerySourceRecords(_m *StoredObject) *SourceRecordQuery {
+	query := (&SourceRecordClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(storedobject.Table, storedobject.FieldID, id),
+			sqlgraph.To(sourcerecord.Table, sourcerecord.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, storedobject.SourceRecordsTable, storedobject.SourceRecordsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2396,6 +2886,22 @@ func (c *UserClient) QueryRecipeShares(_m *User) *RecipeShareQuery {
 	return query
 }
 
+// QueryRequestedImportJobs queries the requested_import_jobs edge of a User.
+func (c *UserClient) QueryRequestedImportJobs(_m *User) *ImportJobQuery {
+	query := (&ImportJobClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(importjob.Table, importjob.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RequestedImportJobsTable, user.RequestedImportJobsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryRefreshSessions queries the refresh_sessions edge of a User.
 func (c *UserClient) QueryRefreshSessions(_m *User) *RefreshSessionQuery {
 	query := (&RefreshSessionClient{config: c.config}).Query()
@@ -2440,13 +2946,13 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Household, HouseholdMember, MediaAsset, Recipe, RecipeIngredient,
-		RecipeNutrition, RecipeShare, RecipeStep, RefreshSession, StoredObject, Tag,
-		User []ent.Hook
+		Household, HouseholdMember, ImportJob, MediaAsset, Recipe, RecipeIngredient,
+		RecipeNutrition, RecipeShare, RecipeStep, RefreshSession, SourceRecord,
+		StoredObject, Tag, User []ent.Hook
 	}
 	inters struct {
-		Household, HouseholdMember, MediaAsset, Recipe, RecipeIngredient,
-		RecipeNutrition, RecipeShare, RecipeStep, RefreshSession, StoredObject, Tag,
-		User []ent.Interceptor
+		Household, HouseholdMember, ImportJob, MediaAsset, Recipe, RecipeIngredient,
+		RecipeNutrition, RecipeShare, RecipeStep, RefreshSession, SourceRecord,
+		StoredObject, Tag, User []ent.Interceptor
 	}
 )

@@ -21,9 +21,9 @@ func (Recipe) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("title").NotEmpty(),
 		field.String("description").Default(""),
+		field.Enum("status").Values(RecipeStatusValues...).Default("published"),
 		field.String("source_url").Default(""),
 		field.Time("source_captured_at").Optional().Nillable(),
-		field.Time("archived_at").Optional().Nillable(),
 		field.String("primary_media_id").Optional().Nillable(),
 		field.JSON("gallery_media_ids", []string{}).Optional(),
 		field.Int("prep_minutes").Optional().Nillable(),
@@ -49,6 +49,8 @@ func (Recipe) Edges() []ent.Edge {
 		edge.To("shares", RecipeShare.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("tags", Tag.Type),
 		edge.To("media_assets", MediaAsset.Type).Annotations(entsql.OnDelete(entsql.SetNull)),
+		edge.To("draft_import_jobs", ImportJob.Type),
+		edge.To("matched_import_jobs", ImportJob.Type),
 	}
 }
 

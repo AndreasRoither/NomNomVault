@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/householdmember"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeshare"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
@@ -22,13 +23,14 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx                 *QueryContext
-	order               []user.OrderOption
-	inters              []Interceptor
-	predicates          []predicate.User
-	withMemberships     *HouseholdMemberQuery
-	withRecipeShares    *RecipeShareQuery
-	withRefreshSessions *RefreshSessionQuery
+	ctx                     *QueryContext
+	order                   []user.OrderOption
+	inters                  []Interceptor
+	predicates              []predicate.User
+	withMemberships         *HouseholdMemberQuery
+	withRecipeShares        *RecipeShareQuery
+	withRequestedImportJobs *ImportJobQuery
+	withRefreshSessions     *RefreshSessionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -102,6 +104,28 @@ func (_q *UserQuery) QueryRecipeShares() *RecipeShareQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(recipeshare.Table, recipeshare.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.RecipeSharesTable, user.RecipeSharesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRequestedImportJobs chains the current query on the "requested_import_jobs" edge.
+func (_q *UserQuery) QueryRequestedImportJobs() *ImportJobQuery {
+	query := (&ImportJobClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(importjob.Table, importjob.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RequestedImportJobsTable, user.RequestedImportJobsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +342,15 @@ func (_q *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:              _q.config,
-		ctx:                 _q.ctx.Clone(),
-		order:               append([]user.OrderOption{}, _q.order...),
-		inters:              append([]Interceptor{}, _q.inters...),
-		predicates:          append([]predicate.User{}, _q.predicates...),
-		withMemberships:     _q.withMemberships.Clone(),
-		withRecipeShares:    _q.withRecipeShares.Clone(),
-		withRefreshSessions: _q.withRefreshSessions.Clone(),
+		config:                  _q.config,
+		ctx:                     _q.ctx.Clone(),
+		order:                   append([]user.OrderOption{}, _q.order...),
+		inters:                  append([]Interceptor{}, _q.inters...),
+		predicates:              append([]predicate.User{}, _q.predicates...),
+		withMemberships:         _q.withMemberships.Clone(),
+		withRecipeShares:        _q.withRecipeShares.Clone(),
+		withRequestedImportJobs: _q.withRequestedImportJobs.Clone(),
+		withRefreshSessions:     _q.withRefreshSessions.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -351,6 +376,17 @@ func (_q *UserQuery) WithRecipeShares(opts ...func(*RecipeShareQuery)) *UserQuer
 		opt(query)
 	}
 	_q.withRecipeShares = query
+	return _q
+}
+
+// WithRequestedImportJobs tells the query-builder to eager-load the nodes that are connected to
+// the "requested_import_jobs" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithRequestedImportJobs(opts ...func(*ImportJobQuery)) *UserQuery {
+	query := (&ImportJobClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withRequestedImportJobs = query
 	return _q
 }
 
@@ -443,9 +479,10 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			_q.withMemberships != nil,
 			_q.withRecipeShares != nil,
+			_q.withRequestedImportJobs != nil,
 			_q.withRefreshSessions != nil,
 		}
 	)
@@ -478,6 +515,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadRecipeShares(ctx, query, nodes,
 			func(n *User) { n.Edges.RecipeShares = []*RecipeShare{} },
 			func(n *User, e *RecipeShare) { n.Edges.RecipeShares = append(n.Edges.RecipeShares, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withRequestedImportJobs; query != nil {
+		if err := _q.loadRequestedImportJobs(ctx, query, nodes,
+			func(n *User) { n.Edges.RequestedImportJobs = []*ImportJob{} },
+			func(n *User, e *ImportJob) { n.Edges.RequestedImportJobs = append(n.Edges.RequestedImportJobs, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -546,6 +590,36 @@ func (_q *UserQuery) loadRecipeShares(ctx context.Context, query *RecipeShareQue
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "created_by_user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadRequestedImportJobs(ctx context.Context, query *ImportJobQuery, nodes []*User, init func(*User), assign func(*User, *ImportJob)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(importjob.FieldRequestedByUserID)
+	}
+	query.Where(predicate.ImportJob(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.RequestedImportJobsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.RequestedByUserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "requested_by_user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

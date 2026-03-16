@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/householdmember"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
@@ -21,6 +22,7 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeshare"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipestep"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/sourcerecord"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
@@ -37,6 +39,7 @@ const (
 	// Node types.
 	TypeHousehold        = "Household"
 	TypeHouseholdMember  = "HouseholdMember"
+	TypeImportJob        = "ImportJob"
 	TypeMediaAsset       = "MediaAsset"
 	TypeRecipe           = "Recipe"
 	TypeRecipeIngredient = "RecipeIngredient"
@@ -44,6 +47,7 @@ const (
 	TypeRecipeShare      = "RecipeShare"
 	TypeRecipeStep       = "RecipeStep"
 	TypeRefreshSession   = "RefreshSession"
+	TypeSourceRecord     = "SourceRecord"
 	TypeStoredObject     = "StoredObject"
 	TypeTag              = "Tag"
 	TypeUser             = "User"
@@ -77,6 +81,12 @@ type HouseholdMutation struct {
 	stored_objects          map[string]struct{}
 	removedstored_objects   map[string]struct{}
 	clearedstored_objects   bool
+	source_records          map[string]struct{}
+	removedsource_records   map[string]struct{}
+	clearedsource_records   bool
+	import_jobs             map[string]struct{}
+	removedimport_jobs      map[string]struct{}
+	clearedimport_jobs      bool
 	refresh_sessions        map[string]struct{}
 	removedrefresh_sessions map[string]struct{}
 	clearedrefresh_sessions bool
@@ -675,6 +685,114 @@ func (m *HouseholdMutation) ResetStoredObjects() {
 	m.removedstored_objects = nil
 }
 
+// AddSourceRecordIDs adds the "source_records" edge to the SourceRecord entity by ids.
+func (m *HouseholdMutation) AddSourceRecordIDs(ids ...string) {
+	if m.source_records == nil {
+		m.source_records = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.source_records[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSourceRecords clears the "source_records" edge to the SourceRecord entity.
+func (m *HouseholdMutation) ClearSourceRecords() {
+	m.clearedsource_records = true
+}
+
+// SourceRecordsCleared reports if the "source_records" edge to the SourceRecord entity was cleared.
+func (m *HouseholdMutation) SourceRecordsCleared() bool {
+	return m.clearedsource_records
+}
+
+// RemoveSourceRecordIDs removes the "source_records" edge to the SourceRecord entity by IDs.
+func (m *HouseholdMutation) RemoveSourceRecordIDs(ids ...string) {
+	if m.removedsource_records == nil {
+		m.removedsource_records = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.source_records, ids[i])
+		m.removedsource_records[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSourceRecords returns the removed IDs of the "source_records" edge to the SourceRecord entity.
+func (m *HouseholdMutation) RemovedSourceRecordsIDs() (ids []string) {
+	for id := range m.removedsource_records {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SourceRecordsIDs returns the "source_records" edge IDs in the mutation.
+func (m *HouseholdMutation) SourceRecordsIDs() (ids []string) {
+	for id := range m.source_records {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSourceRecords resets all changes to the "source_records" edge.
+func (m *HouseholdMutation) ResetSourceRecords() {
+	m.source_records = nil
+	m.clearedsource_records = false
+	m.removedsource_records = nil
+}
+
+// AddImportJobIDs adds the "import_jobs" edge to the ImportJob entity by ids.
+func (m *HouseholdMutation) AddImportJobIDs(ids ...string) {
+	if m.import_jobs == nil {
+		m.import_jobs = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.import_jobs[ids[i]] = struct{}{}
+	}
+}
+
+// ClearImportJobs clears the "import_jobs" edge to the ImportJob entity.
+func (m *HouseholdMutation) ClearImportJobs() {
+	m.clearedimport_jobs = true
+}
+
+// ImportJobsCleared reports if the "import_jobs" edge to the ImportJob entity was cleared.
+func (m *HouseholdMutation) ImportJobsCleared() bool {
+	return m.clearedimport_jobs
+}
+
+// RemoveImportJobIDs removes the "import_jobs" edge to the ImportJob entity by IDs.
+func (m *HouseholdMutation) RemoveImportJobIDs(ids ...string) {
+	if m.removedimport_jobs == nil {
+		m.removedimport_jobs = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.import_jobs, ids[i])
+		m.removedimport_jobs[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedImportJobs returns the removed IDs of the "import_jobs" edge to the ImportJob entity.
+func (m *HouseholdMutation) RemovedImportJobsIDs() (ids []string) {
+	for id := range m.removedimport_jobs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ImportJobsIDs returns the "import_jobs" edge IDs in the mutation.
+func (m *HouseholdMutation) ImportJobsIDs() (ids []string) {
+	for id := range m.import_jobs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetImportJobs resets all changes to the "import_jobs" edge.
+func (m *HouseholdMutation) ResetImportJobs() {
+	m.import_jobs = nil
+	m.clearedimport_jobs = false
+	m.removedimport_jobs = nil
+}
+
 // AddRefreshSessionIDs adds the "refresh_sessions" edge to the RefreshSession entity by ids.
 func (m *HouseholdMutation) AddRefreshSessionIDs(ids ...string) {
 	if m.refresh_sessions == nil {
@@ -947,7 +1065,7 @@ func (m *HouseholdMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *HouseholdMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 8)
 	if m.members != nil {
 		edges = append(edges, household.EdgeMembers)
 	}
@@ -962,6 +1080,12 @@ func (m *HouseholdMutation) AddedEdges() []string {
 	}
 	if m.stored_objects != nil {
 		edges = append(edges, household.EdgeStoredObjects)
+	}
+	if m.source_records != nil {
+		edges = append(edges, household.EdgeSourceRecords)
+	}
+	if m.import_jobs != nil {
+		edges = append(edges, household.EdgeImportJobs)
 	}
 	if m.refresh_sessions != nil {
 		edges = append(edges, household.EdgeRefreshSessions)
@@ -1003,6 +1127,18 @@ func (m *HouseholdMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case household.EdgeSourceRecords:
+		ids := make([]ent.Value, 0, len(m.source_records))
+		for id := range m.source_records {
+			ids = append(ids, id)
+		}
+		return ids
+	case household.EdgeImportJobs:
+		ids := make([]ent.Value, 0, len(m.import_jobs))
+		for id := range m.import_jobs {
+			ids = append(ids, id)
+		}
+		return ids
 	case household.EdgeRefreshSessions:
 		ids := make([]ent.Value, 0, len(m.refresh_sessions))
 		for id := range m.refresh_sessions {
@@ -1015,7 +1151,7 @@ func (m *HouseholdMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *HouseholdMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 8)
 	if m.removedmembers != nil {
 		edges = append(edges, household.EdgeMembers)
 	}
@@ -1030,6 +1166,12 @@ func (m *HouseholdMutation) RemovedEdges() []string {
 	}
 	if m.removedstored_objects != nil {
 		edges = append(edges, household.EdgeStoredObjects)
+	}
+	if m.removedsource_records != nil {
+		edges = append(edges, household.EdgeSourceRecords)
+	}
+	if m.removedimport_jobs != nil {
+		edges = append(edges, household.EdgeImportJobs)
 	}
 	if m.removedrefresh_sessions != nil {
 		edges = append(edges, household.EdgeRefreshSessions)
@@ -1071,6 +1213,18 @@ func (m *HouseholdMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case household.EdgeSourceRecords:
+		ids := make([]ent.Value, 0, len(m.removedsource_records))
+		for id := range m.removedsource_records {
+			ids = append(ids, id)
+		}
+		return ids
+	case household.EdgeImportJobs:
+		ids := make([]ent.Value, 0, len(m.removedimport_jobs))
+		for id := range m.removedimport_jobs {
+			ids = append(ids, id)
+		}
+		return ids
 	case household.EdgeRefreshSessions:
 		ids := make([]ent.Value, 0, len(m.removedrefresh_sessions))
 		for id := range m.removedrefresh_sessions {
@@ -1083,7 +1237,7 @@ func (m *HouseholdMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *HouseholdMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 8)
 	if m.clearedmembers {
 		edges = append(edges, household.EdgeMembers)
 	}
@@ -1098,6 +1252,12 @@ func (m *HouseholdMutation) ClearedEdges() []string {
 	}
 	if m.clearedstored_objects {
 		edges = append(edges, household.EdgeStoredObjects)
+	}
+	if m.clearedsource_records {
+		edges = append(edges, household.EdgeSourceRecords)
+	}
+	if m.clearedimport_jobs {
+		edges = append(edges, household.EdgeImportJobs)
 	}
 	if m.clearedrefresh_sessions {
 		edges = append(edges, household.EdgeRefreshSessions)
@@ -1119,6 +1279,10 @@ func (m *HouseholdMutation) EdgeCleared(name string) bool {
 		return m.clearedmedia_assets
 	case household.EdgeStoredObjects:
 		return m.clearedstored_objects
+	case household.EdgeSourceRecords:
+		return m.clearedsource_records
+	case household.EdgeImportJobs:
+		return m.clearedimport_jobs
 	case household.EdgeRefreshSessions:
 		return m.clearedrefresh_sessions
 	}
@@ -1151,6 +1315,12 @@ func (m *HouseholdMutation) ResetEdge(name string) error {
 		return nil
 	case household.EdgeStoredObjects:
 		m.ResetStoredObjects()
+		return nil
+	case household.EdgeSourceRecords:
+		m.ResetSourceRecords()
+		return nil
+	case household.EdgeImportJobs:
+		m.ResetImportJobs()
 		return nil
 	case household.EdgeRefreshSessions:
 		m.ResetRefreshSessions()
@@ -1805,6 +1975,2028 @@ func (m *HouseholdMemberMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown HouseholdMember edge %s", name)
+}
+
+// ImportJobMutation represents an operation that mutates the ImportJob nodes in the graph.
+type ImportJobMutation struct {
+	config
+	op                       Op
+	typ                      string
+	id                       *string
+	created_at               *time.Time
+	updated_at               *time.Time
+	import_kind              *importjob.ImportKind
+	status                   *importjob.Status
+	idempotency_key          *string
+	active_idempotency_key   *string
+	active_fingerprint_key   *string
+	fallback_fingerprint     *string
+	normalized_payload_json  *map[string]interface{}
+	conflict_state           *importjob.ConflictState
+	warnings_json            *[]string
+	appendwarnings_json      []string
+	confidence_score         *float64
+	addconfidence_score      *float64
+	error_code               *string
+	error_message            *string
+	attempt_count            *int
+	addattempt_count         *int
+	started_at               *time.Time
+	finished_at              *time.Time
+	clearedFields            map[string]struct{}
+	household                *string
+	clearedhousehold         bool
+	requested_by_user        *string
+	clearedrequested_by_user bool
+	source_record            *string
+	clearedsource_record     bool
+	draft_recipe             *string
+	cleareddraft_recipe      bool
+	match_recipe             *string
+	clearedmatch_recipe      bool
+	done                     bool
+	oldValue                 func(context.Context) (*ImportJob, error)
+	predicates               []predicate.ImportJob
+}
+
+var _ ent.Mutation = (*ImportJobMutation)(nil)
+
+// importjobOption allows management of the mutation configuration using functional options.
+type importjobOption func(*ImportJobMutation)
+
+// newImportJobMutation creates new mutation for the ImportJob entity.
+func newImportJobMutation(c config, op Op, opts ...importjobOption) *ImportJobMutation {
+	m := &ImportJobMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeImportJob,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withImportJobID sets the ID field of the mutation.
+func withImportJobID(id string) importjobOption {
+	return func(m *ImportJobMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ImportJob
+		)
+		m.oldValue = func(ctx context.Context) (*ImportJob, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ImportJob.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withImportJob sets the old ImportJob of the mutation.
+func withImportJob(node *ImportJob) importjobOption {
+	return func(m *ImportJobMutation) {
+		m.oldValue = func(context.Context) (*ImportJob, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ImportJobMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ImportJobMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("generated: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of ImportJob entities.
+func (m *ImportJobMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ImportJobMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ImportJobMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ImportJob.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ImportJobMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ImportJobMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ImportJobMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *ImportJobMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *ImportJobMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *ImportJobMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetHouseholdID sets the "household_id" field.
+func (m *ImportJobMutation) SetHouseholdID(s string) {
+	m.household = &s
+}
+
+// HouseholdID returns the value of the "household_id" field in the mutation.
+func (m *ImportJobMutation) HouseholdID() (r string, exists bool) {
+	v := m.household
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHouseholdID returns the old "household_id" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldHouseholdID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHouseholdID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHouseholdID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHouseholdID: %w", err)
+	}
+	return oldValue.HouseholdID, nil
+}
+
+// ResetHouseholdID resets all changes to the "household_id" field.
+func (m *ImportJobMutation) ResetHouseholdID() {
+	m.household = nil
+}
+
+// SetRequestedByUserID sets the "requested_by_user_id" field.
+func (m *ImportJobMutation) SetRequestedByUserID(s string) {
+	m.requested_by_user = &s
+}
+
+// RequestedByUserID returns the value of the "requested_by_user_id" field in the mutation.
+func (m *ImportJobMutation) RequestedByUserID() (r string, exists bool) {
+	v := m.requested_by_user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestedByUserID returns the old "requested_by_user_id" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldRequestedByUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequestedByUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequestedByUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestedByUserID: %w", err)
+	}
+	return oldValue.RequestedByUserID, nil
+}
+
+// ResetRequestedByUserID resets all changes to the "requested_by_user_id" field.
+func (m *ImportJobMutation) ResetRequestedByUserID() {
+	m.requested_by_user = nil
+}
+
+// SetSourceRecordID sets the "source_record_id" field.
+func (m *ImportJobMutation) SetSourceRecordID(s string) {
+	m.source_record = &s
+}
+
+// SourceRecordID returns the value of the "source_record_id" field in the mutation.
+func (m *ImportJobMutation) SourceRecordID() (r string, exists bool) {
+	v := m.source_record
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceRecordID returns the old "source_record_id" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldSourceRecordID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSourceRecordID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSourceRecordID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceRecordID: %w", err)
+	}
+	return oldValue.SourceRecordID, nil
+}
+
+// ResetSourceRecordID resets all changes to the "source_record_id" field.
+func (m *ImportJobMutation) ResetSourceRecordID() {
+	m.source_record = nil
+}
+
+// SetImportKind sets the "import_kind" field.
+func (m *ImportJobMutation) SetImportKind(ik importjob.ImportKind) {
+	m.import_kind = &ik
+}
+
+// ImportKind returns the value of the "import_kind" field in the mutation.
+func (m *ImportJobMutation) ImportKind() (r importjob.ImportKind, exists bool) {
+	v := m.import_kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportKind returns the old "import_kind" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldImportKind(ctx context.Context) (v importjob.ImportKind, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportKind: %w", err)
+	}
+	return oldValue.ImportKind, nil
+}
+
+// ResetImportKind resets all changes to the "import_kind" field.
+func (m *ImportJobMutation) ResetImportKind() {
+	m.import_kind = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *ImportJobMutation) SetStatus(i importjob.Status) {
+	m.status = &i
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *ImportJobMutation) Status() (r importjob.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldStatus(ctx context.Context) (v importjob.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *ImportJobMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetIdempotencyKey sets the "idempotency_key" field.
+func (m *ImportJobMutation) SetIdempotencyKey(s string) {
+	m.idempotency_key = &s
+}
+
+// IdempotencyKey returns the value of the "idempotency_key" field in the mutation.
+func (m *ImportJobMutation) IdempotencyKey() (r string, exists bool) {
+	v := m.idempotency_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIdempotencyKey returns the old "idempotency_key" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldIdempotencyKey(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIdempotencyKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIdempotencyKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIdempotencyKey: %w", err)
+	}
+	return oldValue.IdempotencyKey, nil
+}
+
+// ClearIdempotencyKey clears the value of the "idempotency_key" field.
+func (m *ImportJobMutation) ClearIdempotencyKey() {
+	m.idempotency_key = nil
+	m.clearedFields[importjob.FieldIdempotencyKey] = struct{}{}
+}
+
+// IdempotencyKeyCleared returns if the "idempotency_key" field was cleared in this mutation.
+func (m *ImportJobMutation) IdempotencyKeyCleared() bool {
+	_, ok := m.clearedFields[importjob.FieldIdempotencyKey]
+	return ok
+}
+
+// ResetIdempotencyKey resets all changes to the "idempotency_key" field.
+func (m *ImportJobMutation) ResetIdempotencyKey() {
+	m.idempotency_key = nil
+	delete(m.clearedFields, importjob.FieldIdempotencyKey)
+}
+
+// SetActiveIdempotencyKey sets the "active_idempotency_key" field.
+func (m *ImportJobMutation) SetActiveIdempotencyKey(s string) {
+	m.active_idempotency_key = &s
+}
+
+// ActiveIdempotencyKey returns the value of the "active_idempotency_key" field in the mutation.
+func (m *ImportJobMutation) ActiveIdempotencyKey() (r string, exists bool) {
+	v := m.active_idempotency_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActiveIdempotencyKey returns the old "active_idempotency_key" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldActiveIdempotencyKey(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActiveIdempotencyKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActiveIdempotencyKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActiveIdempotencyKey: %w", err)
+	}
+	return oldValue.ActiveIdempotencyKey, nil
+}
+
+// ClearActiveIdempotencyKey clears the value of the "active_idempotency_key" field.
+func (m *ImportJobMutation) ClearActiveIdempotencyKey() {
+	m.active_idempotency_key = nil
+	m.clearedFields[importjob.FieldActiveIdempotencyKey] = struct{}{}
+}
+
+// ActiveIdempotencyKeyCleared returns if the "active_idempotency_key" field was cleared in this mutation.
+func (m *ImportJobMutation) ActiveIdempotencyKeyCleared() bool {
+	_, ok := m.clearedFields[importjob.FieldActiveIdempotencyKey]
+	return ok
+}
+
+// ResetActiveIdempotencyKey resets all changes to the "active_idempotency_key" field.
+func (m *ImportJobMutation) ResetActiveIdempotencyKey() {
+	m.active_idempotency_key = nil
+	delete(m.clearedFields, importjob.FieldActiveIdempotencyKey)
+}
+
+// SetActiveFingerprintKey sets the "active_fingerprint_key" field.
+func (m *ImportJobMutation) SetActiveFingerprintKey(s string) {
+	m.active_fingerprint_key = &s
+}
+
+// ActiveFingerprintKey returns the value of the "active_fingerprint_key" field in the mutation.
+func (m *ImportJobMutation) ActiveFingerprintKey() (r string, exists bool) {
+	v := m.active_fingerprint_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActiveFingerprintKey returns the old "active_fingerprint_key" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldActiveFingerprintKey(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActiveFingerprintKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActiveFingerprintKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActiveFingerprintKey: %w", err)
+	}
+	return oldValue.ActiveFingerprintKey, nil
+}
+
+// ClearActiveFingerprintKey clears the value of the "active_fingerprint_key" field.
+func (m *ImportJobMutation) ClearActiveFingerprintKey() {
+	m.active_fingerprint_key = nil
+	m.clearedFields[importjob.FieldActiveFingerprintKey] = struct{}{}
+}
+
+// ActiveFingerprintKeyCleared returns if the "active_fingerprint_key" field was cleared in this mutation.
+func (m *ImportJobMutation) ActiveFingerprintKeyCleared() bool {
+	_, ok := m.clearedFields[importjob.FieldActiveFingerprintKey]
+	return ok
+}
+
+// ResetActiveFingerprintKey resets all changes to the "active_fingerprint_key" field.
+func (m *ImportJobMutation) ResetActiveFingerprintKey() {
+	m.active_fingerprint_key = nil
+	delete(m.clearedFields, importjob.FieldActiveFingerprintKey)
+}
+
+// SetFallbackFingerprint sets the "fallback_fingerprint" field.
+func (m *ImportJobMutation) SetFallbackFingerprint(s string) {
+	m.fallback_fingerprint = &s
+}
+
+// FallbackFingerprint returns the value of the "fallback_fingerprint" field in the mutation.
+func (m *ImportJobMutation) FallbackFingerprint() (r string, exists bool) {
+	v := m.fallback_fingerprint
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFallbackFingerprint returns the old "fallback_fingerprint" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldFallbackFingerprint(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFallbackFingerprint is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFallbackFingerprint requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFallbackFingerprint: %w", err)
+	}
+	return oldValue.FallbackFingerprint, nil
+}
+
+// ResetFallbackFingerprint resets all changes to the "fallback_fingerprint" field.
+func (m *ImportJobMutation) ResetFallbackFingerprint() {
+	m.fallback_fingerprint = nil
+}
+
+// SetNormalizedPayloadJSON sets the "normalized_payload_json" field.
+func (m *ImportJobMutation) SetNormalizedPayloadJSON(value map[string]interface{}) {
+	m.normalized_payload_json = &value
+}
+
+// NormalizedPayloadJSON returns the value of the "normalized_payload_json" field in the mutation.
+func (m *ImportJobMutation) NormalizedPayloadJSON() (r map[string]interface{}, exists bool) {
+	v := m.normalized_payload_json
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNormalizedPayloadJSON returns the old "normalized_payload_json" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldNormalizedPayloadJSON(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNormalizedPayloadJSON is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNormalizedPayloadJSON requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNormalizedPayloadJSON: %w", err)
+	}
+	return oldValue.NormalizedPayloadJSON, nil
+}
+
+// ClearNormalizedPayloadJSON clears the value of the "normalized_payload_json" field.
+func (m *ImportJobMutation) ClearNormalizedPayloadJSON() {
+	m.normalized_payload_json = nil
+	m.clearedFields[importjob.FieldNormalizedPayloadJSON] = struct{}{}
+}
+
+// NormalizedPayloadJSONCleared returns if the "normalized_payload_json" field was cleared in this mutation.
+func (m *ImportJobMutation) NormalizedPayloadJSONCleared() bool {
+	_, ok := m.clearedFields[importjob.FieldNormalizedPayloadJSON]
+	return ok
+}
+
+// ResetNormalizedPayloadJSON resets all changes to the "normalized_payload_json" field.
+func (m *ImportJobMutation) ResetNormalizedPayloadJSON() {
+	m.normalized_payload_json = nil
+	delete(m.clearedFields, importjob.FieldNormalizedPayloadJSON)
+}
+
+// SetDraftRecipeID sets the "draft_recipe_id" field.
+func (m *ImportJobMutation) SetDraftRecipeID(s string) {
+	m.draft_recipe = &s
+}
+
+// DraftRecipeID returns the value of the "draft_recipe_id" field in the mutation.
+func (m *ImportJobMutation) DraftRecipeID() (r string, exists bool) {
+	v := m.draft_recipe
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDraftRecipeID returns the old "draft_recipe_id" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldDraftRecipeID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDraftRecipeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDraftRecipeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDraftRecipeID: %w", err)
+	}
+	return oldValue.DraftRecipeID, nil
+}
+
+// ClearDraftRecipeID clears the value of the "draft_recipe_id" field.
+func (m *ImportJobMutation) ClearDraftRecipeID() {
+	m.draft_recipe = nil
+	m.clearedFields[importjob.FieldDraftRecipeID] = struct{}{}
+}
+
+// DraftRecipeIDCleared returns if the "draft_recipe_id" field was cleared in this mutation.
+func (m *ImportJobMutation) DraftRecipeIDCleared() bool {
+	_, ok := m.clearedFields[importjob.FieldDraftRecipeID]
+	return ok
+}
+
+// ResetDraftRecipeID resets all changes to the "draft_recipe_id" field.
+func (m *ImportJobMutation) ResetDraftRecipeID() {
+	m.draft_recipe = nil
+	delete(m.clearedFields, importjob.FieldDraftRecipeID)
+}
+
+// SetMatchRecipeID sets the "match_recipe_id" field.
+func (m *ImportJobMutation) SetMatchRecipeID(s string) {
+	m.match_recipe = &s
+}
+
+// MatchRecipeID returns the value of the "match_recipe_id" field in the mutation.
+func (m *ImportJobMutation) MatchRecipeID() (r string, exists bool) {
+	v := m.match_recipe
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMatchRecipeID returns the old "match_recipe_id" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldMatchRecipeID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMatchRecipeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMatchRecipeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMatchRecipeID: %w", err)
+	}
+	return oldValue.MatchRecipeID, nil
+}
+
+// ClearMatchRecipeID clears the value of the "match_recipe_id" field.
+func (m *ImportJobMutation) ClearMatchRecipeID() {
+	m.match_recipe = nil
+	m.clearedFields[importjob.FieldMatchRecipeID] = struct{}{}
+}
+
+// MatchRecipeIDCleared returns if the "match_recipe_id" field was cleared in this mutation.
+func (m *ImportJobMutation) MatchRecipeIDCleared() bool {
+	_, ok := m.clearedFields[importjob.FieldMatchRecipeID]
+	return ok
+}
+
+// ResetMatchRecipeID resets all changes to the "match_recipe_id" field.
+func (m *ImportJobMutation) ResetMatchRecipeID() {
+	m.match_recipe = nil
+	delete(m.clearedFields, importjob.FieldMatchRecipeID)
+}
+
+// SetConflictState sets the "conflict_state" field.
+func (m *ImportJobMutation) SetConflictState(is importjob.ConflictState) {
+	m.conflict_state = &is
+}
+
+// ConflictState returns the value of the "conflict_state" field in the mutation.
+func (m *ImportJobMutation) ConflictState() (r importjob.ConflictState, exists bool) {
+	v := m.conflict_state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConflictState returns the old "conflict_state" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldConflictState(ctx context.Context) (v importjob.ConflictState, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConflictState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConflictState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConflictState: %w", err)
+	}
+	return oldValue.ConflictState, nil
+}
+
+// ResetConflictState resets all changes to the "conflict_state" field.
+func (m *ImportJobMutation) ResetConflictState() {
+	m.conflict_state = nil
+}
+
+// SetWarningsJSON sets the "warnings_json" field.
+func (m *ImportJobMutation) SetWarningsJSON(s []string) {
+	m.warnings_json = &s
+	m.appendwarnings_json = nil
+}
+
+// WarningsJSON returns the value of the "warnings_json" field in the mutation.
+func (m *ImportJobMutation) WarningsJSON() (r []string, exists bool) {
+	v := m.warnings_json
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWarningsJSON returns the old "warnings_json" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldWarningsJSON(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWarningsJSON is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWarningsJSON requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWarningsJSON: %w", err)
+	}
+	return oldValue.WarningsJSON, nil
+}
+
+// AppendWarningsJSON adds s to the "warnings_json" field.
+func (m *ImportJobMutation) AppendWarningsJSON(s []string) {
+	m.appendwarnings_json = append(m.appendwarnings_json, s...)
+}
+
+// AppendedWarningsJSON returns the list of values that were appended to the "warnings_json" field in this mutation.
+func (m *ImportJobMutation) AppendedWarningsJSON() ([]string, bool) {
+	if len(m.appendwarnings_json) == 0 {
+		return nil, false
+	}
+	return m.appendwarnings_json, true
+}
+
+// ClearWarningsJSON clears the value of the "warnings_json" field.
+func (m *ImportJobMutation) ClearWarningsJSON() {
+	m.warnings_json = nil
+	m.appendwarnings_json = nil
+	m.clearedFields[importjob.FieldWarningsJSON] = struct{}{}
+}
+
+// WarningsJSONCleared returns if the "warnings_json" field was cleared in this mutation.
+func (m *ImportJobMutation) WarningsJSONCleared() bool {
+	_, ok := m.clearedFields[importjob.FieldWarningsJSON]
+	return ok
+}
+
+// ResetWarningsJSON resets all changes to the "warnings_json" field.
+func (m *ImportJobMutation) ResetWarningsJSON() {
+	m.warnings_json = nil
+	m.appendwarnings_json = nil
+	delete(m.clearedFields, importjob.FieldWarningsJSON)
+}
+
+// SetConfidenceScore sets the "confidence_score" field.
+func (m *ImportJobMutation) SetConfidenceScore(f float64) {
+	m.confidence_score = &f
+	m.addconfidence_score = nil
+}
+
+// ConfidenceScore returns the value of the "confidence_score" field in the mutation.
+func (m *ImportJobMutation) ConfidenceScore() (r float64, exists bool) {
+	v := m.confidence_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConfidenceScore returns the old "confidence_score" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldConfidenceScore(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConfidenceScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConfidenceScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConfidenceScore: %w", err)
+	}
+	return oldValue.ConfidenceScore, nil
+}
+
+// AddConfidenceScore adds f to the "confidence_score" field.
+func (m *ImportJobMutation) AddConfidenceScore(f float64) {
+	if m.addconfidence_score != nil {
+		*m.addconfidence_score += f
+	} else {
+		m.addconfidence_score = &f
+	}
+}
+
+// AddedConfidenceScore returns the value that was added to the "confidence_score" field in this mutation.
+func (m *ImportJobMutation) AddedConfidenceScore() (r float64, exists bool) {
+	v := m.addconfidence_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearConfidenceScore clears the value of the "confidence_score" field.
+func (m *ImportJobMutation) ClearConfidenceScore() {
+	m.confidence_score = nil
+	m.addconfidence_score = nil
+	m.clearedFields[importjob.FieldConfidenceScore] = struct{}{}
+}
+
+// ConfidenceScoreCleared returns if the "confidence_score" field was cleared in this mutation.
+func (m *ImportJobMutation) ConfidenceScoreCleared() bool {
+	_, ok := m.clearedFields[importjob.FieldConfidenceScore]
+	return ok
+}
+
+// ResetConfidenceScore resets all changes to the "confidence_score" field.
+func (m *ImportJobMutation) ResetConfidenceScore() {
+	m.confidence_score = nil
+	m.addconfidence_score = nil
+	delete(m.clearedFields, importjob.FieldConfidenceScore)
+}
+
+// SetErrorCode sets the "error_code" field.
+func (m *ImportJobMutation) SetErrorCode(s string) {
+	m.error_code = &s
+}
+
+// ErrorCode returns the value of the "error_code" field in the mutation.
+func (m *ImportJobMutation) ErrorCode() (r string, exists bool) {
+	v := m.error_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorCode returns the old "error_code" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldErrorCode(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorCode: %w", err)
+	}
+	return oldValue.ErrorCode, nil
+}
+
+// ClearErrorCode clears the value of the "error_code" field.
+func (m *ImportJobMutation) ClearErrorCode() {
+	m.error_code = nil
+	m.clearedFields[importjob.FieldErrorCode] = struct{}{}
+}
+
+// ErrorCodeCleared returns if the "error_code" field was cleared in this mutation.
+func (m *ImportJobMutation) ErrorCodeCleared() bool {
+	_, ok := m.clearedFields[importjob.FieldErrorCode]
+	return ok
+}
+
+// ResetErrorCode resets all changes to the "error_code" field.
+func (m *ImportJobMutation) ResetErrorCode() {
+	m.error_code = nil
+	delete(m.clearedFields, importjob.FieldErrorCode)
+}
+
+// SetErrorMessage sets the "error_message" field.
+func (m *ImportJobMutation) SetErrorMessage(s string) {
+	m.error_message = &s
+}
+
+// ErrorMessage returns the value of the "error_message" field in the mutation.
+func (m *ImportJobMutation) ErrorMessage() (r string, exists bool) {
+	v := m.error_message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorMessage returns the old "error_message" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldErrorMessage(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorMessage: %w", err)
+	}
+	return oldValue.ErrorMessage, nil
+}
+
+// ClearErrorMessage clears the value of the "error_message" field.
+func (m *ImportJobMutation) ClearErrorMessage() {
+	m.error_message = nil
+	m.clearedFields[importjob.FieldErrorMessage] = struct{}{}
+}
+
+// ErrorMessageCleared returns if the "error_message" field was cleared in this mutation.
+func (m *ImportJobMutation) ErrorMessageCleared() bool {
+	_, ok := m.clearedFields[importjob.FieldErrorMessage]
+	return ok
+}
+
+// ResetErrorMessage resets all changes to the "error_message" field.
+func (m *ImportJobMutation) ResetErrorMessage() {
+	m.error_message = nil
+	delete(m.clearedFields, importjob.FieldErrorMessage)
+}
+
+// SetAttemptCount sets the "attempt_count" field.
+func (m *ImportJobMutation) SetAttemptCount(i int) {
+	m.attempt_count = &i
+	m.addattempt_count = nil
+}
+
+// AttemptCount returns the value of the "attempt_count" field in the mutation.
+func (m *ImportJobMutation) AttemptCount() (r int, exists bool) {
+	v := m.attempt_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttemptCount returns the old "attempt_count" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldAttemptCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttemptCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttemptCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttemptCount: %w", err)
+	}
+	return oldValue.AttemptCount, nil
+}
+
+// AddAttemptCount adds i to the "attempt_count" field.
+func (m *ImportJobMutation) AddAttemptCount(i int) {
+	if m.addattempt_count != nil {
+		*m.addattempt_count += i
+	} else {
+		m.addattempt_count = &i
+	}
+}
+
+// AddedAttemptCount returns the value that was added to the "attempt_count" field in this mutation.
+func (m *ImportJobMutation) AddedAttemptCount() (r int, exists bool) {
+	v := m.addattempt_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAttemptCount resets all changes to the "attempt_count" field.
+func (m *ImportJobMutation) ResetAttemptCount() {
+	m.attempt_count = nil
+	m.addattempt_count = nil
+}
+
+// SetStartedAt sets the "started_at" field.
+func (m *ImportJobMutation) SetStartedAt(t time.Time) {
+	m.started_at = &t
+}
+
+// StartedAt returns the value of the "started_at" field in the mutation.
+func (m *ImportJobMutation) StartedAt() (r time.Time, exists bool) {
+	v := m.started_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartedAt returns the old "started_at" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldStartedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStartedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStartedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartedAt: %w", err)
+	}
+	return oldValue.StartedAt, nil
+}
+
+// ClearStartedAt clears the value of the "started_at" field.
+func (m *ImportJobMutation) ClearStartedAt() {
+	m.started_at = nil
+	m.clearedFields[importjob.FieldStartedAt] = struct{}{}
+}
+
+// StartedAtCleared returns if the "started_at" field was cleared in this mutation.
+func (m *ImportJobMutation) StartedAtCleared() bool {
+	_, ok := m.clearedFields[importjob.FieldStartedAt]
+	return ok
+}
+
+// ResetStartedAt resets all changes to the "started_at" field.
+func (m *ImportJobMutation) ResetStartedAt() {
+	m.started_at = nil
+	delete(m.clearedFields, importjob.FieldStartedAt)
+}
+
+// SetFinishedAt sets the "finished_at" field.
+func (m *ImportJobMutation) SetFinishedAt(t time.Time) {
+	m.finished_at = &t
+}
+
+// FinishedAt returns the value of the "finished_at" field in the mutation.
+func (m *ImportJobMutation) FinishedAt() (r time.Time, exists bool) {
+	v := m.finished_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFinishedAt returns the old "finished_at" field's value of the ImportJob entity.
+// If the ImportJob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ImportJobMutation) OldFinishedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFinishedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFinishedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFinishedAt: %w", err)
+	}
+	return oldValue.FinishedAt, nil
+}
+
+// ClearFinishedAt clears the value of the "finished_at" field.
+func (m *ImportJobMutation) ClearFinishedAt() {
+	m.finished_at = nil
+	m.clearedFields[importjob.FieldFinishedAt] = struct{}{}
+}
+
+// FinishedAtCleared returns if the "finished_at" field was cleared in this mutation.
+func (m *ImportJobMutation) FinishedAtCleared() bool {
+	_, ok := m.clearedFields[importjob.FieldFinishedAt]
+	return ok
+}
+
+// ResetFinishedAt resets all changes to the "finished_at" field.
+func (m *ImportJobMutation) ResetFinishedAt() {
+	m.finished_at = nil
+	delete(m.clearedFields, importjob.FieldFinishedAt)
+}
+
+// ClearHousehold clears the "household" edge to the Household entity.
+func (m *ImportJobMutation) ClearHousehold() {
+	m.clearedhousehold = true
+	m.clearedFields[importjob.FieldHouseholdID] = struct{}{}
+}
+
+// HouseholdCleared reports if the "household" edge to the Household entity was cleared.
+func (m *ImportJobMutation) HouseholdCleared() bool {
+	return m.clearedhousehold
+}
+
+// HouseholdIDs returns the "household" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// HouseholdID instead. It exists only for internal usage by the builders.
+func (m *ImportJobMutation) HouseholdIDs() (ids []string) {
+	if id := m.household; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetHousehold resets all changes to the "household" edge.
+func (m *ImportJobMutation) ResetHousehold() {
+	m.household = nil
+	m.clearedhousehold = false
+}
+
+// ClearRequestedByUser clears the "requested_by_user" edge to the User entity.
+func (m *ImportJobMutation) ClearRequestedByUser() {
+	m.clearedrequested_by_user = true
+	m.clearedFields[importjob.FieldRequestedByUserID] = struct{}{}
+}
+
+// RequestedByUserCleared reports if the "requested_by_user" edge to the User entity was cleared.
+func (m *ImportJobMutation) RequestedByUserCleared() bool {
+	return m.clearedrequested_by_user
+}
+
+// RequestedByUserIDs returns the "requested_by_user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RequestedByUserID instead. It exists only for internal usage by the builders.
+func (m *ImportJobMutation) RequestedByUserIDs() (ids []string) {
+	if id := m.requested_by_user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRequestedByUser resets all changes to the "requested_by_user" edge.
+func (m *ImportJobMutation) ResetRequestedByUser() {
+	m.requested_by_user = nil
+	m.clearedrequested_by_user = false
+}
+
+// ClearSourceRecord clears the "source_record" edge to the SourceRecord entity.
+func (m *ImportJobMutation) ClearSourceRecord() {
+	m.clearedsource_record = true
+	m.clearedFields[importjob.FieldSourceRecordID] = struct{}{}
+}
+
+// SourceRecordCleared reports if the "source_record" edge to the SourceRecord entity was cleared.
+func (m *ImportJobMutation) SourceRecordCleared() bool {
+	return m.clearedsource_record
+}
+
+// SourceRecordIDs returns the "source_record" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SourceRecordID instead. It exists only for internal usage by the builders.
+func (m *ImportJobMutation) SourceRecordIDs() (ids []string) {
+	if id := m.source_record; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSourceRecord resets all changes to the "source_record" edge.
+func (m *ImportJobMutation) ResetSourceRecord() {
+	m.source_record = nil
+	m.clearedsource_record = false
+}
+
+// ClearDraftRecipe clears the "draft_recipe" edge to the Recipe entity.
+func (m *ImportJobMutation) ClearDraftRecipe() {
+	m.cleareddraft_recipe = true
+	m.clearedFields[importjob.FieldDraftRecipeID] = struct{}{}
+}
+
+// DraftRecipeCleared reports if the "draft_recipe" edge to the Recipe entity was cleared.
+func (m *ImportJobMutation) DraftRecipeCleared() bool {
+	return m.DraftRecipeIDCleared() || m.cleareddraft_recipe
+}
+
+// DraftRecipeIDs returns the "draft_recipe" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DraftRecipeID instead. It exists only for internal usage by the builders.
+func (m *ImportJobMutation) DraftRecipeIDs() (ids []string) {
+	if id := m.draft_recipe; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDraftRecipe resets all changes to the "draft_recipe" edge.
+func (m *ImportJobMutation) ResetDraftRecipe() {
+	m.draft_recipe = nil
+	m.cleareddraft_recipe = false
+}
+
+// ClearMatchRecipe clears the "match_recipe" edge to the Recipe entity.
+func (m *ImportJobMutation) ClearMatchRecipe() {
+	m.clearedmatch_recipe = true
+	m.clearedFields[importjob.FieldMatchRecipeID] = struct{}{}
+}
+
+// MatchRecipeCleared reports if the "match_recipe" edge to the Recipe entity was cleared.
+func (m *ImportJobMutation) MatchRecipeCleared() bool {
+	return m.MatchRecipeIDCleared() || m.clearedmatch_recipe
+}
+
+// MatchRecipeIDs returns the "match_recipe" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// MatchRecipeID instead. It exists only for internal usage by the builders.
+func (m *ImportJobMutation) MatchRecipeIDs() (ids []string) {
+	if id := m.match_recipe; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetMatchRecipe resets all changes to the "match_recipe" edge.
+func (m *ImportJobMutation) ResetMatchRecipe() {
+	m.match_recipe = nil
+	m.clearedmatch_recipe = false
+}
+
+// Where appends a list predicates to the ImportJobMutation builder.
+func (m *ImportJobMutation) Where(ps ...predicate.ImportJob) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ImportJobMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ImportJobMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ImportJob, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ImportJobMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ImportJobMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ImportJob).
+func (m *ImportJobMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ImportJobMutation) Fields() []string {
+	fields := make([]string, 0, 22)
+	if m.created_at != nil {
+		fields = append(fields, importjob.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, importjob.FieldUpdatedAt)
+	}
+	if m.household != nil {
+		fields = append(fields, importjob.FieldHouseholdID)
+	}
+	if m.requested_by_user != nil {
+		fields = append(fields, importjob.FieldRequestedByUserID)
+	}
+	if m.source_record != nil {
+		fields = append(fields, importjob.FieldSourceRecordID)
+	}
+	if m.import_kind != nil {
+		fields = append(fields, importjob.FieldImportKind)
+	}
+	if m.status != nil {
+		fields = append(fields, importjob.FieldStatus)
+	}
+	if m.idempotency_key != nil {
+		fields = append(fields, importjob.FieldIdempotencyKey)
+	}
+	if m.active_idempotency_key != nil {
+		fields = append(fields, importjob.FieldActiveIdempotencyKey)
+	}
+	if m.active_fingerprint_key != nil {
+		fields = append(fields, importjob.FieldActiveFingerprintKey)
+	}
+	if m.fallback_fingerprint != nil {
+		fields = append(fields, importjob.FieldFallbackFingerprint)
+	}
+	if m.normalized_payload_json != nil {
+		fields = append(fields, importjob.FieldNormalizedPayloadJSON)
+	}
+	if m.draft_recipe != nil {
+		fields = append(fields, importjob.FieldDraftRecipeID)
+	}
+	if m.match_recipe != nil {
+		fields = append(fields, importjob.FieldMatchRecipeID)
+	}
+	if m.conflict_state != nil {
+		fields = append(fields, importjob.FieldConflictState)
+	}
+	if m.warnings_json != nil {
+		fields = append(fields, importjob.FieldWarningsJSON)
+	}
+	if m.confidence_score != nil {
+		fields = append(fields, importjob.FieldConfidenceScore)
+	}
+	if m.error_code != nil {
+		fields = append(fields, importjob.FieldErrorCode)
+	}
+	if m.error_message != nil {
+		fields = append(fields, importjob.FieldErrorMessage)
+	}
+	if m.attempt_count != nil {
+		fields = append(fields, importjob.FieldAttemptCount)
+	}
+	if m.started_at != nil {
+		fields = append(fields, importjob.FieldStartedAt)
+	}
+	if m.finished_at != nil {
+		fields = append(fields, importjob.FieldFinishedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ImportJobMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case importjob.FieldCreatedAt:
+		return m.CreatedAt()
+	case importjob.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case importjob.FieldHouseholdID:
+		return m.HouseholdID()
+	case importjob.FieldRequestedByUserID:
+		return m.RequestedByUserID()
+	case importjob.FieldSourceRecordID:
+		return m.SourceRecordID()
+	case importjob.FieldImportKind:
+		return m.ImportKind()
+	case importjob.FieldStatus:
+		return m.Status()
+	case importjob.FieldIdempotencyKey:
+		return m.IdempotencyKey()
+	case importjob.FieldActiveIdempotencyKey:
+		return m.ActiveIdempotencyKey()
+	case importjob.FieldActiveFingerprintKey:
+		return m.ActiveFingerprintKey()
+	case importjob.FieldFallbackFingerprint:
+		return m.FallbackFingerprint()
+	case importjob.FieldNormalizedPayloadJSON:
+		return m.NormalizedPayloadJSON()
+	case importjob.FieldDraftRecipeID:
+		return m.DraftRecipeID()
+	case importjob.FieldMatchRecipeID:
+		return m.MatchRecipeID()
+	case importjob.FieldConflictState:
+		return m.ConflictState()
+	case importjob.FieldWarningsJSON:
+		return m.WarningsJSON()
+	case importjob.FieldConfidenceScore:
+		return m.ConfidenceScore()
+	case importjob.FieldErrorCode:
+		return m.ErrorCode()
+	case importjob.FieldErrorMessage:
+		return m.ErrorMessage()
+	case importjob.FieldAttemptCount:
+		return m.AttemptCount()
+	case importjob.FieldStartedAt:
+		return m.StartedAt()
+	case importjob.FieldFinishedAt:
+		return m.FinishedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ImportJobMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case importjob.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case importjob.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case importjob.FieldHouseholdID:
+		return m.OldHouseholdID(ctx)
+	case importjob.FieldRequestedByUserID:
+		return m.OldRequestedByUserID(ctx)
+	case importjob.FieldSourceRecordID:
+		return m.OldSourceRecordID(ctx)
+	case importjob.FieldImportKind:
+		return m.OldImportKind(ctx)
+	case importjob.FieldStatus:
+		return m.OldStatus(ctx)
+	case importjob.FieldIdempotencyKey:
+		return m.OldIdempotencyKey(ctx)
+	case importjob.FieldActiveIdempotencyKey:
+		return m.OldActiveIdempotencyKey(ctx)
+	case importjob.FieldActiveFingerprintKey:
+		return m.OldActiveFingerprintKey(ctx)
+	case importjob.FieldFallbackFingerprint:
+		return m.OldFallbackFingerprint(ctx)
+	case importjob.FieldNormalizedPayloadJSON:
+		return m.OldNormalizedPayloadJSON(ctx)
+	case importjob.FieldDraftRecipeID:
+		return m.OldDraftRecipeID(ctx)
+	case importjob.FieldMatchRecipeID:
+		return m.OldMatchRecipeID(ctx)
+	case importjob.FieldConflictState:
+		return m.OldConflictState(ctx)
+	case importjob.FieldWarningsJSON:
+		return m.OldWarningsJSON(ctx)
+	case importjob.FieldConfidenceScore:
+		return m.OldConfidenceScore(ctx)
+	case importjob.FieldErrorCode:
+		return m.OldErrorCode(ctx)
+	case importjob.FieldErrorMessage:
+		return m.OldErrorMessage(ctx)
+	case importjob.FieldAttemptCount:
+		return m.OldAttemptCount(ctx)
+	case importjob.FieldStartedAt:
+		return m.OldStartedAt(ctx)
+	case importjob.FieldFinishedAt:
+		return m.OldFinishedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown ImportJob field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ImportJobMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case importjob.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case importjob.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case importjob.FieldHouseholdID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHouseholdID(v)
+		return nil
+	case importjob.FieldRequestedByUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestedByUserID(v)
+		return nil
+	case importjob.FieldSourceRecordID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceRecordID(v)
+		return nil
+	case importjob.FieldImportKind:
+		v, ok := value.(importjob.ImportKind)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportKind(v)
+		return nil
+	case importjob.FieldStatus:
+		v, ok := value.(importjob.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case importjob.FieldIdempotencyKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIdempotencyKey(v)
+		return nil
+	case importjob.FieldActiveIdempotencyKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActiveIdempotencyKey(v)
+		return nil
+	case importjob.FieldActiveFingerprintKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActiveFingerprintKey(v)
+		return nil
+	case importjob.FieldFallbackFingerprint:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFallbackFingerprint(v)
+		return nil
+	case importjob.FieldNormalizedPayloadJSON:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNormalizedPayloadJSON(v)
+		return nil
+	case importjob.FieldDraftRecipeID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDraftRecipeID(v)
+		return nil
+	case importjob.FieldMatchRecipeID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMatchRecipeID(v)
+		return nil
+	case importjob.FieldConflictState:
+		v, ok := value.(importjob.ConflictState)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConflictState(v)
+		return nil
+	case importjob.FieldWarningsJSON:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWarningsJSON(v)
+		return nil
+	case importjob.FieldConfidenceScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConfidenceScore(v)
+		return nil
+	case importjob.FieldErrorCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorCode(v)
+		return nil
+	case importjob.FieldErrorMessage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorMessage(v)
+		return nil
+	case importjob.FieldAttemptCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttemptCount(v)
+		return nil
+	case importjob.FieldStartedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStartedAt(v)
+		return nil
+	case importjob.FieldFinishedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFinishedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ImportJob field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ImportJobMutation) AddedFields() []string {
+	var fields []string
+	if m.addconfidence_score != nil {
+		fields = append(fields, importjob.FieldConfidenceScore)
+	}
+	if m.addattempt_count != nil {
+		fields = append(fields, importjob.FieldAttemptCount)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ImportJobMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case importjob.FieldConfidenceScore:
+		return m.AddedConfidenceScore()
+	case importjob.FieldAttemptCount:
+		return m.AddedAttemptCount()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ImportJobMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case importjob.FieldConfidenceScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddConfidenceScore(v)
+		return nil
+	case importjob.FieldAttemptCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAttemptCount(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ImportJob numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ImportJobMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(importjob.FieldIdempotencyKey) {
+		fields = append(fields, importjob.FieldIdempotencyKey)
+	}
+	if m.FieldCleared(importjob.FieldActiveIdempotencyKey) {
+		fields = append(fields, importjob.FieldActiveIdempotencyKey)
+	}
+	if m.FieldCleared(importjob.FieldActiveFingerprintKey) {
+		fields = append(fields, importjob.FieldActiveFingerprintKey)
+	}
+	if m.FieldCleared(importjob.FieldNormalizedPayloadJSON) {
+		fields = append(fields, importjob.FieldNormalizedPayloadJSON)
+	}
+	if m.FieldCleared(importjob.FieldDraftRecipeID) {
+		fields = append(fields, importjob.FieldDraftRecipeID)
+	}
+	if m.FieldCleared(importjob.FieldMatchRecipeID) {
+		fields = append(fields, importjob.FieldMatchRecipeID)
+	}
+	if m.FieldCleared(importjob.FieldWarningsJSON) {
+		fields = append(fields, importjob.FieldWarningsJSON)
+	}
+	if m.FieldCleared(importjob.FieldConfidenceScore) {
+		fields = append(fields, importjob.FieldConfidenceScore)
+	}
+	if m.FieldCleared(importjob.FieldErrorCode) {
+		fields = append(fields, importjob.FieldErrorCode)
+	}
+	if m.FieldCleared(importjob.FieldErrorMessage) {
+		fields = append(fields, importjob.FieldErrorMessage)
+	}
+	if m.FieldCleared(importjob.FieldStartedAt) {
+		fields = append(fields, importjob.FieldStartedAt)
+	}
+	if m.FieldCleared(importjob.FieldFinishedAt) {
+		fields = append(fields, importjob.FieldFinishedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ImportJobMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ImportJobMutation) ClearField(name string) error {
+	switch name {
+	case importjob.FieldIdempotencyKey:
+		m.ClearIdempotencyKey()
+		return nil
+	case importjob.FieldActiveIdempotencyKey:
+		m.ClearActiveIdempotencyKey()
+		return nil
+	case importjob.FieldActiveFingerprintKey:
+		m.ClearActiveFingerprintKey()
+		return nil
+	case importjob.FieldNormalizedPayloadJSON:
+		m.ClearNormalizedPayloadJSON()
+		return nil
+	case importjob.FieldDraftRecipeID:
+		m.ClearDraftRecipeID()
+		return nil
+	case importjob.FieldMatchRecipeID:
+		m.ClearMatchRecipeID()
+		return nil
+	case importjob.FieldWarningsJSON:
+		m.ClearWarningsJSON()
+		return nil
+	case importjob.FieldConfidenceScore:
+		m.ClearConfidenceScore()
+		return nil
+	case importjob.FieldErrorCode:
+		m.ClearErrorCode()
+		return nil
+	case importjob.FieldErrorMessage:
+		m.ClearErrorMessage()
+		return nil
+	case importjob.FieldStartedAt:
+		m.ClearStartedAt()
+		return nil
+	case importjob.FieldFinishedAt:
+		m.ClearFinishedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown ImportJob nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ImportJobMutation) ResetField(name string) error {
+	switch name {
+	case importjob.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case importjob.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case importjob.FieldHouseholdID:
+		m.ResetHouseholdID()
+		return nil
+	case importjob.FieldRequestedByUserID:
+		m.ResetRequestedByUserID()
+		return nil
+	case importjob.FieldSourceRecordID:
+		m.ResetSourceRecordID()
+		return nil
+	case importjob.FieldImportKind:
+		m.ResetImportKind()
+		return nil
+	case importjob.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case importjob.FieldIdempotencyKey:
+		m.ResetIdempotencyKey()
+		return nil
+	case importjob.FieldActiveIdempotencyKey:
+		m.ResetActiveIdempotencyKey()
+		return nil
+	case importjob.FieldActiveFingerprintKey:
+		m.ResetActiveFingerprintKey()
+		return nil
+	case importjob.FieldFallbackFingerprint:
+		m.ResetFallbackFingerprint()
+		return nil
+	case importjob.FieldNormalizedPayloadJSON:
+		m.ResetNormalizedPayloadJSON()
+		return nil
+	case importjob.FieldDraftRecipeID:
+		m.ResetDraftRecipeID()
+		return nil
+	case importjob.FieldMatchRecipeID:
+		m.ResetMatchRecipeID()
+		return nil
+	case importjob.FieldConflictState:
+		m.ResetConflictState()
+		return nil
+	case importjob.FieldWarningsJSON:
+		m.ResetWarningsJSON()
+		return nil
+	case importjob.FieldConfidenceScore:
+		m.ResetConfidenceScore()
+		return nil
+	case importjob.FieldErrorCode:
+		m.ResetErrorCode()
+		return nil
+	case importjob.FieldErrorMessage:
+		m.ResetErrorMessage()
+		return nil
+	case importjob.FieldAttemptCount:
+		m.ResetAttemptCount()
+		return nil
+	case importjob.FieldStartedAt:
+		m.ResetStartedAt()
+		return nil
+	case importjob.FieldFinishedAt:
+		m.ResetFinishedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown ImportJob field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ImportJobMutation) AddedEdges() []string {
+	edges := make([]string, 0, 5)
+	if m.household != nil {
+		edges = append(edges, importjob.EdgeHousehold)
+	}
+	if m.requested_by_user != nil {
+		edges = append(edges, importjob.EdgeRequestedByUser)
+	}
+	if m.source_record != nil {
+		edges = append(edges, importjob.EdgeSourceRecord)
+	}
+	if m.draft_recipe != nil {
+		edges = append(edges, importjob.EdgeDraftRecipe)
+	}
+	if m.match_recipe != nil {
+		edges = append(edges, importjob.EdgeMatchRecipe)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ImportJobMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case importjob.EdgeHousehold:
+		if id := m.household; id != nil {
+			return []ent.Value{*id}
+		}
+	case importjob.EdgeRequestedByUser:
+		if id := m.requested_by_user; id != nil {
+			return []ent.Value{*id}
+		}
+	case importjob.EdgeSourceRecord:
+		if id := m.source_record; id != nil {
+			return []ent.Value{*id}
+		}
+	case importjob.EdgeDraftRecipe:
+		if id := m.draft_recipe; id != nil {
+			return []ent.Value{*id}
+		}
+	case importjob.EdgeMatchRecipe:
+		if id := m.match_recipe; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ImportJobMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 5)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ImportJobMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ImportJobMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 5)
+	if m.clearedhousehold {
+		edges = append(edges, importjob.EdgeHousehold)
+	}
+	if m.clearedrequested_by_user {
+		edges = append(edges, importjob.EdgeRequestedByUser)
+	}
+	if m.clearedsource_record {
+		edges = append(edges, importjob.EdgeSourceRecord)
+	}
+	if m.cleareddraft_recipe {
+		edges = append(edges, importjob.EdgeDraftRecipe)
+	}
+	if m.clearedmatch_recipe {
+		edges = append(edges, importjob.EdgeMatchRecipe)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ImportJobMutation) EdgeCleared(name string) bool {
+	switch name {
+	case importjob.EdgeHousehold:
+		return m.clearedhousehold
+	case importjob.EdgeRequestedByUser:
+		return m.clearedrequested_by_user
+	case importjob.EdgeSourceRecord:
+		return m.clearedsource_record
+	case importjob.EdgeDraftRecipe:
+		return m.cleareddraft_recipe
+	case importjob.EdgeMatchRecipe:
+		return m.clearedmatch_recipe
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ImportJobMutation) ClearEdge(name string) error {
+	switch name {
+	case importjob.EdgeHousehold:
+		m.ClearHousehold()
+		return nil
+	case importjob.EdgeRequestedByUser:
+		m.ClearRequestedByUser()
+		return nil
+	case importjob.EdgeSourceRecord:
+		m.ClearSourceRecord()
+		return nil
+	case importjob.EdgeDraftRecipe:
+		m.ClearDraftRecipe()
+		return nil
+	case importjob.EdgeMatchRecipe:
+		m.ClearMatchRecipe()
+		return nil
+	}
+	return fmt.Errorf("unknown ImportJob unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ImportJobMutation) ResetEdge(name string) error {
+	switch name {
+	case importjob.EdgeHousehold:
+		m.ResetHousehold()
+		return nil
+	case importjob.EdgeRequestedByUser:
+		m.ResetRequestedByUser()
+		return nil
+	case importjob.EdgeSourceRecord:
+		m.ResetSourceRecord()
+		return nil
+	case importjob.EdgeDraftRecipe:
+		m.ResetDraftRecipe()
+		return nil
+	case importjob.EdgeMatchRecipe:
+		m.ResetMatchRecipe()
+		return nil
+	}
+	return fmt.Errorf("unknown ImportJob edge %s", name)
 }
 
 // MediaAssetMutation represents an operation that mutates the MediaAsset nodes in the graph.
@@ -3146,60 +5338,66 @@ func (m *MediaAssetMutation) ResetEdge(name string) error {
 // RecipeMutation represents an operation that mutates the Recipe nodes in the graph.
 type RecipeMutation struct {
 	config
-	op                       Op
-	typ                      string
-	id                       *string
-	created_at               *time.Time
-	updated_at               *time.Time
-	title                    *string
-	description              *string
-	source_url               *string
-	source_captured_at       *time.Time
-	archived_at              *time.Time
-	primary_media_id         *string
-	gallery_media_ids        *[]string
-	appendgallery_media_ids  []string
-	prep_minutes             *int
-	addprep_minutes          *int
-	cook_minutes             *int
-	addcook_minutes          *int
-	servings                 *int
-	addservings              *int
-	region                   *recipe.Region
-	meal_type                *recipe.MealType
-	difficulty               *recipe.Difficulty
-	cuisine                  *recipe.Cuisine
-	popularity_score         *float64
-	addpopularity_score      *float64
-	allergens                *[]string
-	appendallergens          []string
-	aggregated_at            *time.Time
-	version                  *int
-	addversion               *int
-	clearedFields            map[string]struct{}
-	household                *string
-	clearedhousehold         bool
-	ingredients              map[string]struct{}
-	removedingredients       map[string]struct{}
-	clearedingredients       bool
-	steps                    map[string]struct{}
-	removedsteps             map[string]struct{}
-	clearedsteps             bool
-	nutrition_entries        map[string]struct{}
-	removednutrition_entries map[string]struct{}
-	clearednutrition_entries bool
-	shares                   map[string]struct{}
-	removedshares            map[string]struct{}
-	clearedshares            bool
-	tags                     map[string]struct{}
-	removedtags              map[string]struct{}
-	clearedtags              bool
-	media_assets             map[string]struct{}
-	removedmedia_assets      map[string]struct{}
-	clearedmedia_assets      bool
-	done                     bool
-	oldValue                 func(context.Context) (*Recipe, error)
-	predicates               []predicate.Recipe
+	op                         Op
+	typ                        string
+	id                         *string
+	created_at                 *time.Time
+	updated_at                 *time.Time
+	title                      *string
+	description                *string
+	status                     *recipe.Status
+	source_url                 *string
+	source_captured_at         *time.Time
+	primary_media_id           *string
+	gallery_media_ids          *[]string
+	appendgallery_media_ids    []string
+	prep_minutes               *int
+	addprep_minutes            *int
+	cook_minutes               *int
+	addcook_minutes            *int
+	servings                   *int
+	addservings                *int
+	region                     *recipe.Region
+	meal_type                  *recipe.MealType
+	difficulty                 *recipe.Difficulty
+	cuisine                    *recipe.Cuisine
+	popularity_score           *float64
+	addpopularity_score        *float64
+	allergens                  *[]string
+	appendallergens            []string
+	aggregated_at              *time.Time
+	version                    *int
+	addversion                 *int
+	clearedFields              map[string]struct{}
+	household                  *string
+	clearedhousehold           bool
+	ingredients                map[string]struct{}
+	removedingredients         map[string]struct{}
+	clearedingredients         bool
+	steps                      map[string]struct{}
+	removedsteps               map[string]struct{}
+	clearedsteps               bool
+	nutrition_entries          map[string]struct{}
+	removednutrition_entries   map[string]struct{}
+	clearednutrition_entries   bool
+	shares                     map[string]struct{}
+	removedshares              map[string]struct{}
+	clearedshares              bool
+	tags                       map[string]struct{}
+	removedtags                map[string]struct{}
+	clearedtags                bool
+	media_assets               map[string]struct{}
+	removedmedia_assets        map[string]struct{}
+	clearedmedia_assets        bool
+	draft_import_jobs          map[string]struct{}
+	removeddraft_import_jobs   map[string]struct{}
+	cleareddraft_import_jobs   bool
+	matched_import_jobs        map[string]struct{}
+	removedmatched_import_jobs map[string]struct{}
+	clearedmatched_import_jobs bool
+	done                       bool
+	oldValue                   func(context.Context) (*Recipe, error)
+	predicates                 []predicate.Recipe
 }
 
 var _ ent.Mutation = (*RecipeMutation)(nil)
@@ -3486,6 +5684,42 @@ func (m *RecipeMutation) ResetDescription() {
 	m.description = nil
 }
 
+// SetStatus sets the "status" field.
+func (m *RecipeMutation) SetStatus(r recipe.Status) {
+	m.status = &r
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *RecipeMutation) Status() (r recipe.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the Recipe entity.
+// If the Recipe object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RecipeMutation) OldStatus(ctx context.Context) (v recipe.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *RecipeMutation) ResetStatus() {
+	m.status = nil
+}
+
 // SetSourceURL sets the "source_url" field.
 func (m *RecipeMutation) SetSourceURL(s string) {
 	m.source_url = &s
@@ -3569,55 +5803,6 @@ func (m *RecipeMutation) SourceCapturedAtCleared() bool {
 func (m *RecipeMutation) ResetSourceCapturedAt() {
 	m.source_captured_at = nil
 	delete(m.clearedFields, recipe.FieldSourceCapturedAt)
-}
-
-// SetArchivedAt sets the "archived_at" field.
-func (m *RecipeMutation) SetArchivedAt(t time.Time) {
-	m.archived_at = &t
-}
-
-// ArchivedAt returns the value of the "archived_at" field in the mutation.
-func (m *RecipeMutation) ArchivedAt() (r time.Time, exists bool) {
-	v := m.archived_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldArchivedAt returns the old "archived_at" field's value of the Recipe entity.
-// If the Recipe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RecipeMutation) OldArchivedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldArchivedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldArchivedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldArchivedAt: %w", err)
-	}
-	return oldValue.ArchivedAt, nil
-}
-
-// ClearArchivedAt clears the value of the "archived_at" field.
-func (m *RecipeMutation) ClearArchivedAt() {
-	m.archived_at = nil
-	m.clearedFields[recipe.FieldArchivedAt] = struct{}{}
-}
-
-// ArchivedAtCleared returns if the "archived_at" field was cleared in this mutation.
-func (m *RecipeMutation) ArchivedAtCleared() bool {
-	_, ok := m.clearedFields[recipe.FieldArchivedAt]
-	return ok
-}
-
-// ResetArchivedAt resets all changes to the "archived_at" field.
-func (m *RecipeMutation) ResetArchivedAt() {
-	m.archived_at = nil
-	delete(m.clearedFields, recipe.FieldArchivedAt)
 }
 
 // SetPrimaryMediaID sets the "primary_media_id" field.
@@ -4731,6 +6916,114 @@ func (m *RecipeMutation) ResetMediaAssets() {
 	m.removedmedia_assets = nil
 }
 
+// AddDraftImportJobIDs adds the "draft_import_jobs" edge to the ImportJob entity by ids.
+func (m *RecipeMutation) AddDraftImportJobIDs(ids ...string) {
+	if m.draft_import_jobs == nil {
+		m.draft_import_jobs = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.draft_import_jobs[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDraftImportJobs clears the "draft_import_jobs" edge to the ImportJob entity.
+func (m *RecipeMutation) ClearDraftImportJobs() {
+	m.cleareddraft_import_jobs = true
+}
+
+// DraftImportJobsCleared reports if the "draft_import_jobs" edge to the ImportJob entity was cleared.
+func (m *RecipeMutation) DraftImportJobsCleared() bool {
+	return m.cleareddraft_import_jobs
+}
+
+// RemoveDraftImportJobIDs removes the "draft_import_jobs" edge to the ImportJob entity by IDs.
+func (m *RecipeMutation) RemoveDraftImportJobIDs(ids ...string) {
+	if m.removeddraft_import_jobs == nil {
+		m.removeddraft_import_jobs = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.draft_import_jobs, ids[i])
+		m.removeddraft_import_jobs[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDraftImportJobs returns the removed IDs of the "draft_import_jobs" edge to the ImportJob entity.
+func (m *RecipeMutation) RemovedDraftImportJobsIDs() (ids []string) {
+	for id := range m.removeddraft_import_jobs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DraftImportJobsIDs returns the "draft_import_jobs" edge IDs in the mutation.
+func (m *RecipeMutation) DraftImportJobsIDs() (ids []string) {
+	for id := range m.draft_import_jobs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDraftImportJobs resets all changes to the "draft_import_jobs" edge.
+func (m *RecipeMutation) ResetDraftImportJobs() {
+	m.draft_import_jobs = nil
+	m.cleareddraft_import_jobs = false
+	m.removeddraft_import_jobs = nil
+}
+
+// AddMatchedImportJobIDs adds the "matched_import_jobs" edge to the ImportJob entity by ids.
+func (m *RecipeMutation) AddMatchedImportJobIDs(ids ...string) {
+	if m.matched_import_jobs == nil {
+		m.matched_import_jobs = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.matched_import_jobs[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMatchedImportJobs clears the "matched_import_jobs" edge to the ImportJob entity.
+func (m *RecipeMutation) ClearMatchedImportJobs() {
+	m.clearedmatched_import_jobs = true
+}
+
+// MatchedImportJobsCleared reports if the "matched_import_jobs" edge to the ImportJob entity was cleared.
+func (m *RecipeMutation) MatchedImportJobsCleared() bool {
+	return m.clearedmatched_import_jobs
+}
+
+// RemoveMatchedImportJobIDs removes the "matched_import_jobs" edge to the ImportJob entity by IDs.
+func (m *RecipeMutation) RemoveMatchedImportJobIDs(ids ...string) {
+	if m.removedmatched_import_jobs == nil {
+		m.removedmatched_import_jobs = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.matched_import_jobs, ids[i])
+		m.removedmatched_import_jobs[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMatchedImportJobs returns the removed IDs of the "matched_import_jobs" edge to the ImportJob entity.
+func (m *RecipeMutation) RemovedMatchedImportJobsIDs() (ids []string) {
+	for id := range m.removedmatched_import_jobs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MatchedImportJobsIDs returns the "matched_import_jobs" edge IDs in the mutation.
+func (m *RecipeMutation) MatchedImportJobsIDs() (ids []string) {
+	for id := range m.matched_import_jobs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMatchedImportJobs resets all changes to the "matched_import_jobs" edge.
+func (m *RecipeMutation) ResetMatchedImportJobs() {
+	m.matched_import_jobs = nil
+	m.clearedmatched_import_jobs = false
+	m.removedmatched_import_jobs = nil
+}
+
 // Where appends a list predicates to the RecipeMutation builder.
 func (m *RecipeMutation) Where(ps ...predicate.Recipe) {
 	m.predicates = append(m.predicates, ps...)
@@ -4781,14 +7074,14 @@ func (m *RecipeMutation) Fields() []string {
 	if m.description != nil {
 		fields = append(fields, recipe.FieldDescription)
 	}
+	if m.status != nil {
+		fields = append(fields, recipe.FieldStatus)
+	}
 	if m.source_url != nil {
 		fields = append(fields, recipe.FieldSourceURL)
 	}
 	if m.source_captured_at != nil {
 		fields = append(fields, recipe.FieldSourceCapturedAt)
-	}
-	if m.archived_at != nil {
-		fields = append(fields, recipe.FieldArchivedAt)
 	}
 	if m.primary_media_id != nil {
 		fields = append(fields, recipe.FieldPrimaryMediaID)
@@ -4847,12 +7140,12 @@ func (m *RecipeMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case recipe.FieldDescription:
 		return m.Description()
+	case recipe.FieldStatus:
+		return m.Status()
 	case recipe.FieldSourceURL:
 		return m.SourceURL()
 	case recipe.FieldSourceCapturedAt:
 		return m.SourceCapturedAt()
-	case recipe.FieldArchivedAt:
-		return m.ArchivedAt()
 	case recipe.FieldPrimaryMediaID:
 		return m.PrimaryMediaID()
 	case recipe.FieldGalleryMediaIds:
@@ -4898,12 +7191,12 @@ func (m *RecipeMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldTitle(ctx)
 	case recipe.FieldDescription:
 		return m.OldDescription(ctx)
+	case recipe.FieldStatus:
+		return m.OldStatus(ctx)
 	case recipe.FieldSourceURL:
 		return m.OldSourceURL(ctx)
 	case recipe.FieldSourceCapturedAt:
 		return m.OldSourceCapturedAt(ctx)
-	case recipe.FieldArchivedAt:
-		return m.OldArchivedAt(ctx)
 	case recipe.FieldPrimaryMediaID:
 		return m.OldPrimaryMediaID(ctx)
 	case recipe.FieldGalleryMediaIds:
@@ -4974,6 +7267,13 @@ func (m *RecipeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDescription(v)
 		return nil
+	case recipe.FieldStatus:
+		v, ok := value.(recipe.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
 	case recipe.FieldSourceURL:
 		v, ok := value.(string)
 		if !ok {
@@ -4987,13 +7287,6 @@ func (m *RecipeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSourceCapturedAt(v)
-		return nil
-	case recipe.FieldArchivedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetArchivedAt(v)
 		return nil
 	case recipe.FieldPrimaryMediaID:
 		v, ok := value.(string)
@@ -5182,9 +7475,6 @@ func (m *RecipeMutation) ClearedFields() []string {
 	if m.FieldCleared(recipe.FieldSourceCapturedAt) {
 		fields = append(fields, recipe.FieldSourceCapturedAt)
 	}
-	if m.FieldCleared(recipe.FieldArchivedAt) {
-		fields = append(fields, recipe.FieldArchivedAt)
-	}
 	if m.FieldCleared(recipe.FieldPrimaryMediaID) {
 		fields = append(fields, recipe.FieldPrimaryMediaID)
 	}
@@ -5237,9 +7527,6 @@ func (m *RecipeMutation) ClearField(name string) error {
 	switch name {
 	case recipe.FieldSourceCapturedAt:
 		m.ClearSourceCapturedAt()
-		return nil
-	case recipe.FieldArchivedAt:
-		m.ClearArchivedAt()
 		return nil
 	case recipe.FieldPrimaryMediaID:
 		m.ClearPrimaryMediaID()
@@ -5300,14 +7587,14 @@ func (m *RecipeMutation) ResetField(name string) error {
 	case recipe.FieldDescription:
 		m.ResetDescription()
 		return nil
+	case recipe.FieldStatus:
+		m.ResetStatus()
+		return nil
 	case recipe.FieldSourceURL:
 		m.ResetSourceURL()
 		return nil
 	case recipe.FieldSourceCapturedAt:
 		m.ResetSourceCapturedAt()
-		return nil
-	case recipe.FieldArchivedAt:
-		m.ResetArchivedAt()
 		return nil
 	case recipe.FieldPrimaryMediaID:
 		m.ResetPrimaryMediaID()
@@ -5354,7 +7641,7 @@ func (m *RecipeMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RecipeMutation) AddedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 9)
 	if m.household != nil {
 		edges = append(edges, recipe.EdgeHousehold)
 	}
@@ -5375,6 +7662,12 @@ func (m *RecipeMutation) AddedEdges() []string {
 	}
 	if m.media_assets != nil {
 		edges = append(edges, recipe.EdgeMediaAssets)
+	}
+	if m.draft_import_jobs != nil {
+		edges = append(edges, recipe.EdgeDraftImportJobs)
+	}
+	if m.matched_import_jobs != nil {
+		edges = append(edges, recipe.EdgeMatchedImportJobs)
 	}
 	return edges
 }
@@ -5423,13 +7716,25 @@ func (m *RecipeMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case recipe.EdgeDraftImportJobs:
+		ids := make([]ent.Value, 0, len(m.draft_import_jobs))
+		for id := range m.draft_import_jobs {
+			ids = append(ids, id)
+		}
+		return ids
+	case recipe.EdgeMatchedImportJobs:
+		ids := make([]ent.Value, 0, len(m.matched_import_jobs))
+		for id := range m.matched_import_jobs {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RecipeMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 9)
 	if m.removedingredients != nil {
 		edges = append(edges, recipe.EdgeIngredients)
 	}
@@ -5447,6 +7752,12 @@ func (m *RecipeMutation) RemovedEdges() []string {
 	}
 	if m.removedmedia_assets != nil {
 		edges = append(edges, recipe.EdgeMediaAssets)
+	}
+	if m.removeddraft_import_jobs != nil {
+		edges = append(edges, recipe.EdgeDraftImportJobs)
+	}
+	if m.removedmatched_import_jobs != nil {
+		edges = append(edges, recipe.EdgeMatchedImportJobs)
 	}
 	return edges
 }
@@ -5491,13 +7802,25 @@ func (m *RecipeMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case recipe.EdgeDraftImportJobs:
+		ids := make([]ent.Value, 0, len(m.removeddraft_import_jobs))
+		for id := range m.removeddraft_import_jobs {
+			ids = append(ids, id)
+		}
+		return ids
+	case recipe.EdgeMatchedImportJobs:
+		ids := make([]ent.Value, 0, len(m.removedmatched_import_jobs))
+		for id := range m.removedmatched_import_jobs {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RecipeMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 9)
 	if m.clearedhousehold {
 		edges = append(edges, recipe.EdgeHousehold)
 	}
@@ -5518,6 +7841,12 @@ func (m *RecipeMutation) ClearedEdges() []string {
 	}
 	if m.clearedmedia_assets {
 		edges = append(edges, recipe.EdgeMediaAssets)
+	}
+	if m.cleareddraft_import_jobs {
+		edges = append(edges, recipe.EdgeDraftImportJobs)
+	}
+	if m.clearedmatched_import_jobs {
+		edges = append(edges, recipe.EdgeMatchedImportJobs)
 	}
 	return edges
 }
@@ -5540,6 +7869,10 @@ func (m *RecipeMutation) EdgeCleared(name string) bool {
 		return m.clearedtags
 	case recipe.EdgeMediaAssets:
 		return m.clearedmedia_assets
+	case recipe.EdgeDraftImportJobs:
+		return m.cleareddraft_import_jobs
+	case recipe.EdgeMatchedImportJobs:
+		return m.clearedmatched_import_jobs
 	}
 	return false
 }
@@ -5579,6 +7912,12 @@ func (m *RecipeMutation) ResetEdge(name string) error {
 		return nil
 	case recipe.EdgeMediaAssets:
 		m.ResetMediaAssets()
+		return nil
+	case recipe.EdgeDraftImportJobs:
+		m.ResetDraftImportJobs()
+		return nil
+	case recipe.EdgeMatchedImportJobs:
+		m.ResetMatchedImportJobs()
 		return nil
 	}
 	return fmt.Errorf("unknown Recipe edge %s", name)
@@ -10966,6 +13305,1307 @@ func (m *RefreshSessionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown RefreshSession edge %s", name)
 }
 
+// SourceRecordMutation represents an operation that mutates the SourceRecord nodes in the graph.
+type SourceRecordMutation struct {
+	config
+	op                                 Op
+	typ                                string
+	id                                 *string
+	created_at                         *time.Time
+	updated_at                         *time.Time
+	source_type                        *sourcerecord.SourceType
+	import_kind                        *sourcerecord.ImportKind
+	submitted_url                      *string
+	normalized_url                     *string
+	canonical_url                      *string
+	title_hint                         *string
+	content_hash                       *string
+	metadata_json                      *map[string]interface{}
+	retention_state                    *sourcerecord.RetentionState
+	clearedFields                      map[string]struct{}
+	household                          *string
+	clearedhousehold                   bool
+	raw_snapshot_storage_object        *string
+	clearedraw_snapshot_storage_object bool
+	import_jobs                        map[string]struct{}
+	removedimport_jobs                 map[string]struct{}
+	clearedimport_jobs                 bool
+	done                               bool
+	oldValue                           func(context.Context) (*SourceRecord, error)
+	predicates                         []predicate.SourceRecord
+}
+
+var _ ent.Mutation = (*SourceRecordMutation)(nil)
+
+// sourcerecordOption allows management of the mutation configuration using functional options.
+type sourcerecordOption func(*SourceRecordMutation)
+
+// newSourceRecordMutation creates new mutation for the SourceRecord entity.
+func newSourceRecordMutation(c config, op Op, opts ...sourcerecordOption) *SourceRecordMutation {
+	m := &SourceRecordMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSourceRecord,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSourceRecordID sets the ID field of the mutation.
+func withSourceRecordID(id string) sourcerecordOption {
+	return func(m *SourceRecordMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SourceRecord
+		)
+		m.oldValue = func(ctx context.Context) (*SourceRecord, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SourceRecord.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSourceRecord sets the old SourceRecord of the mutation.
+func withSourceRecord(node *SourceRecord) sourcerecordOption {
+	return func(m *SourceRecordMutation) {
+		m.oldValue = func(context.Context) (*SourceRecord, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SourceRecordMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SourceRecordMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("generated: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SourceRecord entities.
+func (m *SourceRecordMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SourceRecordMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SourceRecordMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SourceRecord.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *SourceRecordMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *SourceRecordMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *SourceRecordMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *SourceRecordMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *SourceRecordMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *SourceRecordMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetHouseholdID sets the "household_id" field.
+func (m *SourceRecordMutation) SetHouseholdID(s string) {
+	m.household = &s
+}
+
+// HouseholdID returns the value of the "household_id" field in the mutation.
+func (m *SourceRecordMutation) HouseholdID() (r string, exists bool) {
+	v := m.household
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHouseholdID returns the old "household_id" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldHouseholdID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHouseholdID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHouseholdID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHouseholdID: %w", err)
+	}
+	return oldValue.HouseholdID, nil
+}
+
+// ResetHouseholdID resets all changes to the "household_id" field.
+func (m *SourceRecordMutation) ResetHouseholdID() {
+	m.household = nil
+}
+
+// SetSourceType sets the "source_type" field.
+func (m *SourceRecordMutation) SetSourceType(st sourcerecord.SourceType) {
+	m.source_type = &st
+}
+
+// SourceType returns the value of the "source_type" field in the mutation.
+func (m *SourceRecordMutation) SourceType() (r sourcerecord.SourceType, exists bool) {
+	v := m.source_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceType returns the old "source_type" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldSourceType(ctx context.Context) (v sourcerecord.SourceType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSourceType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSourceType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceType: %w", err)
+	}
+	return oldValue.SourceType, nil
+}
+
+// ResetSourceType resets all changes to the "source_type" field.
+func (m *SourceRecordMutation) ResetSourceType() {
+	m.source_type = nil
+}
+
+// SetImportKind sets the "import_kind" field.
+func (m *SourceRecordMutation) SetImportKind(sk sourcerecord.ImportKind) {
+	m.import_kind = &sk
+}
+
+// ImportKind returns the value of the "import_kind" field in the mutation.
+func (m *SourceRecordMutation) ImportKind() (r sourcerecord.ImportKind, exists bool) {
+	v := m.import_kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportKind returns the old "import_kind" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldImportKind(ctx context.Context) (v sourcerecord.ImportKind, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportKind: %w", err)
+	}
+	return oldValue.ImportKind, nil
+}
+
+// ResetImportKind resets all changes to the "import_kind" field.
+func (m *SourceRecordMutation) ResetImportKind() {
+	m.import_kind = nil
+}
+
+// SetSubmittedURL sets the "submitted_url" field.
+func (m *SourceRecordMutation) SetSubmittedURL(s string) {
+	m.submitted_url = &s
+}
+
+// SubmittedURL returns the value of the "submitted_url" field in the mutation.
+func (m *SourceRecordMutation) SubmittedURL() (r string, exists bool) {
+	v := m.submitted_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubmittedURL returns the old "submitted_url" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldSubmittedURL(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubmittedURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubmittedURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubmittedURL: %w", err)
+	}
+	return oldValue.SubmittedURL, nil
+}
+
+// ClearSubmittedURL clears the value of the "submitted_url" field.
+func (m *SourceRecordMutation) ClearSubmittedURL() {
+	m.submitted_url = nil
+	m.clearedFields[sourcerecord.FieldSubmittedURL] = struct{}{}
+}
+
+// SubmittedURLCleared returns if the "submitted_url" field was cleared in this mutation.
+func (m *SourceRecordMutation) SubmittedURLCleared() bool {
+	_, ok := m.clearedFields[sourcerecord.FieldSubmittedURL]
+	return ok
+}
+
+// ResetSubmittedURL resets all changes to the "submitted_url" field.
+func (m *SourceRecordMutation) ResetSubmittedURL() {
+	m.submitted_url = nil
+	delete(m.clearedFields, sourcerecord.FieldSubmittedURL)
+}
+
+// SetNormalizedURL sets the "normalized_url" field.
+func (m *SourceRecordMutation) SetNormalizedURL(s string) {
+	m.normalized_url = &s
+}
+
+// NormalizedURL returns the value of the "normalized_url" field in the mutation.
+func (m *SourceRecordMutation) NormalizedURL() (r string, exists bool) {
+	v := m.normalized_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNormalizedURL returns the old "normalized_url" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldNormalizedURL(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNormalizedURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNormalizedURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNormalizedURL: %w", err)
+	}
+	return oldValue.NormalizedURL, nil
+}
+
+// ClearNormalizedURL clears the value of the "normalized_url" field.
+func (m *SourceRecordMutation) ClearNormalizedURL() {
+	m.normalized_url = nil
+	m.clearedFields[sourcerecord.FieldNormalizedURL] = struct{}{}
+}
+
+// NormalizedURLCleared returns if the "normalized_url" field was cleared in this mutation.
+func (m *SourceRecordMutation) NormalizedURLCleared() bool {
+	_, ok := m.clearedFields[sourcerecord.FieldNormalizedURL]
+	return ok
+}
+
+// ResetNormalizedURL resets all changes to the "normalized_url" field.
+func (m *SourceRecordMutation) ResetNormalizedURL() {
+	m.normalized_url = nil
+	delete(m.clearedFields, sourcerecord.FieldNormalizedURL)
+}
+
+// SetCanonicalURL sets the "canonical_url" field.
+func (m *SourceRecordMutation) SetCanonicalURL(s string) {
+	m.canonical_url = &s
+}
+
+// CanonicalURL returns the value of the "canonical_url" field in the mutation.
+func (m *SourceRecordMutation) CanonicalURL() (r string, exists bool) {
+	v := m.canonical_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCanonicalURL returns the old "canonical_url" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldCanonicalURL(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCanonicalURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCanonicalURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCanonicalURL: %w", err)
+	}
+	return oldValue.CanonicalURL, nil
+}
+
+// ClearCanonicalURL clears the value of the "canonical_url" field.
+func (m *SourceRecordMutation) ClearCanonicalURL() {
+	m.canonical_url = nil
+	m.clearedFields[sourcerecord.FieldCanonicalURL] = struct{}{}
+}
+
+// CanonicalURLCleared returns if the "canonical_url" field was cleared in this mutation.
+func (m *SourceRecordMutation) CanonicalURLCleared() bool {
+	_, ok := m.clearedFields[sourcerecord.FieldCanonicalURL]
+	return ok
+}
+
+// ResetCanonicalURL resets all changes to the "canonical_url" field.
+func (m *SourceRecordMutation) ResetCanonicalURL() {
+	m.canonical_url = nil
+	delete(m.clearedFields, sourcerecord.FieldCanonicalURL)
+}
+
+// SetTitleHint sets the "title_hint" field.
+func (m *SourceRecordMutation) SetTitleHint(s string) {
+	m.title_hint = &s
+}
+
+// TitleHint returns the value of the "title_hint" field in the mutation.
+func (m *SourceRecordMutation) TitleHint() (r string, exists bool) {
+	v := m.title_hint
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitleHint returns the old "title_hint" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldTitleHint(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitleHint is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitleHint requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitleHint: %w", err)
+	}
+	return oldValue.TitleHint, nil
+}
+
+// ClearTitleHint clears the value of the "title_hint" field.
+func (m *SourceRecordMutation) ClearTitleHint() {
+	m.title_hint = nil
+	m.clearedFields[sourcerecord.FieldTitleHint] = struct{}{}
+}
+
+// TitleHintCleared returns if the "title_hint" field was cleared in this mutation.
+func (m *SourceRecordMutation) TitleHintCleared() bool {
+	_, ok := m.clearedFields[sourcerecord.FieldTitleHint]
+	return ok
+}
+
+// ResetTitleHint resets all changes to the "title_hint" field.
+func (m *SourceRecordMutation) ResetTitleHint() {
+	m.title_hint = nil
+	delete(m.clearedFields, sourcerecord.FieldTitleHint)
+}
+
+// SetContentHash sets the "content_hash" field.
+func (m *SourceRecordMutation) SetContentHash(s string) {
+	m.content_hash = &s
+}
+
+// ContentHash returns the value of the "content_hash" field in the mutation.
+func (m *SourceRecordMutation) ContentHash() (r string, exists bool) {
+	v := m.content_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContentHash returns the old "content_hash" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldContentHash(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContentHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContentHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContentHash: %w", err)
+	}
+	return oldValue.ContentHash, nil
+}
+
+// ClearContentHash clears the value of the "content_hash" field.
+func (m *SourceRecordMutation) ClearContentHash() {
+	m.content_hash = nil
+	m.clearedFields[sourcerecord.FieldContentHash] = struct{}{}
+}
+
+// ContentHashCleared returns if the "content_hash" field was cleared in this mutation.
+func (m *SourceRecordMutation) ContentHashCleared() bool {
+	_, ok := m.clearedFields[sourcerecord.FieldContentHash]
+	return ok
+}
+
+// ResetContentHash resets all changes to the "content_hash" field.
+func (m *SourceRecordMutation) ResetContentHash() {
+	m.content_hash = nil
+	delete(m.clearedFields, sourcerecord.FieldContentHash)
+}
+
+// SetRawSnapshotStorageObjectID sets the "raw_snapshot_storage_object_id" field.
+func (m *SourceRecordMutation) SetRawSnapshotStorageObjectID(s string) {
+	m.raw_snapshot_storage_object = &s
+}
+
+// RawSnapshotStorageObjectID returns the value of the "raw_snapshot_storage_object_id" field in the mutation.
+func (m *SourceRecordMutation) RawSnapshotStorageObjectID() (r string, exists bool) {
+	v := m.raw_snapshot_storage_object
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRawSnapshotStorageObjectID returns the old "raw_snapshot_storage_object_id" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldRawSnapshotStorageObjectID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRawSnapshotStorageObjectID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRawSnapshotStorageObjectID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRawSnapshotStorageObjectID: %w", err)
+	}
+	return oldValue.RawSnapshotStorageObjectID, nil
+}
+
+// ClearRawSnapshotStorageObjectID clears the value of the "raw_snapshot_storage_object_id" field.
+func (m *SourceRecordMutation) ClearRawSnapshotStorageObjectID() {
+	m.raw_snapshot_storage_object = nil
+	m.clearedFields[sourcerecord.FieldRawSnapshotStorageObjectID] = struct{}{}
+}
+
+// RawSnapshotStorageObjectIDCleared returns if the "raw_snapshot_storage_object_id" field was cleared in this mutation.
+func (m *SourceRecordMutation) RawSnapshotStorageObjectIDCleared() bool {
+	_, ok := m.clearedFields[sourcerecord.FieldRawSnapshotStorageObjectID]
+	return ok
+}
+
+// ResetRawSnapshotStorageObjectID resets all changes to the "raw_snapshot_storage_object_id" field.
+func (m *SourceRecordMutation) ResetRawSnapshotStorageObjectID() {
+	m.raw_snapshot_storage_object = nil
+	delete(m.clearedFields, sourcerecord.FieldRawSnapshotStorageObjectID)
+}
+
+// SetMetadataJSON sets the "metadata_json" field.
+func (m *SourceRecordMutation) SetMetadataJSON(value map[string]interface{}) {
+	m.metadata_json = &value
+}
+
+// MetadataJSON returns the value of the "metadata_json" field in the mutation.
+func (m *SourceRecordMutation) MetadataJSON() (r map[string]interface{}, exists bool) {
+	v := m.metadata_json
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMetadataJSON returns the old "metadata_json" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldMetadataJSON(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMetadataJSON is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMetadataJSON requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMetadataJSON: %w", err)
+	}
+	return oldValue.MetadataJSON, nil
+}
+
+// ClearMetadataJSON clears the value of the "metadata_json" field.
+func (m *SourceRecordMutation) ClearMetadataJSON() {
+	m.metadata_json = nil
+	m.clearedFields[sourcerecord.FieldMetadataJSON] = struct{}{}
+}
+
+// MetadataJSONCleared returns if the "metadata_json" field was cleared in this mutation.
+func (m *SourceRecordMutation) MetadataJSONCleared() bool {
+	_, ok := m.clearedFields[sourcerecord.FieldMetadataJSON]
+	return ok
+}
+
+// ResetMetadataJSON resets all changes to the "metadata_json" field.
+func (m *SourceRecordMutation) ResetMetadataJSON() {
+	m.metadata_json = nil
+	delete(m.clearedFields, sourcerecord.FieldMetadataJSON)
+}
+
+// SetRetentionState sets the "retention_state" field.
+func (m *SourceRecordMutation) SetRetentionState(ss sourcerecord.RetentionState) {
+	m.retention_state = &ss
+}
+
+// RetentionState returns the value of the "retention_state" field in the mutation.
+func (m *SourceRecordMutation) RetentionState() (r sourcerecord.RetentionState, exists bool) {
+	v := m.retention_state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRetentionState returns the old "retention_state" field's value of the SourceRecord entity.
+// If the SourceRecord object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SourceRecordMutation) OldRetentionState(ctx context.Context) (v sourcerecord.RetentionState, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRetentionState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRetentionState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRetentionState: %w", err)
+	}
+	return oldValue.RetentionState, nil
+}
+
+// ResetRetentionState resets all changes to the "retention_state" field.
+func (m *SourceRecordMutation) ResetRetentionState() {
+	m.retention_state = nil
+}
+
+// ClearHousehold clears the "household" edge to the Household entity.
+func (m *SourceRecordMutation) ClearHousehold() {
+	m.clearedhousehold = true
+	m.clearedFields[sourcerecord.FieldHouseholdID] = struct{}{}
+}
+
+// HouseholdCleared reports if the "household" edge to the Household entity was cleared.
+func (m *SourceRecordMutation) HouseholdCleared() bool {
+	return m.clearedhousehold
+}
+
+// HouseholdIDs returns the "household" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// HouseholdID instead. It exists only for internal usage by the builders.
+func (m *SourceRecordMutation) HouseholdIDs() (ids []string) {
+	if id := m.household; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetHousehold resets all changes to the "household" edge.
+func (m *SourceRecordMutation) ResetHousehold() {
+	m.household = nil
+	m.clearedhousehold = false
+}
+
+// ClearRawSnapshotStorageObject clears the "raw_snapshot_storage_object" edge to the StoredObject entity.
+func (m *SourceRecordMutation) ClearRawSnapshotStorageObject() {
+	m.clearedraw_snapshot_storage_object = true
+	m.clearedFields[sourcerecord.FieldRawSnapshotStorageObjectID] = struct{}{}
+}
+
+// RawSnapshotStorageObjectCleared reports if the "raw_snapshot_storage_object" edge to the StoredObject entity was cleared.
+func (m *SourceRecordMutation) RawSnapshotStorageObjectCleared() bool {
+	return m.RawSnapshotStorageObjectIDCleared() || m.clearedraw_snapshot_storage_object
+}
+
+// RawSnapshotStorageObjectIDs returns the "raw_snapshot_storage_object" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RawSnapshotStorageObjectID instead. It exists only for internal usage by the builders.
+func (m *SourceRecordMutation) RawSnapshotStorageObjectIDs() (ids []string) {
+	if id := m.raw_snapshot_storage_object; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRawSnapshotStorageObject resets all changes to the "raw_snapshot_storage_object" edge.
+func (m *SourceRecordMutation) ResetRawSnapshotStorageObject() {
+	m.raw_snapshot_storage_object = nil
+	m.clearedraw_snapshot_storage_object = false
+}
+
+// AddImportJobIDs adds the "import_jobs" edge to the ImportJob entity by ids.
+func (m *SourceRecordMutation) AddImportJobIDs(ids ...string) {
+	if m.import_jobs == nil {
+		m.import_jobs = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.import_jobs[ids[i]] = struct{}{}
+	}
+}
+
+// ClearImportJobs clears the "import_jobs" edge to the ImportJob entity.
+func (m *SourceRecordMutation) ClearImportJobs() {
+	m.clearedimport_jobs = true
+}
+
+// ImportJobsCleared reports if the "import_jobs" edge to the ImportJob entity was cleared.
+func (m *SourceRecordMutation) ImportJobsCleared() bool {
+	return m.clearedimport_jobs
+}
+
+// RemoveImportJobIDs removes the "import_jobs" edge to the ImportJob entity by IDs.
+func (m *SourceRecordMutation) RemoveImportJobIDs(ids ...string) {
+	if m.removedimport_jobs == nil {
+		m.removedimport_jobs = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.import_jobs, ids[i])
+		m.removedimport_jobs[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedImportJobs returns the removed IDs of the "import_jobs" edge to the ImportJob entity.
+func (m *SourceRecordMutation) RemovedImportJobsIDs() (ids []string) {
+	for id := range m.removedimport_jobs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ImportJobsIDs returns the "import_jobs" edge IDs in the mutation.
+func (m *SourceRecordMutation) ImportJobsIDs() (ids []string) {
+	for id := range m.import_jobs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetImportJobs resets all changes to the "import_jobs" edge.
+func (m *SourceRecordMutation) ResetImportJobs() {
+	m.import_jobs = nil
+	m.clearedimport_jobs = false
+	m.removedimport_jobs = nil
+}
+
+// Where appends a list predicates to the SourceRecordMutation builder.
+func (m *SourceRecordMutation) Where(ps ...predicate.SourceRecord) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SourceRecordMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SourceRecordMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SourceRecord, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SourceRecordMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SourceRecordMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SourceRecord).
+func (m *SourceRecordMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SourceRecordMutation) Fields() []string {
+	fields := make([]string, 0, 13)
+	if m.created_at != nil {
+		fields = append(fields, sourcerecord.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, sourcerecord.FieldUpdatedAt)
+	}
+	if m.household != nil {
+		fields = append(fields, sourcerecord.FieldHouseholdID)
+	}
+	if m.source_type != nil {
+		fields = append(fields, sourcerecord.FieldSourceType)
+	}
+	if m.import_kind != nil {
+		fields = append(fields, sourcerecord.FieldImportKind)
+	}
+	if m.submitted_url != nil {
+		fields = append(fields, sourcerecord.FieldSubmittedURL)
+	}
+	if m.normalized_url != nil {
+		fields = append(fields, sourcerecord.FieldNormalizedURL)
+	}
+	if m.canonical_url != nil {
+		fields = append(fields, sourcerecord.FieldCanonicalURL)
+	}
+	if m.title_hint != nil {
+		fields = append(fields, sourcerecord.FieldTitleHint)
+	}
+	if m.content_hash != nil {
+		fields = append(fields, sourcerecord.FieldContentHash)
+	}
+	if m.raw_snapshot_storage_object != nil {
+		fields = append(fields, sourcerecord.FieldRawSnapshotStorageObjectID)
+	}
+	if m.metadata_json != nil {
+		fields = append(fields, sourcerecord.FieldMetadataJSON)
+	}
+	if m.retention_state != nil {
+		fields = append(fields, sourcerecord.FieldRetentionState)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SourceRecordMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case sourcerecord.FieldCreatedAt:
+		return m.CreatedAt()
+	case sourcerecord.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case sourcerecord.FieldHouseholdID:
+		return m.HouseholdID()
+	case sourcerecord.FieldSourceType:
+		return m.SourceType()
+	case sourcerecord.FieldImportKind:
+		return m.ImportKind()
+	case sourcerecord.FieldSubmittedURL:
+		return m.SubmittedURL()
+	case sourcerecord.FieldNormalizedURL:
+		return m.NormalizedURL()
+	case sourcerecord.FieldCanonicalURL:
+		return m.CanonicalURL()
+	case sourcerecord.FieldTitleHint:
+		return m.TitleHint()
+	case sourcerecord.FieldContentHash:
+		return m.ContentHash()
+	case sourcerecord.FieldRawSnapshotStorageObjectID:
+		return m.RawSnapshotStorageObjectID()
+	case sourcerecord.FieldMetadataJSON:
+		return m.MetadataJSON()
+	case sourcerecord.FieldRetentionState:
+		return m.RetentionState()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SourceRecordMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case sourcerecord.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case sourcerecord.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case sourcerecord.FieldHouseholdID:
+		return m.OldHouseholdID(ctx)
+	case sourcerecord.FieldSourceType:
+		return m.OldSourceType(ctx)
+	case sourcerecord.FieldImportKind:
+		return m.OldImportKind(ctx)
+	case sourcerecord.FieldSubmittedURL:
+		return m.OldSubmittedURL(ctx)
+	case sourcerecord.FieldNormalizedURL:
+		return m.OldNormalizedURL(ctx)
+	case sourcerecord.FieldCanonicalURL:
+		return m.OldCanonicalURL(ctx)
+	case sourcerecord.FieldTitleHint:
+		return m.OldTitleHint(ctx)
+	case sourcerecord.FieldContentHash:
+		return m.OldContentHash(ctx)
+	case sourcerecord.FieldRawSnapshotStorageObjectID:
+		return m.OldRawSnapshotStorageObjectID(ctx)
+	case sourcerecord.FieldMetadataJSON:
+		return m.OldMetadataJSON(ctx)
+	case sourcerecord.FieldRetentionState:
+		return m.OldRetentionState(ctx)
+	}
+	return nil, fmt.Errorf("unknown SourceRecord field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SourceRecordMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case sourcerecord.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case sourcerecord.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case sourcerecord.FieldHouseholdID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHouseholdID(v)
+		return nil
+	case sourcerecord.FieldSourceType:
+		v, ok := value.(sourcerecord.SourceType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceType(v)
+		return nil
+	case sourcerecord.FieldImportKind:
+		v, ok := value.(sourcerecord.ImportKind)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportKind(v)
+		return nil
+	case sourcerecord.FieldSubmittedURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubmittedURL(v)
+		return nil
+	case sourcerecord.FieldNormalizedURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNormalizedURL(v)
+		return nil
+	case sourcerecord.FieldCanonicalURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCanonicalURL(v)
+		return nil
+	case sourcerecord.FieldTitleHint:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitleHint(v)
+		return nil
+	case sourcerecord.FieldContentHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContentHash(v)
+		return nil
+	case sourcerecord.FieldRawSnapshotStorageObjectID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRawSnapshotStorageObjectID(v)
+		return nil
+	case sourcerecord.FieldMetadataJSON:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMetadataJSON(v)
+		return nil
+	case sourcerecord.FieldRetentionState:
+		v, ok := value.(sourcerecord.RetentionState)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRetentionState(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SourceRecord field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SourceRecordMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SourceRecordMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SourceRecordMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SourceRecord numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SourceRecordMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(sourcerecord.FieldSubmittedURL) {
+		fields = append(fields, sourcerecord.FieldSubmittedURL)
+	}
+	if m.FieldCleared(sourcerecord.FieldNormalizedURL) {
+		fields = append(fields, sourcerecord.FieldNormalizedURL)
+	}
+	if m.FieldCleared(sourcerecord.FieldCanonicalURL) {
+		fields = append(fields, sourcerecord.FieldCanonicalURL)
+	}
+	if m.FieldCleared(sourcerecord.FieldTitleHint) {
+		fields = append(fields, sourcerecord.FieldTitleHint)
+	}
+	if m.FieldCleared(sourcerecord.FieldContentHash) {
+		fields = append(fields, sourcerecord.FieldContentHash)
+	}
+	if m.FieldCleared(sourcerecord.FieldRawSnapshotStorageObjectID) {
+		fields = append(fields, sourcerecord.FieldRawSnapshotStorageObjectID)
+	}
+	if m.FieldCleared(sourcerecord.FieldMetadataJSON) {
+		fields = append(fields, sourcerecord.FieldMetadataJSON)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SourceRecordMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SourceRecordMutation) ClearField(name string) error {
+	switch name {
+	case sourcerecord.FieldSubmittedURL:
+		m.ClearSubmittedURL()
+		return nil
+	case sourcerecord.FieldNormalizedURL:
+		m.ClearNormalizedURL()
+		return nil
+	case sourcerecord.FieldCanonicalURL:
+		m.ClearCanonicalURL()
+		return nil
+	case sourcerecord.FieldTitleHint:
+		m.ClearTitleHint()
+		return nil
+	case sourcerecord.FieldContentHash:
+		m.ClearContentHash()
+		return nil
+	case sourcerecord.FieldRawSnapshotStorageObjectID:
+		m.ClearRawSnapshotStorageObjectID()
+		return nil
+	case sourcerecord.FieldMetadataJSON:
+		m.ClearMetadataJSON()
+		return nil
+	}
+	return fmt.Errorf("unknown SourceRecord nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SourceRecordMutation) ResetField(name string) error {
+	switch name {
+	case sourcerecord.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case sourcerecord.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case sourcerecord.FieldHouseholdID:
+		m.ResetHouseholdID()
+		return nil
+	case sourcerecord.FieldSourceType:
+		m.ResetSourceType()
+		return nil
+	case sourcerecord.FieldImportKind:
+		m.ResetImportKind()
+		return nil
+	case sourcerecord.FieldSubmittedURL:
+		m.ResetSubmittedURL()
+		return nil
+	case sourcerecord.FieldNormalizedURL:
+		m.ResetNormalizedURL()
+		return nil
+	case sourcerecord.FieldCanonicalURL:
+		m.ResetCanonicalURL()
+		return nil
+	case sourcerecord.FieldTitleHint:
+		m.ResetTitleHint()
+		return nil
+	case sourcerecord.FieldContentHash:
+		m.ResetContentHash()
+		return nil
+	case sourcerecord.FieldRawSnapshotStorageObjectID:
+		m.ResetRawSnapshotStorageObjectID()
+		return nil
+	case sourcerecord.FieldMetadataJSON:
+		m.ResetMetadataJSON()
+		return nil
+	case sourcerecord.FieldRetentionState:
+		m.ResetRetentionState()
+		return nil
+	}
+	return fmt.Errorf("unknown SourceRecord field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SourceRecordMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.household != nil {
+		edges = append(edges, sourcerecord.EdgeHousehold)
+	}
+	if m.raw_snapshot_storage_object != nil {
+		edges = append(edges, sourcerecord.EdgeRawSnapshotStorageObject)
+	}
+	if m.import_jobs != nil {
+		edges = append(edges, sourcerecord.EdgeImportJobs)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SourceRecordMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case sourcerecord.EdgeHousehold:
+		if id := m.household; id != nil {
+			return []ent.Value{*id}
+		}
+	case sourcerecord.EdgeRawSnapshotStorageObject:
+		if id := m.raw_snapshot_storage_object; id != nil {
+			return []ent.Value{*id}
+		}
+	case sourcerecord.EdgeImportJobs:
+		ids := make([]ent.Value, 0, len(m.import_jobs))
+		for id := range m.import_jobs {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SourceRecordMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.removedimport_jobs != nil {
+		edges = append(edges, sourcerecord.EdgeImportJobs)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SourceRecordMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case sourcerecord.EdgeImportJobs:
+		ids := make([]ent.Value, 0, len(m.removedimport_jobs))
+		for id := range m.removedimport_jobs {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SourceRecordMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedhousehold {
+		edges = append(edges, sourcerecord.EdgeHousehold)
+	}
+	if m.clearedraw_snapshot_storage_object {
+		edges = append(edges, sourcerecord.EdgeRawSnapshotStorageObject)
+	}
+	if m.clearedimport_jobs {
+		edges = append(edges, sourcerecord.EdgeImportJobs)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SourceRecordMutation) EdgeCleared(name string) bool {
+	switch name {
+	case sourcerecord.EdgeHousehold:
+		return m.clearedhousehold
+	case sourcerecord.EdgeRawSnapshotStorageObject:
+		return m.clearedraw_snapshot_storage_object
+	case sourcerecord.EdgeImportJobs:
+		return m.clearedimport_jobs
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SourceRecordMutation) ClearEdge(name string) error {
+	switch name {
+	case sourcerecord.EdgeHousehold:
+		m.ClearHousehold()
+		return nil
+	case sourcerecord.EdgeRawSnapshotStorageObject:
+		m.ClearRawSnapshotStorageObject()
+		return nil
+	}
+	return fmt.Errorf("unknown SourceRecord unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SourceRecordMutation) ResetEdge(name string) error {
+	switch name {
+	case sourcerecord.EdgeHousehold:
+		m.ResetHousehold()
+		return nil
+	case sourcerecord.EdgeRawSnapshotStorageObject:
+		m.ResetRawSnapshotStorageObject()
+		return nil
+	case sourcerecord.EdgeImportJobs:
+		m.ResetImportJobs()
+		return nil
+	}
+	return fmt.Errorf("unknown SourceRecord edge %s", name)
+}
+
 // StoredObjectMutation represents an operation that mutates the StoredObject nodes in the graph.
 type StoredObjectMutation struct {
 	config
@@ -10989,6 +14629,9 @@ type StoredObjectMutation struct {
 	thumbnail_media_assets        map[string]struct{}
 	removedthumbnail_media_assets map[string]struct{}
 	clearedthumbnail_media_assets bool
+	source_records                map[string]struct{}
+	removedsource_records         map[string]struct{}
+	clearedsource_records         bool
 	done                          bool
 	oldValue                      func(context.Context) (*StoredObject, error)
 	predicates                    []predicate.StoredObject
@@ -11541,6 +15184,60 @@ func (m *StoredObjectMutation) ResetThumbnailMediaAssets() {
 	m.removedthumbnail_media_assets = nil
 }
 
+// AddSourceRecordIDs adds the "source_records" edge to the SourceRecord entity by ids.
+func (m *StoredObjectMutation) AddSourceRecordIDs(ids ...string) {
+	if m.source_records == nil {
+		m.source_records = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.source_records[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSourceRecords clears the "source_records" edge to the SourceRecord entity.
+func (m *StoredObjectMutation) ClearSourceRecords() {
+	m.clearedsource_records = true
+}
+
+// SourceRecordsCleared reports if the "source_records" edge to the SourceRecord entity was cleared.
+func (m *StoredObjectMutation) SourceRecordsCleared() bool {
+	return m.clearedsource_records
+}
+
+// RemoveSourceRecordIDs removes the "source_records" edge to the SourceRecord entity by IDs.
+func (m *StoredObjectMutation) RemoveSourceRecordIDs(ids ...string) {
+	if m.removedsource_records == nil {
+		m.removedsource_records = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.source_records, ids[i])
+		m.removedsource_records[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSourceRecords returns the removed IDs of the "source_records" edge to the SourceRecord entity.
+func (m *StoredObjectMutation) RemovedSourceRecordsIDs() (ids []string) {
+	for id := range m.removedsource_records {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SourceRecordsIDs returns the "source_records" edge IDs in the mutation.
+func (m *StoredObjectMutation) SourceRecordsIDs() (ids []string) {
+	for id := range m.source_records {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSourceRecords resets all changes to the "source_records" edge.
+func (m *StoredObjectMutation) ResetSourceRecords() {
+	m.source_records = nil
+	m.clearedsource_records = false
+	m.removedsource_records = nil
+}
+
 // Where appends a list predicates to the StoredObjectMutation builder.
 func (m *StoredObjectMutation) Where(ps ...predicate.StoredObject) {
 	m.predicates = append(m.predicates, ps...)
@@ -11808,7 +15505,7 @@ func (m *StoredObjectMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *StoredObjectMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.household != nil {
 		edges = append(edges, storedobject.EdgeHousehold)
 	}
@@ -11817,6 +15514,9 @@ func (m *StoredObjectMutation) AddedEdges() []string {
 	}
 	if m.thumbnail_media_assets != nil {
 		edges = append(edges, storedobject.EdgeThumbnailMediaAssets)
+	}
+	if m.source_records != nil {
+		edges = append(edges, storedobject.EdgeSourceRecords)
 	}
 	return edges
 }
@@ -11841,18 +15541,27 @@ func (m *StoredObjectMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case storedobject.EdgeSourceRecords:
+		ids := make([]ent.Value, 0, len(m.source_records))
+		for id := range m.source_records {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *StoredObjectMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedmedia_assets != nil {
 		edges = append(edges, storedobject.EdgeMediaAssets)
 	}
 	if m.removedthumbnail_media_assets != nil {
 		edges = append(edges, storedobject.EdgeThumbnailMediaAssets)
+	}
+	if m.removedsource_records != nil {
+		edges = append(edges, storedobject.EdgeSourceRecords)
 	}
 	return edges
 }
@@ -11873,13 +15582,19 @@ func (m *StoredObjectMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case storedobject.EdgeSourceRecords:
+		ids := make([]ent.Value, 0, len(m.removedsource_records))
+		for id := range m.removedsource_records {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *StoredObjectMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedhousehold {
 		edges = append(edges, storedobject.EdgeHousehold)
 	}
@@ -11888,6 +15603,9 @@ func (m *StoredObjectMutation) ClearedEdges() []string {
 	}
 	if m.clearedthumbnail_media_assets {
 		edges = append(edges, storedobject.EdgeThumbnailMediaAssets)
+	}
+	if m.clearedsource_records {
+		edges = append(edges, storedobject.EdgeSourceRecords)
 	}
 	return edges
 }
@@ -11902,6 +15620,8 @@ func (m *StoredObjectMutation) EdgeCleared(name string) bool {
 		return m.clearedmedia_assets
 	case storedobject.EdgeThumbnailMediaAssets:
 		return m.clearedthumbnail_media_assets
+	case storedobject.EdgeSourceRecords:
+		return m.clearedsource_records
 	}
 	return false
 }
@@ -11929,6 +15649,9 @@ func (m *StoredObjectMutation) ResetEdge(name string) error {
 		return nil
 	case storedobject.EdgeThumbnailMediaAssets:
 		m.ResetThumbnailMediaAssets()
+		return nil
+	case storedobject.EdgeSourceRecords:
+		m.ResetSourceRecords()
 		return nil
 	}
 	return fmt.Errorf("unknown StoredObject edge %s", name)
@@ -12732,30 +16455,33 @@ func (m *TagMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op                      Op
-	typ                     string
-	id                      *string
-	created_at              *time.Time
-	updated_at              *time.Time
-	display_name            *string
-	email                   *string
-	email_verified          *bool
-	password_hash           *string
-	role                    *user.Role
-	last_login_at           *time.Time
-	clearedFields           map[string]struct{}
-	memberships             map[string]struct{}
-	removedmemberships      map[string]struct{}
-	clearedmemberships      bool
-	recipe_shares           map[string]struct{}
-	removedrecipe_shares    map[string]struct{}
-	clearedrecipe_shares    bool
-	refresh_sessions        map[string]struct{}
-	removedrefresh_sessions map[string]struct{}
-	clearedrefresh_sessions bool
-	done                    bool
-	oldValue                func(context.Context) (*User, error)
-	predicates              []predicate.User
+	op                           Op
+	typ                          string
+	id                           *string
+	created_at                   *time.Time
+	updated_at                   *time.Time
+	display_name                 *string
+	email                        *string
+	email_verified               *bool
+	password_hash                *string
+	role                         *user.Role
+	last_login_at                *time.Time
+	clearedFields                map[string]struct{}
+	memberships                  map[string]struct{}
+	removedmemberships           map[string]struct{}
+	clearedmemberships           bool
+	recipe_shares                map[string]struct{}
+	removedrecipe_shares         map[string]struct{}
+	clearedrecipe_shares         bool
+	requested_import_jobs        map[string]struct{}
+	removedrequested_import_jobs map[string]struct{}
+	clearedrequested_import_jobs bool
+	refresh_sessions             map[string]struct{}
+	removedrefresh_sessions      map[string]struct{}
+	clearedrefresh_sessions      bool
+	done                         bool
+	oldValue                     func(context.Context) (*User, error)
+	predicates                   []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -13271,6 +16997,60 @@ func (m *UserMutation) ResetRecipeShares() {
 	m.removedrecipe_shares = nil
 }
 
+// AddRequestedImportJobIDs adds the "requested_import_jobs" edge to the ImportJob entity by ids.
+func (m *UserMutation) AddRequestedImportJobIDs(ids ...string) {
+	if m.requested_import_jobs == nil {
+		m.requested_import_jobs = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.requested_import_jobs[ids[i]] = struct{}{}
+	}
+}
+
+// ClearRequestedImportJobs clears the "requested_import_jobs" edge to the ImportJob entity.
+func (m *UserMutation) ClearRequestedImportJobs() {
+	m.clearedrequested_import_jobs = true
+}
+
+// RequestedImportJobsCleared reports if the "requested_import_jobs" edge to the ImportJob entity was cleared.
+func (m *UserMutation) RequestedImportJobsCleared() bool {
+	return m.clearedrequested_import_jobs
+}
+
+// RemoveRequestedImportJobIDs removes the "requested_import_jobs" edge to the ImportJob entity by IDs.
+func (m *UserMutation) RemoveRequestedImportJobIDs(ids ...string) {
+	if m.removedrequested_import_jobs == nil {
+		m.removedrequested_import_jobs = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.requested_import_jobs, ids[i])
+		m.removedrequested_import_jobs[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRequestedImportJobs returns the removed IDs of the "requested_import_jobs" edge to the ImportJob entity.
+func (m *UserMutation) RemovedRequestedImportJobsIDs() (ids []string) {
+	for id := range m.removedrequested_import_jobs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// RequestedImportJobsIDs returns the "requested_import_jobs" edge IDs in the mutation.
+func (m *UserMutation) RequestedImportJobsIDs() (ids []string) {
+	for id := range m.requested_import_jobs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetRequestedImportJobs resets all changes to the "requested_import_jobs" edge.
+func (m *UserMutation) ResetRequestedImportJobs() {
+	m.requested_import_jobs = nil
+	m.clearedrequested_import_jobs = false
+	m.removedrequested_import_jobs = nil
+}
+
 // AddRefreshSessionIDs adds the "refresh_sessions" edge to the RefreshSession entity by ids.
 func (m *UserMutation) AddRefreshSessionIDs(ids ...string) {
 	if m.refresh_sessions == nil {
@@ -13586,12 +17366,15 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.memberships != nil {
 		edges = append(edges, user.EdgeMemberships)
 	}
 	if m.recipe_shares != nil {
 		edges = append(edges, user.EdgeRecipeShares)
+	}
+	if m.requested_import_jobs != nil {
+		edges = append(edges, user.EdgeRequestedImportJobs)
 	}
 	if m.refresh_sessions != nil {
 		edges = append(edges, user.EdgeRefreshSessions)
@@ -13615,6 +17398,12 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeRequestedImportJobs:
+		ids := make([]ent.Value, 0, len(m.requested_import_jobs))
+		for id := range m.requested_import_jobs {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeRefreshSessions:
 		ids := make([]ent.Value, 0, len(m.refresh_sessions))
 		for id := range m.refresh_sessions {
@@ -13627,12 +17416,15 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedmemberships != nil {
 		edges = append(edges, user.EdgeMemberships)
 	}
 	if m.removedrecipe_shares != nil {
 		edges = append(edges, user.EdgeRecipeShares)
+	}
+	if m.removedrequested_import_jobs != nil {
+		edges = append(edges, user.EdgeRequestedImportJobs)
 	}
 	if m.removedrefresh_sessions != nil {
 		edges = append(edges, user.EdgeRefreshSessions)
@@ -13656,6 +17448,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeRequestedImportJobs:
+		ids := make([]ent.Value, 0, len(m.removedrequested_import_jobs))
+		for id := range m.removedrequested_import_jobs {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeRefreshSessions:
 		ids := make([]ent.Value, 0, len(m.removedrefresh_sessions))
 		for id := range m.removedrefresh_sessions {
@@ -13668,12 +17466,15 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedmemberships {
 		edges = append(edges, user.EdgeMemberships)
 	}
 	if m.clearedrecipe_shares {
 		edges = append(edges, user.EdgeRecipeShares)
+	}
+	if m.clearedrequested_import_jobs {
+		edges = append(edges, user.EdgeRequestedImportJobs)
 	}
 	if m.clearedrefresh_sessions {
 		edges = append(edges, user.EdgeRefreshSessions)
@@ -13689,6 +17490,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedmemberships
 	case user.EdgeRecipeShares:
 		return m.clearedrecipe_shares
+	case user.EdgeRequestedImportJobs:
+		return m.clearedrequested_import_jobs
 	case user.EdgeRefreshSessions:
 		return m.clearedrefresh_sessions
 	}
@@ -13712,6 +17515,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeRecipeShares:
 		m.ResetRecipeShares()
+		return nil
+	case user.EdgeRequestedImportJobs:
+		m.ResetRequestedImportJobs()
 		return nil
 	case user.EdgeRefreshSessions:
 		m.ResetRefreshSessions()

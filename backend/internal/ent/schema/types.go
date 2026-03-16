@@ -78,6 +78,54 @@ var CuisineValues = []string{
 	"other",
 }
 
+// RecipeStatusValues defines the supported lifecycle states for recipes.
+var RecipeStatusValues = []string{
+	"draft",
+	"published",
+	"archived",
+}
+
+// ImportKindValues defines the supported import pipeline entrypoints.
+var ImportKindValues = []string{
+	"url",
+	"raw_text",
+	"ocr",
+}
+
+// SourceTypeValues defines the persisted source submission shapes.
+var SourceTypeValues = []string{
+	"url",
+	"raw_text",
+	"html",
+	"media",
+}
+
+// ImportJobStatusValues defines the supported import job lifecycle states.
+var ImportJobStatusValues = []string{
+	"queued",
+	"fetching",
+	"parsing",
+	"needs_review",
+	"conflict_detected",
+	"completed",
+	"failed",
+	"cancelled",
+}
+
+// ConflictStateValues defines the import match/conflict outcomes surfaced to review.
+var ConflictStateValues = []string{
+	"none",
+	"possible_duplicate",
+	"requires_merge_decision",
+}
+
+// SourceRetentionStateValues defines the raw source cleanup lifecycle.
+var SourceRetentionStateValues = []string{
+	"retained",
+	"pending_cleanup",
+	"cleaned",
+}
+
 // AllergenValues defines the EU major allergens.
 // Based on the EU regulation: https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32011R1169
 var AllergenValues = []string{

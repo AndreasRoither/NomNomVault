@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/householdmember"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeshare"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
@@ -157,6 +158,21 @@ func (_u *UserUpdate) AddRecipeShares(v ...*RecipeShare) *UserUpdate {
 	return _u.AddRecipeShareIDs(ids...)
 }
 
+// AddRequestedImportJobIDs adds the "requested_import_jobs" edge to the ImportJob entity by IDs.
+func (_u *UserUpdate) AddRequestedImportJobIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddRequestedImportJobIDs(ids...)
+	return _u
+}
+
+// AddRequestedImportJobs adds the "requested_import_jobs" edges to the ImportJob entity.
+func (_u *UserUpdate) AddRequestedImportJobs(v ...*ImportJob) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddRequestedImportJobIDs(ids...)
+}
+
 // AddRefreshSessionIDs adds the "refresh_sessions" edge to the RefreshSession entity by IDs.
 func (_u *UserUpdate) AddRefreshSessionIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddRefreshSessionIDs(ids...)
@@ -217,6 +233,27 @@ func (_u *UserUpdate) RemoveRecipeShares(v ...*RecipeShare) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveRecipeShareIDs(ids...)
+}
+
+// ClearRequestedImportJobs clears all "requested_import_jobs" edges to the ImportJob entity.
+func (_u *UserUpdate) ClearRequestedImportJobs() *UserUpdate {
+	_u.mutation.ClearRequestedImportJobs()
+	return _u
+}
+
+// RemoveRequestedImportJobIDs removes the "requested_import_jobs" edge to ImportJob entities by IDs.
+func (_u *UserUpdate) RemoveRequestedImportJobIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveRequestedImportJobIDs(ids...)
+	return _u
+}
+
+// RemoveRequestedImportJobs removes "requested_import_jobs" edges to ImportJob entities.
+func (_u *UserUpdate) RemoveRequestedImportJobs(v ...*ImportJob) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveRequestedImportJobIDs(ids...)
 }
 
 // ClearRefreshSessions clears all "refresh_sessions" edges to the RefreshSession entity.
@@ -427,6 +464,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.RequestedImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestedImportJobsTable,
+			Columns: []string{user.RequestedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedRequestedImportJobsIDs(); len(nodes) > 0 && !_u.mutation.RequestedImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestedImportJobsTable,
+			Columns: []string{user.RequestedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RequestedImportJobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestedImportJobsTable,
+			Columns: []string{user.RequestedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _u.mutation.RefreshSessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -618,6 +700,21 @@ func (_u *UserUpdateOne) AddRecipeShares(v ...*RecipeShare) *UserUpdateOne {
 	return _u.AddRecipeShareIDs(ids...)
 }
 
+// AddRequestedImportJobIDs adds the "requested_import_jobs" edge to the ImportJob entity by IDs.
+func (_u *UserUpdateOne) AddRequestedImportJobIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddRequestedImportJobIDs(ids...)
+	return _u
+}
+
+// AddRequestedImportJobs adds the "requested_import_jobs" edges to the ImportJob entity.
+func (_u *UserUpdateOne) AddRequestedImportJobs(v ...*ImportJob) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddRequestedImportJobIDs(ids...)
+}
+
 // AddRefreshSessionIDs adds the "refresh_sessions" edge to the RefreshSession entity by IDs.
 func (_u *UserUpdateOne) AddRefreshSessionIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddRefreshSessionIDs(ids...)
@@ -678,6 +775,27 @@ func (_u *UserUpdateOne) RemoveRecipeShares(v ...*RecipeShare) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveRecipeShareIDs(ids...)
+}
+
+// ClearRequestedImportJobs clears all "requested_import_jobs" edges to the ImportJob entity.
+func (_u *UserUpdateOne) ClearRequestedImportJobs() *UserUpdateOne {
+	_u.mutation.ClearRequestedImportJobs()
+	return _u
+}
+
+// RemoveRequestedImportJobIDs removes the "requested_import_jobs" edge to ImportJob entities by IDs.
+func (_u *UserUpdateOne) RemoveRequestedImportJobIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveRequestedImportJobIDs(ids...)
+	return _u
+}
+
+// RemoveRequestedImportJobs removes "requested_import_jobs" edges to ImportJob entities.
+func (_u *UserUpdateOne) RemoveRequestedImportJobs(v ...*ImportJob) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveRequestedImportJobIDs(ids...)
 }
 
 // ClearRefreshSessions clears all "refresh_sessions" edges to the RefreshSession entity.
@@ -911,6 +1029,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(recipeshare.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.RequestedImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestedImportJobsTable,
+			Columns: []string{user.RequestedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedRequestedImportJobsIDs(); len(nodes) > 0 && !_u.mutation.RequestedImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestedImportJobsTable,
+			Columns: []string{user.RequestedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RequestedImportJobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RequestedImportJobsTable,
+			Columns: []string{user.RequestedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

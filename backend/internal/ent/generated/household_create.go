@@ -12,9 +12,11 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/householdmember"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/sourcerecord"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 )
@@ -181,6 +183,36 @@ func (_c *HouseholdCreate) AddStoredObjects(v ...*StoredObject) *HouseholdCreate
 		ids[i] = v[i].ID
 	}
 	return _c.AddStoredObjectIDs(ids...)
+}
+
+// AddSourceRecordIDs adds the "source_records" edge to the SourceRecord entity by IDs.
+func (_c *HouseholdCreate) AddSourceRecordIDs(ids ...string) *HouseholdCreate {
+	_c.mutation.AddSourceRecordIDs(ids...)
+	return _c
+}
+
+// AddSourceRecords adds the "source_records" edges to the SourceRecord entity.
+func (_c *HouseholdCreate) AddSourceRecords(v ...*SourceRecord) *HouseholdCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSourceRecordIDs(ids...)
+}
+
+// AddImportJobIDs adds the "import_jobs" edge to the ImportJob entity by IDs.
+func (_c *HouseholdCreate) AddImportJobIDs(ids ...string) *HouseholdCreate {
+	_c.mutation.AddImportJobIDs(ids...)
+	return _c
+}
+
+// AddImportJobs adds the "import_jobs" edges to the ImportJob entity.
+func (_c *HouseholdCreate) AddImportJobs(v ...*ImportJob) *HouseholdCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddImportJobIDs(ids...)
 }
 
 // AddRefreshSessionIDs adds the "refresh_sessions" edge to the RefreshSession entity by IDs.
@@ -417,6 +449,38 @@ func (_c *HouseholdCreate) createSpec() (*Household, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SourceRecordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.SourceRecordsTable,
+			Columns: []string{household.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ImportJobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.ImportJobsTable,
+			Columns: []string{household.ImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

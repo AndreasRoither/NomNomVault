@@ -33,6 +33,18 @@ func (f HouseholdMemberFunc) Mutate(ctx context.Context, m generated.Mutation) (
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *generated.HouseholdMemberMutation", m)
 }
 
+// The ImportJobFunc type is an adapter to allow the use of ordinary
+// function as ImportJob mutator.
+type ImportJobFunc func(context.Context, *generated.ImportJobMutation) (generated.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ImportJobFunc) Mutate(ctx context.Context, m generated.Mutation) (generated.Value, error) {
+	if mv, ok := m.(*generated.ImportJobMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *generated.ImportJobMutation", m)
+}
+
 // The MediaAssetFunc type is an adapter to allow the use of ordinary
 // function as MediaAsset mutator.
 type MediaAssetFunc func(context.Context, *generated.MediaAssetMutation) (generated.Value, error)
@@ -115,6 +127,18 @@ func (f RefreshSessionFunc) Mutate(ctx context.Context, m generated.Mutation) (g
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *generated.RefreshSessionMutation", m)
+}
+
+// The SourceRecordFunc type is an adapter to allow the use of ordinary
+// function as SourceRecord mutator.
+type SourceRecordFunc func(context.Context, *generated.SourceRecordMutation) (generated.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SourceRecordFunc) Mutate(ctx context.Context, m generated.Mutation) (generated.Value, error) {
+	if mv, ok := m.(*generated.SourceRecordMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *generated.SourceRecordMutation", m)
 }
 
 // The StoredObjectFunc type is an adapter to allow the use of ordinary

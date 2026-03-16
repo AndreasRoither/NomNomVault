@@ -7,6 +7,7 @@ type RecipeSummaryView struct {
 	ID               string
 	Title            string
 	Description      string
+	Status           string
 	SourceURL        string
 	SourceCapturedAt *time.Time
 	PrimaryMediaID   *string
@@ -150,11 +151,12 @@ type CreateRecipeResult struct {
 
 // ListRecipesInput defines the available list and search filters.
 type ListRecipesInput struct {
-	HouseholdID string
-	Cursor      *string
-	Limit       int
-	Query       string
-	TagSlugs    []string
+	HouseholdID   string
+	Cursor        *string
+	Limit         int
+	Query         string
+	TagSlugs      []string
+	IncludeDrafts bool
 }
 
 // UpdateRecipeInput replaces the editable fields on a recipe.

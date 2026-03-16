@@ -31,6 +31,8 @@ func (Household) Edges() []ent.Edge {
 		edge.To("tags", Tag.Type),
 		edge.To("media_assets", MediaAsset.Type),
 		edge.To("stored_objects", StoredObject.Type),
+		edge.To("source_records", SourceRecord.Type),
+		edge.To("import_jobs", ImportJob.Type),
 		edge.To("refresh_sessions", RefreshSession.Type),
 	}
 }

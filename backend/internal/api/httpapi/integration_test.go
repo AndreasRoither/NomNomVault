@@ -25,11 +25,13 @@ import (
 	_ "modernc.org/sqlite"
 
 	authhttpapi "github.com/AndreasRoither/NomNomVault/backend/internal/api/httpapi/auth"
+	importshttpapi "github.com/AndreasRoither/NomNomVault/backend/internal/api/httpapi/imports"
 	recipeshttpapi "github.com/AndreasRoither/NomNomVault/backend/internal/api/httpapi/recipes"
 	authsvc "github.com/AndreasRoither/NomNomVault/backend/internal/auth"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/householdmember"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
+	importsvc "github.com/AndreasRoither/NomNomVault/backend/internal/imports"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/platform/clock"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/platform/ratelimit"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/platform/requestid"
@@ -1149,6 +1151,7 @@ func newTestEnv(t *testing.T) *testEnv {
 	csrf := authsvc.NewCSRFManager("test-csrf-secret")
 	cookies := authsvc.NewCookieManager(false)
 	authService := authsvc.NewService(client, clock.RealClock{}, signer, csrf)
+	importService := importsvc.NewService(client, clock.RealClock{})
 	store := storage.NewPostgresStore(client)
 	recipeService := recipesvc.NewService(client, store, clock.RealClock{})
 	loginLimiter := ratelimit.New(5, time.Minute)
@@ -1156,6 +1159,12 @@ func newTestEnv(t *testing.T) *testEnv {
 
 	api := router.Group("/api/v1")
 	authhttpapi.RegisterRoutes(api, authService, cookies, csrf, loginLimiter, refreshLimiter)
+	importshttpapi.RegisterRoutes(
+		api,
+		importService,
+		authsvc.Middleware(signer, cookies),
+		authsvc.CSRFMiddleware(csrf),
+	)
 	recipeshttpapi.RegisterRoutes(
 		api,
 		recipeService,

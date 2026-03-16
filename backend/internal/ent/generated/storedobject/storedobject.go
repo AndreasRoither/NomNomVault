@@ -36,6 +36,8 @@ const (
 	EdgeMediaAssets = "media_assets"
 	// EdgeThumbnailMediaAssets holds the string denoting the thumbnail_media_assets edge name in mutations.
 	EdgeThumbnailMediaAssets = "thumbnail_media_assets"
+	// EdgeSourceRecords holds the string denoting the source_records edge name in mutations.
+	EdgeSourceRecords = "source_records"
 	// Table holds the table name of the storedobject in the database.
 	Table = "stored_objects"
 	// HouseholdTable is the table that holds the household relation/edge.
@@ -59,6 +61,13 @@ const (
 	ThumbnailMediaAssetsInverseTable = "media_assets"
 	// ThumbnailMediaAssetsColumn is the table column denoting the thumbnail_media_assets relation/edge.
 	ThumbnailMediaAssetsColumn = "thumbnail_storage_object_id"
+	// SourceRecordsTable is the table that holds the source_records relation/edge.
+	SourceRecordsTable = "source_records"
+	// SourceRecordsInverseTable is the table name for the SourceRecord entity.
+	// It exists in this package in order to avoid circular dependency with the "sourcerecord" package.
+	SourceRecordsInverseTable = "source_records"
+	// SourceRecordsColumn is the table column denoting the source_records relation/edge.
+	SourceRecordsColumn = "raw_snapshot_storage_object_id"
 )
 
 // Columns holds all SQL columns for storedobject fields.
@@ -178,6 +187,20 @@ func ByThumbnailMediaAssets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOpt
 		sqlgraph.OrderByNeighborTerms(s, newThumbnailMediaAssetsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySourceRecordsCount orders the results by source_records count.
+func BySourceRecordsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSourceRecordsStep(), opts...)
+	}
+}
+
+// BySourceRecords orders the results by source_records terms.
+func BySourceRecords(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSourceRecordsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newHouseholdStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -197,5 +220,12 @@ func newThumbnailMediaAssetsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ThumbnailMediaAssetsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ThumbnailMediaAssetsTable, ThumbnailMediaAssetsColumn),
+	)
+}
+func newSourceRecordsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SourceRecordsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SourceRecordsTable, SourceRecordsColumn),
 	)
 }

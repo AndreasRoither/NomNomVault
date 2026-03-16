@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/householdmember"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeingredient"
@@ -21,6 +22,7 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeshare"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipestep"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/sourcerecord"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
@@ -86,6 +88,7 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			household.Table:        household.ValidColumn,
 			householdmember.Table:  householdmember.ValidColumn,
+			importjob.Table:        importjob.ValidColumn,
 			mediaasset.Table:       mediaasset.ValidColumn,
 			recipe.Table:           recipe.ValidColumn,
 			recipeingredient.Table: recipeingredient.ValidColumn,
@@ -93,6 +96,7 @@ func checkColumn(t, c string) error {
 			recipeshare.Table:      recipeshare.ValidColumn,
 			recipestep.Table:       recipestep.ValidColumn,
 			refreshsession.Table:   refreshsession.ValidColumn,
+			sourcerecord.Table:     sourcerecord.ValidColumn,
 			storedobject.Table:     storedobject.ValidColumn,
 			tag.Table:              tag.ValidColumn,
 			user.Table:             user.ValidColumn,

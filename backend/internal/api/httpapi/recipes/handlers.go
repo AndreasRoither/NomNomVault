@@ -53,6 +53,7 @@ func newHandler(service *recipesvc.Service, maxUploadBytes int64, allowedMIMEs [
 // @Param limit query int false "Maximum number of recipes to return"
 // @Param q query string false "Case-insensitive recipe search query"
 // @Param tag query []string false "Repeatable tag slug filters"
+// @Param draft query bool false "Include draft recipes alongside published recipes"
 // @Success 200 {object} RecipeListResponse
 // @Failure 400 {object} apicontract.ErrorResponse
 // @Failure 401 {object} apicontract.ErrorResponse
@@ -82,12 +83,23 @@ func (h *handler) listRecipes(c *gin.Context) {
 		cursor = &rawCursor
 	}
 
+	includeDrafts := false
+	if rawDraft := strings.TrimSpace(c.Query("draft")); rawDraft != "" {
+		parsed, err := strconv.ParseBool(rawDraft)
+		if err != nil {
+			httpx.WriteValidationError(c, validationErrors("draft", "Draft must be true or false."))
+			return
+		}
+		includeDrafts = parsed
+	}
+
 	result, err := h.service.ListRecipes(c.Request.Context(), recipesvc.ListRecipesInput{
-		HouseholdID: session.ActiveHouseholdID,
-		Cursor:      cursor,
-		Limit:       limit,
-		Query:       strings.TrimSpace(c.Query("q")),
-		TagSlugs:    c.QueryArray("tag"),
+		HouseholdID:   session.ActiveHouseholdID,
+		Cursor:        cursor,
+		Limit:         limit,
+		Query:         strings.TrimSpace(c.Query("q")),
+		TagSlugs:      c.QueryArray("tag"),
+		IncludeDrafts: includeDrafts,
 	})
 	if err != nil {
 		httpx.WriteServiceError(c, err)
@@ -603,6 +615,7 @@ func mapRecipeSummary(summary recipesvc.RecipeSummaryView) RecipeSummary {
 		ID:               summary.ID,
 		Title:            summary.Title,
 		Description:      summary.Description,
+		Status:           summary.Status,
 		SourceURL:        summary.SourceURL,
 		SourceCapturedAt: summary.SourceCapturedAt,
 		PrimaryMediaID:   summary.PrimaryMediaID,

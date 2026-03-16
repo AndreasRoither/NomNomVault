@@ -12,6 +12,9 @@ type Household func(*sql.Selector)
 // HouseholdMember is the predicate function for householdmember builders.
 type HouseholdMember func(*sql.Selector)
 
+// ImportJob is the predicate function for importjob builders.
+type ImportJob func(*sql.Selector)
+
 // MediaAsset is the predicate function for mediaasset builders.
 type MediaAsset func(*sql.Selector)
 
@@ -32,6 +35,9 @@ type RecipeStep func(*sql.Selector)
 
 // RefreshSession is the predicate function for refreshsession builders.
 type RefreshSession func(*sql.Selector)
+
+// SourceRecord is the predicate function for sourcerecord builders.
+type SourceRecord func(*sql.Selector)
 
 // StoredObject is the predicate function for storedobject builders.
 type StoredObject func(*sql.Selector)

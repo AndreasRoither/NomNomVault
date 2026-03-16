@@ -29,12 +29,12 @@ type Recipe struct {
 	Title string `json:"title,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
+	// Status holds the value of the "status" field.
+	Status recipe.Status `json:"status,omitempty"`
 	// SourceURL holds the value of the "source_url" field.
 	SourceURL string `json:"source_url,omitempty"`
 	// SourceCapturedAt holds the value of the "source_captured_at" field.
 	SourceCapturedAt *time.Time `json:"source_captured_at,omitempty"`
-	// ArchivedAt holds the value of the "archived_at" field.
-	ArchivedAt *time.Time `json:"archived_at,omitempty"`
 	// PrimaryMediaID holds the value of the "primary_media_id" field.
 	PrimaryMediaID *string `json:"primary_media_id,omitempty"`
 	// GalleryMediaIds holds the value of the "gallery_media_ids" field.
@@ -83,9 +83,13 @@ type RecipeEdges struct {
 	Tags []*Tag `json:"tags,omitempty"`
 	// MediaAssets holds the value of the media_assets edge.
 	MediaAssets []*MediaAsset `json:"media_assets,omitempty"`
+	// DraftImportJobs holds the value of the draft_import_jobs edge.
+	DraftImportJobs []*ImportJob `json:"draft_import_jobs,omitempty"`
+	// MatchedImportJobs holds the value of the matched_import_jobs edge.
+	MatchedImportJobs []*ImportJob `json:"matched_import_jobs,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [7]bool
+	loadedTypes [9]bool
 }
 
 // HouseholdOrErr returns the Household value or an error if the edge
@@ -153,6 +157,24 @@ func (e RecipeEdges) MediaAssetsOrErr() ([]*MediaAsset, error) {
 	return nil, &NotLoadedError{edge: "media_assets"}
 }
 
+// DraftImportJobsOrErr returns the DraftImportJobs value or an error if the edge
+// was not loaded in eager-loading.
+func (e RecipeEdges) DraftImportJobsOrErr() ([]*ImportJob, error) {
+	if e.loadedTypes[7] {
+		return e.DraftImportJobs, nil
+	}
+	return nil, &NotLoadedError{edge: "draft_import_jobs"}
+}
+
+// MatchedImportJobsOrErr returns the MatchedImportJobs value or an error if the edge
+// was not loaded in eager-loading.
+func (e RecipeEdges) MatchedImportJobsOrErr() ([]*ImportJob, error) {
+	if e.loadedTypes[8] {
+		return e.MatchedImportJobs, nil
+	}
+	return nil, &NotLoadedError{edge: "matched_import_jobs"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Recipe) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -164,9 +186,9 @@ func (*Recipe) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case recipe.FieldPrepMinutes, recipe.FieldCookMinutes, recipe.FieldServings, recipe.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case recipe.FieldID, recipe.FieldHouseholdID, recipe.FieldTitle, recipe.FieldDescription, recipe.FieldSourceURL, recipe.FieldPrimaryMediaID, recipe.FieldRegion, recipe.FieldMealType, recipe.FieldDifficulty, recipe.FieldCuisine:
+		case recipe.FieldID, recipe.FieldHouseholdID, recipe.FieldTitle, recipe.FieldDescription, recipe.FieldStatus, recipe.FieldSourceURL, recipe.FieldPrimaryMediaID, recipe.FieldRegion, recipe.FieldMealType, recipe.FieldDifficulty, recipe.FieldCuisine:
 			values[i] = new(sql.NullString)
-		case recipe.FieldCreatedAt, recipe.FieldUpdatedAt, recipe.FieldSourceCapturedAt, recipe.FieldArchivedAt, recipe.FieldAggregatedAt:
+		case recipe.FieldCreatedAt, recipe.FieldUpdatedAt, recipe.FieldSourceCapturedAt, recipe.FieldAggregatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -219,6 +241,12 @@ func (_m *Recipe) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = value.String
 			}
+		case recipe.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				_m.Status = recipe.Status(value.String)
+			}
 		case recipe.FieldSourceURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field source_url", values[i])
@@ -231,13 +259,6 @@ func (_m *Recipe) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.SourceCapturedAt = new(time.Time)
 				*_m.SourceCapturedAt = value.Time
-			}
-		case recipe.FieldArchivedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field archived_at", values[i])
-			} else if value.Valid {
-				_m.ArchivedAt = new(time.Time)
-				*_m.ArchivedAt = value.Time
 			}
 		case recipe.FieldPrimaryMediaID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -379,6 +400,16 @@ func (_m *Recipe) QueryMediaAssets() *MediaAssetQuery {
 	return NewRecipeClient(_m.config).QueryMediaAssets(_m)
 }
 
+// QueryDraftImportJobs queries the "draft_import_jobs" edge of the Recipe entity.
+func (_m *Recipe) QueryDraftImportJobs() *ImportJobQuery {
+	return NewRecipeClient(_m.config).QueryDraftImportJobs(_m)
+}
+
+// QueryMatchedImportJobs queries the "matched_import_jobs" edge of the Recipe entity.
+func (_m *Recipe) QueryMatchedImportJobs() *ImportJobQuery {
+	return NewRecipeClient(_m.config).QueryMatchedImportJobs(_m)
+}
+
 // Update returns a builder for updating this Recipe.
 // Note that you need to call Recipe.Unwrap() before calling this method if this Recipe
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -417,16 +448,14 @@ func (_m *Recipe) String() string {
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
 	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
 	builder.WriteString("source_url=")
 	builder.WriteString(_m.SourceURL)
 	builder.WriteString(", ")
 	if v := _m.SourceCapturedAt; v != nil {
 		builder.WriteString("source_captured_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
-	builder.WriteString(", ")
-	if v := _m.ArchivedAt; v != nil {
-		builder.WriteString("archived_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")

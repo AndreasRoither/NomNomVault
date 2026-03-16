@@ -25,12 +25,12 @@ const (
 	FieldTitle = "title"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// FieldSourceURL holds the string denoting the source_url field in the database.
 	FieldSourceURL = "source_url"
 	// FieldSourceCapturedAt holds the string denoting the source_captured_at field in the database.
 	FieldSourceCapturedAt = "source_captured_at"
-	// FieldArchivedAt holds the string denoting the archived_at field in the database.
-	FieldArchivedAt = "archived_at"
 	// FieldPrimaryMediaID holds the string denoting the primary_media_id field in the database.
 	FieldPrimaryMediaID = "primary_media_id"
 	// FieldGalleryMediaIds holds the string denoting the gallery_media_ids field in the database.
@@ -71,6 +71,10 @@ const (
 	EdgeTags = "tags"
 	// EdgeMediaAssets holds the string denoting the media_assets edge name in mutations.
 	EdgeMediaAssets = "media_assets"
+	// EdgeDraftImportJobs holds the string denoting the draft_import_jobs edge name in mutations.
+	EdgeDraftImportJobs = "draft_import_jobs"
+	// EdgeMatchedImportJobs holds the string denoting the matched_import_jobs edge name in mutations.
+	EdgeMatchedImportJobs = "matched_import_jobs"
 	// Table holds the table name of the recipe in the database.
 	Table = "recipes"
 	// HouseholdTable is the table that holds the household relation/edge.
@@ -120,6 +124,20 @@ const (
 	MediaAssetsInverseTable = "media_assets"
 	// MediaAssetsColumn is the table column denoting the media_assets relation/edge.
 	MediaAssetsColumn = "recipe_id"
+	// DraftImportJobsTable is the table that holds the draft_import_jobs relation/edge.
+	DraftImportJobsTable = "import_jobs"
+	// DraftImportJobsInverseTable is the table name for the ImportJob entity.
+	// It exists in this package in order to avoid circular dependency with the "importjob" package.
+	DraftImportJobsInverseTable = "import_jobs"
+	// DraftImportJobsColumn is the table column denoting the draft_import_jobs relation/edge.
+	DraftImportJobsColumn = "draft_recipe_id"
+	// MatchedImportJobsTable is the table that holds the matched_import_jobs relation/edge.
+	MatchedImportJobsTable = "import_jobs"
+	// MatchedImportJobsInverseTable is the table name for the ImportJob entity.
+	// It exists in this package in order to avoid circular dependency with the "importjob" package.
+	MatchedImportJobsInverseTable = "import_jobs"
+	// MatchedImportJobsColumn is the table column denoting the matched_import_jobs relation/edge.
+	MatchedImportJobsColumn = "match_recipe_id"
 )
 
 // Columns holds all SQL columns for recipe fields.
@@ -130,9 +148,9 @@ var Columns = []string{
 	FieldHouseholdID,
 	FieldTitle,
 	FieldDescription,
+	FieldStatus,
 	FieldSourceURL,
 	FieldSourceCapturedAt,
-	FieldArchivedAt,
 	FieldPrimaryMediaID,
 	FieldGalleryMediaIds,
 	FieldPrepMinutes,
@@ -186,6 +204,33 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 )
+
+// Status defines the type for the "status" enum field.
+type Status string
+
+// StatusPublished is the default value of the Status enum.
+const DefaultStatus = StatusPublished
+
+// Status values.
+const (
+	StatusDraft     Status = "draft"
+	StatusPublished Status = "published"
+	StatusArchived  Status = "archived"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusDraft, StatusPublished, StatusArchived:
+		return nil
+	default:
+		return fmt.Errorf("recipe: invalid enum value for status field: %q", s)
+	}
+}
 
 // Region defines the type for the "region" enum field.
 type Region string
@@ -349,6 +394,11 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
 // BySourceURL orders the results by the source_url field.
 func BySourceURL(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSourceURL, opts...).ToFunc()
@@ -357,11 +407,6 @@ func BySourceURL(opts ...sql.OrderTermOption) OrderOption {
 // BySourceCapturedAt orders the results by the source_captured_at field.
 func BySourceCapturedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSourceCapturedAt, opts...).ToFunc()
-}
-
-// ByArchivedAt orders the results by the archived_at field.
-func ByArchivedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldArchivedAt, opts...).ToFunc()
 }
 
 // ByPrimaryMediaID orders the results by the primary_media_id field.
@@ -509,6 +554,34 @@ func ByMediaAssets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newMediaAssetsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByDraftImportJobsCount orders the results by draft_import_jobs count.
+func ByDraftImportJobsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDraftImportJobsStep(), opts...)
+	}
+}
+
+// ByDraftImportJobs orders the results by draft_import_jobs terms.
+func ByDraftImportJobs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDraftImportJobsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByMatchedImportJobsCount orders the results by matched_import_jobs count.
+func ByMatchedImportJobsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newMatchedImportJobsStep(), opts...)
+	}
+}
+
+// ByMatchedImportJobs orders the results by matched_import_jobs terms.
+func ByMatchedImportJobs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMatchedImportJobsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newHouseholdStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -556,5 +629,19 @@ func newMediaAssetsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MediaAssetsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, MediaAssetsTable, MediaAssetsColumn),
+	)
+}
+func newDraftImportJobsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DraftImportJobsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DraftImportJobsTable, DraftImportJobsColumn),
+	)
+}
+func newMatchedImportJobsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MatchedImportJobsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, MatchedImportJobsTable, MatchedImportJobsColumn),
 	)
 }

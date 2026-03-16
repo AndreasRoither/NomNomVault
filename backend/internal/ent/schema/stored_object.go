@@ -32,6 +32,7 @@ func (StoredObject) Edges() []ent.Edge {
 		edge.From("household", Household.Type).Ref("stored_objects").Field("household_id").Unique().Required(),
 		edge.To("media_assets", MediaAsset.Type),
 		edge.To("thumbnail_media_assets", MediaAsset.Type),
+		edge.To("source_records", SourceRecord.Type),
 	}
 }
 

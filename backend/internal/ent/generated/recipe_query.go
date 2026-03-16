@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
@@ -26,17 +27,19 @@ import (
 // RecipeQuery is the builder for querying Recipe entities.
 type RecipeQuery struct {
 	config
-	ctx                  *QueryContext
-	order                []recipe.OrderOption
-	inters               []Interceptor
-	predicates           []predicate.Recipe
-	withHousehold        *HouseholdQuery
-	withIngredients      *RecipeIngredientQuery
-	withSteps            *RecipeStepQuery
-	withNutritionEntries *RecipeNutritionQuery
-	withShares           *RecipeShareQuery
-	withTags             *TagQuery
-	withMediaAssets      *MediaAssetQuery
+	ctx                   *QueryContext
+	order                 []recipe.OrderOption
+	inters                []Interceptor
+	predicates            []predicate.Recipe
+	withHousehold         *HouseholdQuery
+	withIngredients       *RecipeIngredientQuery
+	withSteps             *RecipeStepQuery
+	withNutritionEntries  *RecipeNutritionQuery
+	withShares            *RecipeShareQuery
+	withTags              *TagQuery
+	withMediaAssets       *MediaAssetQuery
+	withDraftImportJobs   *ImportJobQuery
+	withMatchedImportJobs *ImportJobQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -220,6 +223,50 @@ func (_q *RecipeQuery) QueryMediaAssets() *MediaAssetQuery {
 			sqlgraph.From(recipe.Table, recipe.FieldID, selector),
 			sqlgraph.To(mediaasset.Table, mediaasset.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, recipe.MediaAssetsTable, recipe.MediaAssetsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDraftImportJobs chains the current query on the "draft_import_jobs" edge.
+func (_q *RecipeQuery) QueryDraftImportJobs() *ImportJobQuery {
+	query := (&ImportJobClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(recipe.Table, recipe.FieldID, selector),
+			sqlgraph.To(importjob.Table, importjob.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, recipe.DraftImportJobsTable, recipe.DraftImportJobsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMatchedImportJobs chains the current query on the "matched_import_jobs" edge.
+func (_q *RecipeQuery) QueryMatchedImportJobs() *ImportJobQuery {
+	query := (&ImportJobClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(recipe.Table, recipe.FieldID, selector),
+			sqlgraph.To(importjob.Table, importjob.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, recipe.MatchedImportJobsTable, recipe.MatchedImportJobsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -414,18 +461,20 @@ func (_q *RecipeQuery) Clone() *RecipeQuery {
 		return nil
 	}
 	return &RecipeQuery{
-		config:               _q.config,
-		ctx:                  _q.ctx.Clone(),
-		order:                append([]recipe.OrderOption{}, _q.order...),
-		inters:               append([]Interceptor{}, _q.inters...),
-		predicates:           append([]predicate.Recipe{}, _q.predicates...),
-		withHousehold:        _q.withHousehold.Clone(),
-		withIngredients:      _q.withIngredients.Clone(),
-		withSteps:            _q.withSteps.Clone(),
-		withNutritionEntries: _q.withNutritionEntries.Clone(),
-		withShares:           _q.withShares.Clone(),
-		withTags:             _q.withTags.Clone(),
-		withMediaAssets:      _q.withMediaAssets.Clone(),
+		config:                _q.config,
+		ctx:                   _q.ctx.Clone(),
+		order:                 append([]recipe.OrderOption{}, _q.order...),
+		inters:                append([]Interceptor{}, _q.inters...),
+		predicates:            append([]predicate.Recipe{}, _q.predicates...),
+		withHousehold:         _q.withHousehold.Clone(),
+		withIngredients:       _q.withIngredients.Clone(),
+		withSteps:             _q.withSteps.Clone(),
+		withNutritionEntries:  _q.withNutritionEntries.Clone(),
+		withShares:            _q.withShares.Clone(),
+		withTags:              _q.withTags.Clone(),
+		withMediaAssets:       _q.withMediaAssets.Clone(),
+		withDraftImportJobs:   _q.withDraftImportJobs.Clone(),
+		withMatchedImportJobs: _q.withMatchedImportJobs.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -509,6 +558,28 @@ func (_q *RecipeQuery) WithMediaAssets(opts ...func(*MediaAssetQuery)) *RecipeQu
 	return _q
 }
 
+// WithDraftImportJobs tells the query-builder to eager-load the nodes that are connected to
+// the "draft_import_jobs" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *RecipeQuery) WithDraftImportJobs(opts ...func(*ImportJobQuery)) *RecipeQuery {
+	query := (&ImportJobClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withDraftImportJobs = query
+	return _q
+}
+
+// WithMatchedImportJobs tells the query-builder to eager-load the nodes that are connected to
+// the "matched_import_jobs" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *RecipeQuery) WithMatchedImportJobs(opts ...func(*ImportJobQuery)) *RecipeQuery {
+	query := (&ImportJobClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withMatchedImportJobs = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -587,7 +658,7 @@ func (_q *RecipeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Recip
 	var (
 		nodes       = []*Recipe{}
 		_spec       = _q.querySpec()
-		loadedTypes = [7]bool{
+		loadedTypes = [9]bool{
 			_q.withHousehold != nil,
 			_q.withIngredients != nil,
 			_q.withSteps != nil,
@@ -595,6 +666,8 @@ func (_q *RecipeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Recip
 			_q.withShares != nil,
 			_q.withTags != nil,
 			_q.withMediaAssets != nil,
+			_q.withDraftImportJobs != nil,
+			_q.withMatchedImportJobs != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -660,6 +733,20 @@ func (_q *RecipeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Recip
 		if err := _q.loadMediaAssets(ctx, query, nodes,
 			func(n *Recipe) { n.Edges.MediaAssets = []*MediaAsset{} },
 			func(n *Recipe, e *MediaAsset) { n.Edges.MediaAssets = append(n.Edges.MediaAssets, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withDraftImportJobs; query != nil {
+		if err := _q.loadDraftImportJobs(ctx, query, nodes,
+			func(n *Recipe) { n.Edges.DraftImportJobs = []*ImportJob{} },
+			func(n *Recipe, e *ImportJob) { n.Edges.DraftImportJobs = append(n.Edges.DraftImportJobs, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withMatchedImportJobs; query != nil {
+		if err := _q.loadMatchedImportJobs(ctx, query, nodes,
+			func(n *Recipe) { n.Edges.MatchedImportJobs = []*ImportJob{} },
+			func(n *Recipe, e *ImportJob) { n.Edges.MatchedImportJobs = append(n.Edges.MatchedImportJobs, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -904,6 +991,72 @@ func (_q *RecipeQuery) loadMediaAssets(ctx context.Context, query *MediaAssetQue
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "recipe_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *RecipeQuery) loadDraftImportJobs(ctx context.Context, query *ImportJobQuery, nodes []*Recipe, init func(*Recipe), assign func(*Recipe, *ImportJob)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Recipe)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(importjob.FieldDraftRecipeID)
+	}
+	query.Where(predicate.ImportJob(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(recipe.DraftImportJobsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.DraftRecipeID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "draft_recipe_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "draft_recipe_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *RecipeQuery) loadMatchedImportJobs(ctx context.Context, query *ImportJobQuery, nodes []*Recipe, init func(*Recipe), assign func(*Recipe, *ImportJob)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Recipe)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(importjob.FieldMatchRecipeID)
+	}
+	query.Where(predicate.ImportJob(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(recipe.MatchedImportJobsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.MatchRecipeID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "match_recipe_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "match_recipe_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

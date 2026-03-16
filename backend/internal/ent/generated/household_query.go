@@ -14,10 +14,12 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/householdmember"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/sourcerecord"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 )
@@ -34,6 +36,8 @@ type HouseholdQuery struct {
 	withTags            *TagQuery
 	withMediaAssets     *MediaAssetQuery
 	withStoredObjects   *StoredObjectQuery
+	withSourceRecords   *SourceRecordQuery
+	withImportJobs      *ImportJobQuery
 	withRefreshSessions *RefreshSessionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -174,6 +178,50 @@ func (_q *HouseholdQuery) QueryStoredObjects() *StoredObjectQuery {
 			sqlgraph.From(household.Table, household.FieldID, selector),
 			sqlgraph.To(storedobject.Table, storedobject.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, household.StoredObjectsTable, household.StoredObjectsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySourceRecords chains the current query on the "source_records" edge.
+func (_q *HouseholdQuery) QuerySourceRecords() *SourceRecordQuery {
+	query := (&SourceRecordClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(household.Table, household.FieldID, selector),
+			sqlgraph.To(sourcerecord.Table, sourcerecord.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, household.SourceRecordsTable, household.SourceRecordsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryImportJobs chains the current query on the "import_jobs" edge.
+func (_q *HouseholdQuery) QueryImportJobs() *ImportJobQuery {
+	query := (&ImportJobClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(household.Table, household.FieldID, selector),
+			sqlgraph.To(importjob.Table, importjob.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, household.ImportJobsTable, household.ImportJobsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -400,6 +448,8 @@ func (_q *HouseholdQuery) Clone() *HouseholdQuery {
 		withTags:            _q.withTags.Clone(),
 		withMediaAssets:     _q.withMediaAssets.Clone(),
 		withStoredObjects:   _q.withStoredObjects.Clone(),
+		withSourceRecords:   _q.withSourceRecords.Clone(),
+		withImportJobs:      _q.withImportJobs.Clone(),
 		withRefreshSessions: _q.withRefreshSessions.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
@@ -459,6 +509,28 @@ func (_q *HouseholdQuery) WithStoredObjects(opts ...func(*StoredObjectQuery)) *H
 		opt(query)
 	}
 	_q.withStoredObjects = query
+	return _q
+}
+
+// WithSourceRecords tells the query-builder to eager-load the nodes that are connected to
+// the "source_records" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *HouseholdQuery) WithSourceRecords(opts ...func(*SourceRecordQuery)) *HouseholdQuery {
+	query := (&SourceRecordClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSourceRecords = query
+	return _q
+}
+
+// WithImportJobs tells the query-builder to eager-load the nodes that are connected to
+// the "import_jobs" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *HouseholdQuery) WithImportJobs(opts ...func(*ImportJobQuery)) *HouseholdQuery {
+	query := (&ImportJobClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withImportJobs = query
 	return _q
 }
 
@@ -551,12 +623,14 @@ func (_q *HouseholdQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ho
 	var (
 		nodes       = []*Household{}
 		_spec       = _q.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [8]bool{
 			_q.withMembers != nil,
 			_q.withRecipes != nil,
 			_q.withTags != nil,
 			_q.withMediaAssets != nil,
 			_q.withStoredObjects != nil,
+			_q.withSourceRecords != nil,
+			_q.withImportJobs != nil,
 			_q.withRefreshSessions != nil,
 		}
 	)
@@ -610,6 +684,20 @@ func (_q *HouseholdQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ho
 		if err := _q.loadStoredObjects(ctx, query, nodes,
 			func(n *Household) { n.Edges.StoredObjects = []*StoredObject{} },
 			func(n *Household, e *StoredObject) { n.Edges.StoredObjects = append(n.Edges.StoredObjects, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSourceRecords; query != nil {
+		if err := _q.loadSourceRecords(ctx, query, nodes,
+			func(n *Household) { n.Edges.SourceRecords = []*SourceRecord{} },
+			func(n *Household, e *SourceRecord) { n.Edges.SourceRecords = append(n.Edges.SourceRecords, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withImportJobs; query != nil {
+		if err := _q.loadImportJobs(ctx, query, nodes,
+			func(n *Household) { n.Edges.ImportJobs = []*ImportJob{} },
+			func(n *Household, e *ImportJob) { n.Edges.ImportJobs = append(n.Edges.ImportJobs, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -758,6 +846,66 @@ func (_q *HouseholdQuery) loadStoredObjects(ctx context.Context, query *StoredOb
 	}
 	query.Where(predicate.StoredObject(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(household.StoredObjectsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.HouseholdID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "household_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *HouseholdQuery) loadSourceRecords(ctx context.Context, query *SourceRecordQuery, nodes []*Household, init func(*Household), assign func(*Household, *SourceRecord)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Household)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(sourcerecord.FieldHouseholdID)
+	}
+	query.Where(predicate.SourceRecord(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(household.SourceRecordsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.HouseholdID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "household_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *HouseholdQuery) loadImportJobs(ctx context.Context, query *ImportJobQuery, nodes []*Household, init func(*Household), assign func(*Household, *ImportJob)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Household)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(importjob.FieldHouseholdID)
+	}
+	query.Where(predicate.ImportJob(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(household.ImportJobsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

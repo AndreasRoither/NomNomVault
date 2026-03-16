@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/sourcerecord"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 )
 
@@ -133,6 +134,21 @@ func (_c *StoredObjectCreate) AddThumbnailMediaAssets(v ...*MediaAsset) *StoredO
 		ids[i] = v[i].ID
 	}
 	return _c.AddThumbnailMediaAssetIDs(ids...)
+}
+
+// AddSourceRecordIDs adds the "source_records" edge to the SourceRecord entity by IDs.
+func (_c *StoredObjectCreate) AddSourceRecordIDs(ids ...string) *StoredObjectCreate {
+	_c.mutation.AddSourceRecordIDs(ids...)
+	return _c
+}
+
+// AddSourceRecords adds the "source_records" edges to the SourceRecord entity.
+func (_c *StoredObjectCreate) AddSourceRecords(v ...*SourceRecord) *StoredObjectCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSourceRecordIDs(ids...)
 }
 
 // Mutation returns the StoredObjectMutation object of the builder.
@@ -333,6 +349,22 @@ func (_c *StoredObjectCreate) createSpec() (*StoredObject, *sqlgraph.CreateSpec)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediaasset.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SourceRecordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   storedobject.SourceRecordsTable,
+			Columns: []string{storedobject.SourceRecordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(sourcerecord.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

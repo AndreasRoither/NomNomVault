@@ -501,6 +501,29 @@ func HasRecipeSharesWith(preds ...predicate.RecipeShare) predicate.User {
 	})
 }
 
+// HasRequestedImportJobs applies the HasEdge predicate on the "requested_import_jobs" edge.
+func HasRequestedImportJobs() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RequestedImportJobsTable, RequestedImportJobsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRequestedImportJobsWith applies the HasEdge predicate on the "requested_import_jobs" edge with a given conditions (other predicates).
+func HasRequestedImportJobsWith(preds ...predicate.ImportJob) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newRequestedImportJobsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasRefreshSessions applies the HasEdge predicate on the "refresh_sessions" edge.
 func HasRefreshSessions() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

@@ -26,7 +26,7 @@ mkdir -p "$ROOT_DIR/backend/openapi" "$(dirname "$GENERATED_SCHEMA_FILE")"
   cd "$ROOT_DIR/backend"
   go run github.com/swaggo/swag/cmd/swag@v1.16.6 init \
     --generalInfo main.go \
-    --dir cmd/api,internal/api/httpapi/auth,internal/api/httpapi/recipes,internal/api/apicontract \
+    --dir cmd/api,internal/api/httpapi/auth,internal/api/httpapi/imports,internal/api/httpapi/recipes,internal/api/apicontract \
     --parseInternal \
     --output openapi \
     --outputTypes yaml

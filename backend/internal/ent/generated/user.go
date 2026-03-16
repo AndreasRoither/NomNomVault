@@ -45,11 +45,13 @@ type UserEdges struct {
 	Memberships []*HouseholdMember `json:"memberships,omitempty"`
 	// RecipeShares holds the value of the recipe_shares edge.
 	RecipeShares []*RecipeShare `json:"recipe_shares,omitempty"`
+	// RequestedImportJobs holds the value of the requested_import_jobs edge.
+	RequestedImportJobs []*ImportJob `json:"requested_import_jobs,omitempty"`
 	// RefreshSessions holds the value of the refresh_sessions edge.
 	RefreshSessions []*RefreshSession `json:"refresh_sessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // MembershipsOrErr returns the Memberships value or an error if the edge
@@ -70,10 +72,19 @@ func (e UserEdges) RecipeSharesOrErr() ([]*RecipeShare, error) {
 	return nil, &NotLoadedError{edge: "recipe_shares"}
 }
 
+// RequestedImportJobsOrErr returns the RequestedImportJobs value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RequestedImportJobsOrErr() ([]*ImportJob, error) {
+	if e.loadedTypes[2] {
+		return e.RequestedImportJobs, nil
+	}
+	return nil, &NotLoadedError{edge: "requested_import_jobs"}
+}
+
 // RefreshSessionsOrErr returns the RefreshSessions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) RefreshSessionsOrErr() ([]*RefreshSession, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.RefreshSessions, nil
 	}
 	return nil, &NotLoadedError{edge: "refresh_sessions"}
@@ -181,6 +192,11 @@ func (_m *User) QueryMemberships() *HouseholdMemberQuery {
 // QueryRecipeShares queries the "recipe_shares" edge of the User entity.
 func (_m *User) QueryRecipeShares() *RecipeShareQuery {
 	return NewUserClient(_m.config).QueryRecipeShares(_m)
+}
+
+// QueryRequestedImportJobs queries the "requested_import_jobs" edge of the User entity.
+func (_m *User) QueryRequestedImportJobs() *ImportJobQuery {
+	return NewUserClient(_m.config).QueryRequestedImportJobs(_m)
 }
 
 // QueryRefreshSessions queries the "refresh_sessions" edge of the User entity.

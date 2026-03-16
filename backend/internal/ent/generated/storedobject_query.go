@@ -15,6 +15,7 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/sourcerecord"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 )
 
@@ -28,6 +29,7 @@ type StoredObjectQuery struct {
 	withHousehold            *HouseholdQuery
 	withMediaAssets          *MediaAssetQuery
 	withThumbnailMediaAssets *MediaAssetQuery
+	withSourceRecords        *SourceRecordQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -123,6 +125,28 @@ func (_q *StoredObjectQuery) QueryThumbnailMediaAssets() *MediaAssetQuery {
 			sqlgraph.From(storedobject.Table, storedobject.FieldID, selector),
 			sqlgraph.To(mediaasset.Table, mediaasset.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, storedobject.ThumbnailMediaAssetsTable, storedobject.ThumbnailMediaAssetsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySourceRecords chains the current query on the "source_records" edge.
+func (_q *StoredObjectQuery) QuerySourceRecords() *SourceRecordQuery {
+	query := (&SourceRecordClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(storedobject.Table, storedobject.FieldID, selector),
+			sqlgraph.To(sourcerecord.Table, sourcerecord.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, storedobject.SourceRecordsTable, storedobject.SourceRecordsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -325,6 +349,7 @@ func (_q *StoredObjectQuery) Clone() *StoredObjectQuery {
 		withHousehold:            _q.withHousehold.Clone(),
 		withMediaAssets:          _q.withMediaAssets.Clone(),
 		withThumbnailMediaAssets: _q.withThumbnailMediaAssets.Clone(),
+		withSourceRecords:        _q.withSourceRecords.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -361,6 +386,17 @@ func (_q *StoredObjectQuery) WithThumbnailMediaAssets(opts ...func(*MediaAssetQu
 		opt(query)
 	}
 	_q.withThumbnailMediaAssets = query
+	return _q
+}
+
+// WithSourceRecords tells the query-builder to eager-load the nodes that are connected to
+// the "source_records" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *StoredObjectQuery) WithSourceRecords(opts ...func(*SourceRecordQuery)) *StoredObjectQuery {
+	query := (&SourceRecordClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSourceRecords = query
 	return _q
 }
 
@@ -442,10 +478,11 @@ func (_q *StoredObjectQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	var (
 		nodes       = []*StoredObject{}
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			_q.withHousehold != nil,
 			_q.withMediaAssets != nil,
 			_q.withThumbnailMediaAssets != nil,
+			_q.withSourceRecords != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -485,6 +522,13 @@ func (_q *StoredObjectQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 			func(n *StoredObject, e *MediaAsset) {
 				n.Edges.ThumbnailMediaAssets = append(n.Edges.ThumbnailMediaAssets, e)
 			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSourceRecords; query != nil {
+		if err := _q.loadSourceRecords(ctx, query, nodes,
+			func(n *StoredObject) { n.Edges.SourceRecords = []*SourceRecord{} },
+			func(n *StoredObject, e *SourceRecord) { n.Edges.SourceRecords = append(n.Edges.SourceRecords, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -578,6 +622,39 @@ func (_q *StoredObjectQuery) loadThumbnailMediaAssets(ctx context.Context, query
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "thumbnail_storage_object_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *StoredObjectQuery) loadSourceRecords(ctx context.Context, query *SourceRecordQuery, nodes []*StoredObject, init func(*StoredObject), assign func(*StoredObject, *SourceRecord)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*StoredObject)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(sourcerecord.FieldRawSnapshotStorageObjectID)
+	}
+	query.Where(predicate.SourceRecord(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(storedobject.SourceRecordsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.RawSnapshotStorageObjectID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "raw_snapshot_storage_object_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "raw_snapshot_storage_object_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

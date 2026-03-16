@@ -495,6 +495,52 @@ func HasStoredObjectsWith(preds ...predicate.StoredObject) predicate.Household {
 	})
 }
 
+// HasSourceRecords applies the HasEdge predicate on the "source_records" edge.
+func HasSourceRecords() predicate.Household {
+	return predicate.Household(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SourceRecordsTable, SourceRecordsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSourceRecordsWith applies the HasEdge predicate on the "source_records" edge with a given conditions (other predicates).
+func HasSourceRecordsWith(preds ...predicate.SourceRecord) predicate.Household {
+	return predicate.Household(func(s *sql.Selector) {
+		step := newSourceRecordsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasImportJobs applies the HasEdge predicate on the "import_jobs" edge.
+func HasImportJobs() predicate.Household {
+	return predicate.Household(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ImportJobsTable, ImportJobsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasImportJobsWith applies the HasEdge predicate on the "import_jobs" edge with a given conditions (other predicates).
+func HasImportJobsWith(preds ...predicate.ImportJob) predicate.Household {
+	return predicate.Household(func(s *sql.Selector) {
+		step := newImportJobsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasRefreshSessions applies the HasEdge predicate on the "refresh_sessions" edge.
 func HasRefreshSessions() predicate.Household {
 	return predicate.Household(func(s *sql.Selector) {

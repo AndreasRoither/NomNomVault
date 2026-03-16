@@ -7,6 +7,7 @@ import (
 
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/householdmember"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeingredient"
@@ -14,6 +15,7 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeshare"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipestep"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/sourcerecord"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
@@ -78,6 +80,33 @@ func init() {
 	householdmemberDescID := householdmemberMixinFields0[0].Descriptor()
 	// householdmember.DefaultID holds the default value on creation for the id field.
 	householdmember.DefaultID = householdmemberDescID.Default.(func() string)
+	importjobMixin := schema.ImportJob{}.Mixin()
+	importjobMixinFields0 := importjobMixin[0].Fields()
+	_ = importjobMixinFields0
+	importjobFields := schema.ImportJob{}.Fields()
+	_ = importjobFields
+	// importjobDescCreatedAt is the schema descriptor for created_at field.
+	importjobDescCreatedAt := importjobMixinFields0[1].Descriptor()
+	// importjob.DefaultCreatedAt holds the default value on creation for the created_at field.
+	importjob.DefaultCreatedAt = importjobDescCreatedAt.Default.(func() time.Time)
+	// importjobDescUpdatedAt is the schema descriptor for updated_at field.
+	importjobDescUpdatedAt := importjobMixinFields0[2].Descriptor()
+	// importjob.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	importjob.DefaultUpdatedAt = importjobDescUpdatedAt.Default.(func() time.Time)
+	// importjob.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	importjob.UpdateDefaultUpdatedAt = importjobDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// importjobDescFallbackFingerprint is the schema descriptor for fallback_fingerprint field.
+	importjobDescFallbackFingerprint := importjobFields[7].Descriptor()
+	// importjob.FallbackFingerprintValidator is a validator for the "fallback_fingerprint" field. It is called by the builders before save.
+	importjob.FallbackFingerprintValidator = importjobDescFallbackFingerprint.Validators[0].(func(string) error)
+	// importjobDescAttemptCount is the schema descriptor for attempt_count field.
+	importjobDescAttemptCount := importjobFields[16].Descriptor()
+	// importjob.DefaultAttemptCount holds the default value on creation for the attempt_count field.
+	importjob.DefaultAttemptCount = importjobDescAttemptCount.Default.(int)
+	// importjobDescID is the schema descriptor for id field.
+	importjobDescID := importjobMixinFields0[0].Descriptor()
+	// importjob.DefaultID holds the default value on creation for the id field.
+	importjob.DefaultID = importjobDescID.Default.(func() string)
 	mediaassetMixin := schema.MediaAsset{}.Mixin()
 	mediaassetMixinFields0 := mediaassetMixin[0].Fields()
 	_ = mediaassetMixinFields0
@@ -141,7 +170,7 @@ func init() {
 	// recipe.DefaultDescription holds the default value on creation for the description field.
 	recipe.DefaultDescription = recipeDescDescription.Default.(string)
 	// recipeDescSourceURL is the schema descriptor for source_url field.
-	recipeDescSourceURL := recipeFields[2].Descriptor()
+	recipeDescSourceURL := recipeFields[3].Descriptor()
 	// recipe.DefaultSourceURL holds the default value on creation for the source_url field.
 	recipe.DefaultSourceURL = recipeDescSourceURL.Default.(string)
 	// recipeDescPopularityScore is the schema descriptor for popularity_score field.
@@ -279,6 +308,25 @@ func init() {
 	refreshsessionDescID := refreshsessionMixinFields0[0].Descriptor()
 	// refreshsession.DefaultID holds the default value on creation for the id field.
 	refreshsession.DefaultID = refreshsessionDescID.Default.(func() string)
+	sourcerecordMixin := schema.SourceRecord{}.Mixin()
+	sourcerecordMixinFields0 := sourcerecordMixin[0].Fields()
+	_ = sourcerecordMixinFields0
+	sourcerecordFields := schema.SourceRecord{}.Fields()
+	_ = sourcerecordFields
+	// sourcerecordDescCreatedAt is the schema descriptor for created_at field.
+	sourcerecordDescCreatedAt := sourcerecordMixinFields0[1].Descriptor()
+	// sourcerecord.DefaultCreatedAt holds the default value on creation for the created_at field.
+	sourcerecord.DefaultCreatedAt = sourcerecordDescCreatedAt.Default.(func() time.Time)
+	// sourcerecordDescUpdatedAt is the schema descriptor for updated_at field.
+	sourcerecordDescUpdatedAt := sourcerecordMixinFields0[2].Descriptor()
+	// sourcerecord.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	sourcerecord.DefaultUpdatedAt = sourcerecordDescUpdatedAt.Default.(func() time.Time)
+	// sourcerecord.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	sourcerecord.UpdateDefaultUpdatedAt = sourcerecordDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// sourcerecordDescID is the schema descriptor for id field.
+	sourcerecordDescID := sourcerecordMixinFields0[0].Descriptor()
+	// sourcerecord.DefaultID holds the default value on creation for the id field.
+	sourcerecord.DefaultID = sourcerecordDescID.Default.(func() string)
 	storedobjectMixin := schema.StoredObject{}.Mixin()
 	storedobjectMixinFields0 := storedobjectMixin[0].Fields()
 	_ = storedobjectMixinFields0

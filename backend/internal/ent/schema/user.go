@@ -30,6 +30,7 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("memberships", HouseholdMember.Type),
 		edge.To("recipe_shares", RecipeShare.Type),
+		edge.To("requested_import_jobs", ImportJob.Type),
 		edge.To("refresh_sessions", RefreshSession.Type),
 	}
 }

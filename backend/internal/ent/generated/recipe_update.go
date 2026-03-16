@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
@@ -84,6 +85,20 @@ func (_u *RecipeUpdate) SetNillableDescription(v *string) *RecipeUpdate {
 	return _u
 }
 
+// SetStatus sets the "status" field.
+func (_u *RecipeUpdate) SetStatus(v recipe.Status) *RecipeUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *RecipeUpdate) SetNillableStatus(v *recipe.Status) *RecipeUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
 // SetSourceURL sets the "source_url" field.
 func (_u *RecipeUpdate) SetSourceURL(v string) *RecipeUpdate {
 	_u.mutation.SetSourceURL(v)
@@ -115,26 +130,6 @@ func (_u *RecipeUpdate) SetNillableSourceCapturedAt(v *time.Time) *RecipeUpdate 
 // ClearSourceCapturedAt clears the value of the "source_captured_at" field.
 func (_u *RecipeUpdate) ClearSourceCapturedAt() *RecipeUpdate {
 	_u.mutation.ClearSourceCapturedAt()
-	return _u
-}
-
-// SetArchivedAt sets the "archived_at" field.
-func (_u *RecipeUpdate) SetArchivedAt(v time.Time) *RecipeUpdate {
-	_u.mutation.SetArchivedAt(v)
-	return _u
-}
-
-// SetNillableArchivedAt sets the "archived_at" field if the given value is not nil.
-func (_u *RecipeUpdate) SetNillableArchivedAt(v *time.Time) *RecipeUpdate {
-	if v != nil {
-		_u.SetArchivedAt(*v)
-	}
-	return _u
-}
-
-// ClearArchivedAt clears the value of the "archived_at" field.
-func (_u *RecipeUpdate) ClearArchivedAt() *RecipeUpdate {
-	_u.mutation.ClearArchivedAt()
 	return _u
 }
 
@@ -518,6 +513,36 @@ func (_u *RecipeUpdate) AddMediaAssets(v ...*MediaAsset) *RecipeUpdate {
 	return _u.AddMediaAssetIDs(ids...)
 }
 
+// AddDraftImportJobIDs adds the "draft_import_jobs" edge to the ImportJob entity by IDs.
+func (_u *RecipeUpdate) AddDraftImportJobIDs(ids ...string) *RecipeUpdate {
+	_u.mutation.AddDraftImportJobIDs(ids...)
+	return _u
+}
+
+// AddDraftImportJobs adds the "draft_import_jobs" edges to the ImportJob entity.
+func (_u *RecipeUpdate) AddDraftImportJobs(v ...*ImportJob) *RecipeUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDraftImportJobIDs(ids...)
+}
+
+// AddMatchedImportJobIDs adds the "matched_import_jobs" edge to the ImportJob entity by IDs.
+func (_u *RecipeUpdate) AddMatchedImportJobIDs(ids ...string) *RecipeUpdate {
+	_u.mutation.AddMatchedImportJobIDs(ids...)
+	return _u
+}
+
+// AddMatchedImportJobs adds the "matched_import_jobs" edges to the ImportJob entity.
+func (_u *RecipeUpdate) AddMatchedImportJobs(v ...*ImportJob) *RecipeUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddMatchedImportJobIDs(ids...)
+}
+
 // Mutation returns the RecipeMutation object of the builder.
 func (_u *RecipeUpdate) Mutation() *RecipeMutation {
 	return _u.mutation
@@ -655,6 +680,48 @@ func (_u *RecipeUpdate) RemoveMediaAssets(v ...*MediaAsset) *RecipeUpdate {
 	return _u.RemoveMediaAssetIDs(ids...)
 }
 
+// ClearDraftImportJobs clears all "draft_import_jobs" edges to the ImportJob entity.
+func (_u *RecipeUpdate) ClearDraftImportJobs() *RecipeUpdate {
+	_u.mutation.ClearDraftImportJobs()
+	return _u
+}
+
+// RemoveDraftImportJobIDs removes the "draft_import_jobs" edge to ImportJob entities by IDs.
+func (_u *RecipeUpdate) RemoveDraftImportJobIDs(ids ...string) *RecipeUpdate {
+	_u.mutation.RemoveDraftImportJobIDs(ids...)
+	return _u
+}
+
+// RemoveDraftImportJobs removes "draft_import_jobs" edges to ImportJob entities.
+func (_u *RecipeUpdate) RemoveDraftImportJobs(v ...*ImportJob) *RecipeUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDraftImportJobIDs(ids...)
+}
+
+// ClearMatchedImportJobs clears all "matched_import_jobs" edges to the ImportJob entity.
+func (_u *RecipeUpdate) ClearMatchedImportJobs() *RecipeUpdate {
+	_u.mutation.ClearMatchedImportJobs()
+	return _u
+}
+
+// RemoveMatchedImportJobIDs removes the "matched_import_jobs" edge to ImportJob entities by IDs.
+func (_u *RecipeUpdate) RemoveMatchedImportJobIDs(ids ...string) *RecipeUpdate {
+	_u.mutation.RemoveMatchedImportJobIDs(ids...)
+	return _u
+}
+
+// RemoveMatchedImportJobs removes "matched_import_jobs" edges to ImportJob entities.
+func (_u *RecipeUpdate) RemoveMatchedImportJobs(v ...*ImportJob) *RecipeUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMatchedImportJobIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RecipeUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
@@ -696,6 +763,11 @@ func (_u *RecipeUpdate) check() error {
 	if v, ok := _u.mutation.Title(); ok {
 		if err := recipe.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`generated: validator failed for field "Recipe.title": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := recipe.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`generated: validator failed for field "Recipe.status": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Region(); ok {
@@ -750,6 +822,9 @@ func (_u *RecipeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(recipe.FieldDescription, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(recipe.FieldStatus, field.TypeEnum, value)
+	}
 	if value, ok := _u.mutation.SourceURL(); ok {
 		_spec.SetField(recipe.FieldSourceURL, field.TypeString, value)
 	}
@@ -758,12 +833,6 @@ func (_u *RecipeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.SourceCapturedAtCleared() {
 		_spec.ClearField(recipe.FieldSourceCapturedAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.ArchivedAt(); ok {
-		_spec.SetField(recipe.FieldArchivedAt, field.TypeTime, value)
-	}
-	if _u.mutation.ArchivedAtCleared() {
-		_spec.ClearField(recipe.FieldArchivedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.PrimaryMediaID(); ok {
 		_spec.SetField(recipe.FieldPrimaryMediaID, field.TypeString, value)
@@ -1164,6 +1233,96 @@ func (_u *RecipeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.DraftImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.DraftImportJobsTable,
+			Columns: []string{recipe.DraftImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDraftImportJobsIDs(); len(nodes) > 0 && !_u.mutation.DraftImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.DraftImportJobsTable,
+			Columns: []string{recipe.DraftImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DraftImportJobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.DraftImportJobsTable,
+			Columns: []string{recipe.DraftImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.MatchedImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.MatchedImportJobsTable,
+			Columns: []string{recipe.MatchedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedMatchedImportJobsIDs(); len(nodes) > 0 && !_u.mutation.MatchedImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.MatchedImportJobsTable,
+			Columns: []string{recipe.MatchedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MatchedImportJobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.MatchedImportJobsTable,
+			Columns: []string{recipe.MatchedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{recipe.Label}
@@ -1232,6 +1391,20 @@ func (_u *RecipeUpdateOne) SetNillableDescription(v *string) *RecipeUpdateOne {
 	return _u
 }
 
+// SetStatus sets the "status" field.
+func (_u *RecipeUpdateOne) SetStatus(v recipe.Status) *RecipeUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *RecipeUpdateOne) SetNillableStatus(v *recipe.Status) *RecipeUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
 // SetSourceURL sets the "source_url" field.
 func (_u *RecipeUpdateOne) SetSourceURL(v string) *RecipeUpdateOne {
 	_u.mutation.SetSourceURL(v)
@@ -1263,26 +1436,6 @@ func (_u *RecipeUpdateOne) SetNillableSourceCapturedAt(v *time.Time) *RecipeUpda
 // ClearSourceCapturedAt clears the value of the "source_captured_at" field.
 func (_u *RecipeUpdateOne) ClearSourceCapturedAt() *RecipeUpdateOne {
 	_u.mutation.ClearSourceCapturedAt()
-	return _u
-}
-
-// SetArchivedAt sets the "archived_at" field.
-func (_u *RecipeUpdateOne) SetArchivedAt(v time.Time) *RecipeUpdateOne {
-	_u.mutation.SetArchivedAt(v)
-	return _u
-}
-
-// SetNillableArchivedAt sets the "archived_at" field if the given value is not nil.
-func (_u *RecipeUpdateOne) SetNillableArchivedAt(v *time.Time) *RecipeUpdateOne {
-	if v != nil {
-		_u.SetArchivedAt(*v)
-	}
-	return _u
-}
-
-// ClearArchivedAt clears the value of the "archived_at" field.
-func (_u *RecipeUpdateOne) ClearArchivedAt() *RecipeUpdateOne {
-	_u.mutation.ClearArchivedAt()
 	return _u
 }
 
@@ -1666,6 +1819,36 @@ func (_u *RecipeUpdateOne) AddMediaAssets(v ...*MediaAsset) *RecipeUpdateOne {
 	return _u.AddMediaAssetIDs(ids...)
 }
 
+// AddDraftImportJobIDs adds the "draft_import_jobs" edge to the ImportJob entity by IDs.
+func (_u *RecipeUpdateOne) AddDraftImportJobIDs(ids ...string) *RecipeUpdateOne {
+	_u.mutation.AddDraftImportJobIDs(ids...)
+	return _u
+}
+
+// AddDraftImportJobs adds the "draft_import_jobs" edges to the ImportJob entity.
+func (_u *RecipeUpdateOne) AddDraftImportJobs(v ...*ImportJob) *RecipeUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDraftImportJobIDs(ids...)
+}
+
+// AddMatchedImportJobIDs adds the "matched_import_jobs" edge to the ImportJob entity by IDs.
+func (_u *RecipeUpdateOne) AddMatchedImportJobIDs(ids ...string) *RecipeUpdateOne {
+	_u.mutation.AddMatchedImportJobIDs(ids...)
+	return _u
+}
+
+// AddMatchedImportJobs adds the "matched_import_jobs" edges to the ImportJob entity.
+func (_u *RecipeUpdateOne) AddMatchedImportJobs(v ...*ImportJob) *RecipeUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddMatchedImportJobIDs(ids...)
+}
+
 // Mutation returns the RecipeMutation object of the builder.
 func (_u *RecipeUpdateOne) Mutation() *RecipeMutation {
 	return _u.mutation
@@ -1803,6 +1986,48 @@ func (_u *RecipeUpdateOne) RemoveMediaAssets(v ...*MediaAsset) *RecipeUpdateOne 
 	return _u.RemoveMediaAssetIDs(ids...)
 }
 
+// ClearDraftImportJobs clears all "draft_import_jobs" edges to the ImportJob entity.
+func (_u *RecipeUpdateOne) ClearDraftImportJobs() *RecipeUpdateOne {
+	_u.mutation.ClearDraftImportJobs()
+	return _u
+}
+
+// RemoveDraftImportJobIDs removes the "draft_import_jobs" edge to ImportJob entities by IDs.
+func (_u *RecipeUpdateOne) RemoveDraftImportJobIDs(ids ...string) *RecipeUpdateOne {
+	_u.mutation.RemoveDraftImportJobIDs(ids...)
+	return _u
+}
+
+// RemoveDraftImportJobs removes "draft_import_jobs" edges to ImportJob entities.
+func (_u *RecipeUpdateOne) RemoveDraftImportJobs(v ...*ImportJob) *RecipeUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDraftImportJobIDs(ids...)
+}
+
+// ClearMatchedImportJobs clears all "matched_import_jobs" edges to the ImportJob entity.
+func (_u *RecipeUpdateOne) ClearMatchedImportJobs() *RecipeUpdateOne {
+	_u.mutation.ClearMatchedImportJobs()
+	return _u
+}
+
+// RemoveMatchedImportJobIDs removes the "matched_import_jobs" edge to ImportJob entities by IDs.
+func (_u *RecipeUpdateOne) RemoveMatchedImportJobIDs(ids ...string) *RecipeUpdateOne {
+	_u.mutation.RemoveMatchedImportJobIDs(ids...)
+	return _u
+}
+
+// RemoveMatchedImportJobs removes "matched_import_jobs" edges to ImportJob entities.
+func (_u *RecipeUpdateOne) RemoveMatchedImportJobs(v ...*ImportJob) *RecipeUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMatchedImportJobIDs(ids...)
+}
+
 // Where appends a list predicates to the RecipeUpdate builder.
 func (_u *RecipeUpdateOne) Where(ps ...predicate.Recipe) *RecipeUpdateOne {
 	_u.mutation.Where(ps...)
@@ -1857,6 +2082,11 @@ func (_u *RecipeUpdateOne) check() error {
 	if v, ok := _u.mutation.Title(); ok {
 		if err := recipe.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`generated: validator failed for field "Recipe.title": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := recipe.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`generated: validator failed for field "Recipe.status": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Region(); ok {
@@ -1928,6 +2158,9 @@ func (_u *RecipeUpdateOne) sqlSave(ctx context.Context) (_node *Recipe, err erro
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(recipe.FieldDescription, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(recipe.FieldStatus, field.TypeEnum, value)
+	}
 	if value, ok := _u.mutation.SourceURL(); ok {
 		_spec.SetField(recipe.FieldSourceURL, field.TypeString, value)
 	}
@@ -1936,12 +2169,6 @@ func (_u *RecipeUpdateOne) sqlSave(ctx context.Context) (_node *Recipe, err erro
 	}
 	if _u.mutation.SourceCapturedAtCleared() {
 		_spec.ClearField(recipe.FieldSourceCapturedAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.ArchivedAt(); ok {
-		_spec.SetField(recipe.FieldArchivedAt, field.TypeTime, value)
-	}
-	if _u.mutation.ArchivedAtCleared() {
-		_spec.ClearField(recipe.FieldArchivedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.PrimaryMediaID(); ok {
 		_spec.SetField(recipe.FieldPrimaryMediaID, field.TypeString, value)
@@ -2335,6 +2562,96 @@ func (_u *RecipeUpdateOne) sqlSave(ctx context.Context) (_node *Recipe, err erro
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediaasset.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DraftImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.DraftImportJobsTable,
+			Columns: []string{recipe.DraftImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDraftImportJobsIDs(); len(nodes) > 0 && !_u.mutation.DraftImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.DraftImportJobsTable,
+			Columns: []string{recipe.DraftImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DraftImportJobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.DraftImportJobsTable,
+			Columns: []string{recipe.DraftImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.MatchedImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.MatchedImportJobsTable,
+			Columns: []string{recipe.MatchedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedMatchedImportJobsIDs(); len(nodes) > 0 && !_u.mutation.MatchedImportJobsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.MatchedImportJobsTable,
+			Columns: []string{recipe.MatchedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MatchedImportJobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.MatchedImportJobsTable,
+			Columns: []string{recipe.MatchedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

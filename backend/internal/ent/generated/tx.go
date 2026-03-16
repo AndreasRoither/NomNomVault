@@ -16,6 +16,8 @@ type Tx struct {
 	Household *HouseholdClient
 	// HouseholdMember is the client for interacting with the HouseholdMember builders.
 	HouseholdMember *HouseholdMemberClient
+	// ImportJob is the client for interacting with the ImportJob builders.
+	ImportJob *ImportJobClient
 	// MediaAsset is the client for interacting with the MediaAsset builders.
 	MediaAsset *MediaAssetClient
 	// Recipe is the client for interacting with the Recipe builders.
@@ -30,6 +32,8 @@ type Tx struct {
 	RecipeStep *RecipeStepClient
 	// RefreshSession is the client for interacting with the RefreshSession builders.
 	RefreshSession *RefreshSessionClient
+	// SourceRecord is the client for interacting with the SourceRecord builders.
+	SourceRecord *SourceRecordClient
 	// StoredObject is the client for interacting with the StoredObject builders.
 	StoredObject *StoredObjectClient
 	// Tag is the client for interacting with the Tag builders.
@@ -169,6 +173,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Household = NewHouseholdClient(tx.config)
 	tx.HouseholdMember = NewHouseholdMemberClient(tx.config)
+	tx.ImportJob = NewImportJobClient(tx.config)
 	tx.MediaAsset = NewMediaAssetClient(tx.config)
 	tx.Recipe = NewRecipeClient(tx.config)
 	tx.RecipeIngredient = NewRecipeIngredientClient(tx.config)
@@ -176,6 +181,7 @@ func (tx *Tx) init() {
 	tx.RecipeShare = NewRecipeShareClient(tx.config)
 	tx.RecipeStep = NewRecipeStepClient(tx.config)
 	tx.RefreshSession = NewRefreshSessionClient(tx.config)
+	tx.SourceRecord = NewSourceRecordClient(tx.config)
 	tx.StoredObject = NewStoredObjectClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
 	tx.User = NewUserClient(tx.config)

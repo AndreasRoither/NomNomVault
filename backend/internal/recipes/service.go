@@ -61,12 +61,17 @@ func (s *Service) ListRecipes(ctx context.Context, in ListRecipesInput) (RecipeL
 	query := s.db.Recipe.Query().
 		Where(
 			recipe.HouseholdIDEQ(in.HouseholdID),
-			recipe.ArchivedAtIsNil(),
 		).
 		Order(
 			entgen.Desc(recipe.FieldUpdatedAt),
 			entgen.Desc(recipe.FieldID),
 		)
+
+	if in.IncludeDrafts {
+		query.Where(recipe.StatusIn(recipe.StatusPublished, recipe.StatusDraft))
+	} else {
+		query.Where(recipe.StatusEQ(recipe.StatusPublished))
+	}
 
 	if searchQuery := strings.TrimSpace(in.Query); searchQuery != "" {
 		query.Where(recipe.Or(
@@ -143,6 +148,7 @@ func (s *Service) CreateRecipe(ctx context.Context, in CreateRecipeInput) (Creat
 		SetHouseholdID(in.HouseholdID).
 		SetTitle(strings.TrimSpace(in.Title)).
 		SetDescription(strings.TrimSpace(in.Description)).
+		SetStatus(recipe.StatusPublished).
 		SetSourceURL(strings.TrimSpace(in.SourceURL))
 
 	if in.PrepMinutes != nil {
@@ -320,12 +326,15 @@ func (s *Service) ArchiveRecipe(ctx context.Context, in ArchiveRecipeInput) erro
 		return fmt.Errorf("query recipe for archive: %w", err)
 	}
 
-	if entity.ArchivedAt != nil {
+	if entity.Status == recipe.StatusArchived {
 		return nil
+	}
+	if entity.Status == recipe.StatusDraft {
+		return httpx.StatusError{Status: http.StatusConflict, Code: "draft_cannot_be_archived", Message: "Draft recipes must be discarded instead of archived."}
 	}
 
 	if _, err := s.db.Recipe.UpdateOneID(entity.ID).
-		SetArchivedAt(s.clock.Now()).
+		SetStatus(recipe.StatusArchived).
 		SetVersion(entity.Version + 1).
 		Save(ctx); err != nil {
 		return fmt.Errorf("archive recipe: %w", err)
@@ -354,12 +363,15 @@ func (s *Service) UnarchiveRecipe(ctx context.Context, in ArchiveRecipeInput) er
 		return fmt.Errorf("query recipe for unarchive: %w", err)
 	}
 
-	if entity.ArchivedAt == nil {
+	if entity.Status == recipe.StatusPublished {
 		return nil
+	}
+	if entity.Status == recipe.StatusDraft {
+		return httpx.StatusError{Status: http.StatusConflict, Code: "draft_cannot_be_unarchived", Message: "Draft recipes cannot be unarchived."}
 	}
 
 	if _, err := s.db.Recipe.UpdateOneID(entity.ID).
-		ClearArchivedAt().
+		SetStatus(recipe.StatusPublished).
 		SetVersion(entity.Version + 1).
 		Save(ctx); err != nil {
 		return fmt.Errorf("unarchive recipe: %w", err)
@@ -948,6 +960,7 @@ func mapRecipeSummary(entity *entgen.Recipe) RecipeSummaryView {
 		ID:               entity.ID,
 		Title:            entity.Title,
 		Description:      entity.Description,
+		Status:           string(entity.Status),
 		SourceURL:        entity.SourceURL,
 		SourceCapturedAt: entity.SourceCapturedAt,
 		PrimaryMediaID:   entity.PrimaryMediaID,

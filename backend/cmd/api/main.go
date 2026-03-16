@@ -17,9 +17,11 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 
 	authhttpapi "github.com/AndreasRoither/NomNomVault/backend/internal/api/httpapi/auth"
+	importshttpapi "github.com/AndreasRoither/NomNomVault/backend/internal/api/httpapi/imports"
 	recipeshttpapi "github.com/AndreasRoither/NomNomVault/backend/internal/api/httpapi/recipes"
 	authsvc "github.com/AndreasRoither/NomNomVault/backend/internal/auth"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent"
+	importsvc "github.com/AndreasRoither/NomNomVault/backend/internal/imports"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/platform/clock"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/platform/config"
 	corsmiddleware "github.com/AndreasRoither/NomNomVault/backend/internal/platform/cors"
@@ -56,6 +58,7 @@ func main() {
 	csrf := authsvc.NewCSRFManager(cfg.AuthCSRFSecret)
 	cookies := authsvc.NewCookieManager(cfg.CookieSecure)
 	authService := authsvc.NewService(db, clock.RealClock{}, signer, csrf)
+	importService := importsvc.NewService(db, clock.RealClock{})
 	recipeService := recipesvc.NewService(db, storage.NewPostgresStore(db), clock.RealClock{})
 	loginLimiter := ratelimit.New(cfg.AuthLoginRateLimitPerMinute, time.Minute)
 	refreshLimiter := ratelimit.New(cfg.AuthRefreshRateLimitPerMinute, time.Minute)
@@ -63,6 +66,12 @@ func main() {
 	apiV1 := router.Group("/api/v1")
 	apiV1.GET("/healthz", healthz)
 	authhttpapi.RegisterRoutes(apiV1, authService, cookies, csrf, loginLimiter, refreshLimiter)
+	importshttpapi.RegisterRoutes(
+		apiV1,
+		importService,
+		authsvc.Middleware(signer, cookies),
+		authsvc.CSRFMiddleware(csrf),
+	)
 	recipeshttpapi.RegisterRoutes(
 		apiV1,
 		recipeService,

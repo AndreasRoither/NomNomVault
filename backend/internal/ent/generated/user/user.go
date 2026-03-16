@@ -35,6 +35,8 @@ const (
 	EdgeMemberships = "memberships"
 	// EdgeRecipeShares holds the string denoting the recipe_shares edge name in mutations.
 	EdgeRecipeShares = "recipe_shares"
+	// EdgeRequestedImportJobs holds the string denoting the requested_import_jobs edge name in mutations.
+	EdgeRequestedImportJobs = "requested_import_jobs"
 	// EdgeRefreshSessions holds the string denoting the refresh_sessions edge name in mutations.
 	EdgeRefreshSessions = "refresh_sessions"
 	// Table holds the table name of the user in the database.
@@ -53,6 +55,13 @@ const (
 	RecipeSharesInverseTable = "recipe_shares"
 	// RecipeSharesColumn is the table column denoting the recipe_shares relation/edge.
 	RecipeSharesColumn = "created_by_user_id"
+	// RequestedImportJobsTable is the table that holds the requested_import_jobs relation/edge.
+	RequestedImportJobsTable = "import_jobs"
+	// RequestedImportJobsInverseTable is the table name for the ImportJob entity.
+	// It exists in this package in order to avoid circular dependency with the "importjob" package.
+	RequestedImportJobsInverseTable = "import_jobs"
+	// RequestedImportJobsColumn is the table column denoting the requested_import_jobs relation/edge.
+	RequestedImportJobsColumn = "requested_by_user_id"
 	// RefreshSessionsTable is the table that holds the refresh_sessions relation/edge.
 	RefreshSessionsTable = "refresh_sessions"
 	// RefreshSessionsInverseTable is the table name for the RefreshSession entity.
@@ -206,6 +215,20 @@ func ByRecipeShares(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByRequestedImportJobsCount orders the results by requested_import_jobs count.
+func ByRequestedImportJobsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRequestedImportJobsStep(), opts...)
+	}
+}
+
+// ByRequestedImportJobs orders the results by requested_import_jobs terms.
+func ByRequestedImportJobs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRequestedImportJobsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByRefreshSessionsCount orders the results by refresh_sessions count.
 func ByRefreshSessionsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -231,6 +254,13 @@ func newRecipeSharesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(RecipeSharesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, RecipeSharesTable, RecipeSharesColumn),
+	)
+}
+func newRequestedImportJobsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RequestedImportJobsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, RequestedImportJobsTable, RequestedImportJobsColumn),
 	)
 }
 func newRefreshSessionsStep() *sqlgraph.Step {

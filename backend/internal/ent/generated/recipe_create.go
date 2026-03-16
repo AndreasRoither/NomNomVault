@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/importjob"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeingredient"
@@ -81,6 +82,20 @@ func (_c *RecipeCreate) SetNillableDescription(v *string) *RecipeCreate {
 	return _c
 }
 
+// SetStatus sets the "status" field.
+func (_c *RecipeCreate) SetStatus(v recipe.Status) *RecipeCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *RecipeCreate) SetNillableStatus(v *recipe.Status) *RecipeCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
 // SetSourceURL sets the "source_url" field.
 func (_c *RecipeCreate) SetSourceURL(v string) *RecipeCreate {
 	_c.mutation.SetSourceURL(v)
@@ -105,20 +120,6 @@ func (_c *RecipeCreate) SetSourceCapturedAt(v time.Time) *RecipeCreate {
 func (_c *RecipeCreate) SetNillableSourceCapturedAt(v *time.Time) *RecipeCreate {
 	if v != nil {
 		_c.SetSourceCapturedAt(*v)
-	}
-	return _c
-}
-
-// SetArchivedAt sets the "archived_at" field.
-func (_c *RecipeCreate) SetArchivedAt(v time.Time) *RecipeCreate {
-	_c.mutation.SetArchivedAt(v)
-	return _c
-}
-
-// SetNillableArchivedAt sets the "archived_at" field if the given value is not nil.
-func (_c *RecipeCreate) SetNillableArchivedAt(v *time.Time) *RecipeCreate {
-	if v != nil {
-		_c.SetArchivedAt(*v)
 	}
 	return _c
 }
@@ -398,6 +399,36 @@ func (_c *RecipeCreate) AddMediaAssets(v ...*MediaAsset) *RecipeCreate {
 	return _c.AddMediaAssetIDs(ids...)
 }
 
+// AddDraftImportJobIDs adds the "draft_import_jobs" edge to the ImportJob entity by IDs.
+func (_c *RecipeCreate) AddDraftImportJobIDs(ids ...string) *RecipeCreate {
+	_c.mutation.AddDraftImportJobIDs(ids...)
+	return _c
+}
+
+// AddDraftImportJobs adds the "draft_import_jobs" edges to the ImportJob entity.
+func (_c *RecipeCreate) AddDraftImportJobs(v ...*ImportJob) *RecipeCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddDraftImportJobIDs(ids...)
+}
+
+// AddMatchedImportJobIDs adds the "matched_import_jobs" edge to the ImportJob entity by IDs.
+func (_c *RecipeCreate) AddMatchedImportJobIDs(ids ...string) *RecipeCreate {
+	_c.mutation.AddMatchedImportJobIDs(ids...)
+	return _c
+}
+
+// AddMatchedImportJobs adds the "matched_import_jobs" edges to the ImportJob entity.
+func (_c *RecipeCreate) AddMatchedImportJobs(v ...*ImportJob) *RecipeCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddMatchedImportJobIDs(ids...)
+}
+
 // Mutation returns the RecipeMutation object of the builder.
 func (_c *RecipeCreate) Mutation() *RecipeMutation {
 	return _c.mutation
@@ -445,6 +476,10 @@ func (_c *RecipeCreate) defaults() {
 		v := recipe.DefaultDescription
 		_c.mutation.SetDescription(v)
 	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := recipe.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
 	if _, ok := _c.mutation.SourceURL(); !ok {
 		v := recipe.DefaultSourceURL
 		_c.mutation.SetSourceURL(v)
@@ -484,6 +519,14 @@ func (_c *RecipeCreate) check() error {
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`generated: missing required field "Recipe.description"`)}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`generated: missing required field "Recipe.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := recipe.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`generated: validator failed for field "Recipe.status": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.SourceURL(); !ok {
 		return &ValidationError{Name: "source_url", err: errors.New(`generated: missing required field "Recipe.source_url"`)}
@@ -570,6 +613,10 @@ func (_c *RecipeCreate) createSpec() (*Recipe, *sqlgraph.CreateSpec) {
 		_spec.SetField(recipe.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(recipe.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
+	}
 	if value, ok := _c.mutation.SourceURL(); ok {
 		_spec.SetField(recipe.FieldSourceURL, field.TypeString, value)
 		_node.SourceURL = value
@@ -577,10 +624,6 @@ func (_c *RecipeCreate) createSpec() (*Recipe, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.SourceCapturedAt(); ok {
 		_spec.SetField(recipe.FieldSourceCapturedAt, field.TypeTime, value)
 		_node.SourceCapturedAt = &value
-	}
-	if value, ok := _c.mutation.ArchivedAt(); ok {
-		_spec.SetField(recipe.FieldArchivedAt, field.TypeTime, value)
-		_node.ArchivedAt = &value
 	}
 	if value, ok := _c.mutation.PrimaryMediaID(); ok {
 		_spec.SetField(recipe.FieldPrimaryMediaID, field.TypeString, value)
@@ -740,6 +783,38 @@ func (_c *RecipeCreate) createSpec() (*Recipe, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediaasset.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.DraftImportJobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.DraftImportJobsTable,
+			Columns: []string{recipe.DraftImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.MatchedImportJobsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   recipe.MatchedImportJobsTable,
+			Columns: []string{recipe.MatchedImportJobsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(importjob.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -61,6 +61,92 @@ var (
 			},
 		},
 	}
+	// ImportJobsColumns holds the columns for the "import_jobs" table.
+	ImportJobsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "import_kind", Type: field.TypeEnum, Enums: []string{"url", "raw_text", "ocr"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"queued", "fetching", "parsing", "needs_review", "conflict_detected", "completed", "failed", "cancelled"}, Default: "queued"},
+		{Name: "idempotency_key", Type: field.TypeString, Nullable: true},
+		{Name: "active_idempotency_key", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "active_fingerprint_key", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "fallback_fingerprint", Type: field.TypeString},
+		{Name: "normalized_payload_json", Type: field.TypeJSON, Nullable: true},
+		{Name: "conflict_state", Type: field.TypeEnum, Enums: []string{"none", "possible_duplicate", "requires_merge_decision"}, Default: "none"},
+		{Name: "warnings_json", Type: field.TypeJSON, Nullable: true},
+		{Name: "confidence_score", Type: field.TypeFloat64, Nullable: true},
+		{Name: "error_code", Type: field.TypeString, Nullable: true},
+		{Name: "error_message", Type: field.TypeString, Nullable: true},
+		{Name: "attempt_count", Type: field.TypeInt, Default: 1},
+		{Name: "started_at", Type: field.TypeTime, Nullable: true},
+		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
+		{Name: "household_id", Type: field.TypeString},
+		{Name: "draft_recipe_id", Type: field.TypeString, Nullable: true},
+		{Name: "match_recipe_id", Type: field.TypeString, Nullable: true},
+		{Name: "source_record_id", Type: field.TypeString},
+		{Name: "requested_by_user_id", Type: field.TypeString},
+	}
+	// ImportJobsTable holds the schema information for the "import_jobs" table.
+	ImportJobsTable = &schema.Table{
+		Name:       "import_jobs",
+		Columns:    ImportJobsColumns,
+		PrimaryKey: []*schema.Column{ImportJobsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "import_jobs_households_import_jobs",
+				Columns:    []*schema.Column{ImportJobsColumns[18]},
+				RefColumns: []*schema.Column{HouseholdsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "import_jobs_recipes_draft_import_jobs",
+				Columns:    []*schema.Column{ImportJobsColumns[19]},
+				RefColumns: []*schema.Column{RecipesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "import_jobs_recipes_matched_import_jobs",
+				Columns:    []*schema.Column{ImportJobsColumns[20]},
+				RefColumns: []*schema.Column{RecipesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "import_jobs_source_records_import_jobs",
+				Columns:    []*schema.Column{ImportJobsColumns[21]},
+				RefColumns: []*schema.Column{SourceRecordsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "import_jobs_users_requested_import_jobs",
+				Columns:    []*schema.Column{ImportJobsColumns[22]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "importjob_household_id_requested_by_user_id_import_kind_idempotency_key",
+				Unique:  false,
+				Columns: []*schema.Column{ImportJobsColumns[18], ImportJobsColumns[22], ImportJobsColumns[3], ImportJobsColumns[5]},
+			},
+			{
+				Name:    "importjob_household_id_import_kind_fallback_fingerprint",
+				Unique:  false,
+				Columns: []*schema.Column{ImportJobsColumns[18], ImportJobsColumns[3], ImportJobsColumns[8]},
+			},
+			{
+				Name:    "importjob_household_id_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{ImportJobsColumns[18], ImportJobsColumns[4], ImportJobsColumns[1]},
+			},
+			{
+				Name:    "importjob_source_record_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{ImportJobsColumns[21], ImportJobsColumns[1]},
+			},
+		},
+	}
 	// MediaAssetsColumns holds the columns for the "media_assets" table.
 	MediaAssetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -125,9 +211,9 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"draft", "published", "archived"}, Default: "published"},
 		{Name: "source_url", Type: field.TypeString, Default: ""},
 		{Name: "source_captured_at", Type: field.TypeTime, Nullable: true},
-		{Name: "archived_at", Type: field.TypeTime, Nullable: true},
 		{Name: "primary_media_id", Type: field.TypeString, Nullable: true},
 		{Name: "gallery_media_ids", Type: field.TypeJSON, Nullable: true},
 		{Name: "prep_minutes", Type: field.TypeInt, Nullable: true},
@@ -370,6 +456,55 @@ var (
 			},
 		},
 	}
+	// SourceRecordsColumns holds the columns for the "source_records" table.
+	SourceRecordsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "source_type", Type: field.TypeEnum, Enums: []string{"url", "raw_text", "html", "media"}},
+		{Name: "import_kind", Type: field.TypeEnum, Enums: []string{"url", "raw_text", "ocr"}},
+		{Name: "submitted_url", Type: field.TypeString, Nullable: true},
+		{Name: "normalized_url", Type: field.TypeString, Nullable: true},
+		{Name: "canonical_url", Type: field.TypeString, Nullable: true},
+		{Name: "title_hint", Type: field.TypeString, Nullable: true},
+		{Name: "content_hash", Type: field.TypeString, Nullable: true},
+		{Name: "metadata_json", Type: field.TypeJSON, Nullable: true},
+		{Name: "retention_state", Type: field.TypeEnum, Enums: []string{"retained", "pending_cleanup", "cleaned"}, Default: "retained"},
+		{Name: "household_id", Type: field.TypeString},
+		{Name: "raw_snapshot_storage_object_id", Type: field.TypeString, Nullable: true},
+	}
+	// SourceRecordsTable holds the schema information for the "source_records" table.
+	SourceRecordsTable = &schema.Table{
+		Name:       "source_records",
+		Columns:    SourceRecordsColumns,
+		PrimaryKey: []*schema.Column{SourceRecordsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "source_records_households_source_records",
+				Columns:    []*schema.Column{SourceRecordsColumns[12]},
+				RefColumns: []*schema.Column{HouseholdsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "source_records_stored_objects_source_records",
+				Columns:    []*schema.Column{SourceRecordsColumns[13]},
+				RefColumns: []*schema.Column{StoredObjectsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "sourcerecord_household_id_import_kind_normalized_url",
+				Unique:  false,
+				Columns: []*schema.Column{SourceRecordsColumns[12], SourceRecordsColumns[4], SourceRecordsColumns[6]},
+			},
+			{
+				Name:    "sourcerecord_household_id_import_kind_content_hash",
+				Unique:  false,
+				Columns: []*schema.Column{SourceRecordsColumns[12], SourceRecordsColumns[4], SourceRecordsColumns[9]},
+			},
+		},
+	}
 	// StoredObjectsColumns holds the columns for the "stored_objects" table.
 	StoredObjectsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -482,6 +617,7 @@ var (
 	Tables = []*schema.Table{
 		HouseholdsTable,
 		HouseholdMembersTable,
+		ImportJobsTable,
 		MediaAssetsTable,
 		RecipesTable,
 		RecipeIngredientsTable,
@@ -489,6 +625,7 @@ var (
 		RecipeSharesTable,
 		RecipeStepsTable,
 		RefreshSessionsTable,
+		SourceRecordsTable,
 		StoredObjectsTable,
 		TagsTable,
 		UsersTable,
@@ -499,6 +636,11 @@ var (
 func init() {
 	HouseholdMembersTable.ForeignKeys[0].RefTable = HouseholdsTable
 	HouseholdMembersTable.ForeignKeys[1].RefTable = UsersTable
+	ImportJobsTable.ForeignKeys[0].RefTable = HouseholdsTable
+	ImportJobsTable.ForeignKeys[1].RefTable = RecipesTable
+	ImportJobsTable.ForeignKeys[2].RefTable = RecipesTable
+	ImportJobsTable.ForeignKeys[3].RefTable = SourceRecordsTable
+	ImportJobsTable.ForeignKeys[4].RefTable = UsersTable
 	MediaAssetsTable.ForeignKeys[0].RefTable = HouseholdsTable
 	MediaAssetsTable.ForeignKeys[1].RefTable = RecipesTable
 	MediaAssetsTable.ForeignKeys[2].RefTable = StoredObjectsTable
@@ -514,6 +656,8 @@ func init() {
 	RecipeStepsTable.ForeignKeys[0].RefTable = RecipesTable
 	RefreshSessionsTable.ForeignKeys[0].RefTable = HouseholdsTable
 	RefreshSessionsTable.ForeignKeys[1].RefTable = UsersTable
+	SourceRecordsTable.ForeignKeys[0].RefTable = HouseholdsTable
+	SourceRecordsTable.ForeignKeys[1].RefTable = StoredObjectsTable
 	StoredObjectsTable.ForeignKeys[0].RefTable = HouseholdsTable
 	TagsTable.ForeignKeys[0].RefTable = HouseholdsTable
 	RecipeTagsTable.ForeignKeys[0].RefTable = RecipesTable
