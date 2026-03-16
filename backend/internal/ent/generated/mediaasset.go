@@ -30,6 +30,8 @@ type MediaAsset struct {
 	RecipeID *string `json:"recipe_id,omitempty"`
 	// StorageObjectID holds the value of the "storage_object_id" field.
 	StorageObjectID string `json:"storage_object_id,omitempty"`
+	// ThumbnailStorageObjectID holds the value of the "thumbnail_storage_object_id" field.
+	ThumbnailStorageObjectID *string `json:"thumbnail_storage_object_id,omitempty"`
 	// OriginalFilename holds the value of the "original_filename" field.
 	OriginalFilename string `json:"original_filename,omitempty"`
 	// MimeType holds the value of the "mime_type" field.
@@ -60,9 +62,11 @@ type MediaAssetEdges struct {
 	Recipe *Recipe `json:"recipe,omitempty"`
 	// StorageObject holds the value of the storage_object edge.
 	StorageObject *StoredObject `json:"storage_object,omitempty"`
+	// ThumbnailStorageObject holds the value of the thumbnail_storage_object edge.
+	ThumbnailStorageObject *StoredObject `json:"thumbnail_storage_object,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // HouseholdOrErr returns the Household value or an error if the edge
@@ -98,6 +102,17 @@ func (e MediaAssetEdges) StorageObjectOrErr() (*StoredObject, error) {
 	return nil, &NotLoadedError{edge: "storage_object"}
 }
 
+// ThumbnailStorageObjectOrErr returns the ThumbnailStorageObject value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MediaAssetEdges) ThumbnailStorageObjectOrErr() (*StoredObject, error) {
+	if e.ThumbnailStorageObject != nil {
+		return e.ThumbnailStorageObject, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: storedobject.Label}
+	}
+	return nil, &NotLoadedError{edge: "thumbnail_storage_object"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*MediaAsset) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -105,7 +120,7 @@ func (*MediaAsset) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case mediaasset.FieldSizeBytes, mediaasset.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
-		case mediaasset.FieldID, mediaasset.FieldHouseholdID, mediaasset.FieldRecipeID, mediaasset.FieldStorageObjectID, mediaasset.FieldOriginalFilename, mediaasset.FieldMimeType, mediaasset.FieldMediaType, mediaasset.FieldChecksum, mediaasset.FieldAltText:
+		case mediaasset.FieldID, mediaasset.FieldHouseholdID, mediaasset.FieldRecipeID, mediaasset.FieldStorageObjectID, mediaasset.FieldThumbnailStorageObjectID, mediaasset.FieldOriginalFilename, mediaasset.FieldMimeType, mediaasset.FieldMediaType, mediaasset.FieldChecksum, mediaasset.FieldAltText:
 			values[i] = new(sql.NullString)
 		case mediaasset.FieldCreatedAt, mediaasset.FieldUpdatedAt, mediaasset.FieldStoredAt:
 			values[i] = new(sql.NullTime)
@@ -160,6 +175,13 @@ func (_m *MediaAsset) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field storage_object_id", values[i])
 			} else if value.Valid {
 				_m.StorageObjectID = value.String
+			}
+		case mediaasset.FieldThumbnailStorageObjectID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field thumbnail_storage_object_id", values[i])
+			} else if value.Valid {
+				_m.ThumbnailStorageObjectID = new(string)
+				*_m.ThumbnailStorageObjectID = value.String
 			}
 		case mediaasset.FieldOriginalFilename:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -237,6 +259,11 @@ func (_m *MediaAsset) QueryStorageObject() *StoredObjectQuery {
 	return NewMediaAssetClient(_m.config).QueryStorageObject(_m)
 }
 
+// QueryThumbnailStorageObject queries the "thumbnail_storage_object" edge of the MediaAsset entity.
+func (_m *MediaAsset) QueryThumbnailStorageObject() *StoredObjectQuery {
+	return NewMediaAssetClient(_m.config).QueryThumbnailStorageObject(_m)
+}
+
 // Update returns a builder for updating this MediaAsset.
 // Note that you need to call MediaAsset.Unwrap() before calling this method if this MediaAsset
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -276,6 +303,11 @@ func (_m *MediaAsset) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("storage_object_id=")
 	builder.WriteString(_m.StorageObjectID)
+	builder.WriteString(", ")
+	if v := _m.ThumbnailStorageObjectID; v != nil {
+		builder.WriteString("thumbnail_storage_object_id=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("original_filename=")
 	builder.WriteString(_m.OriginalFilename)

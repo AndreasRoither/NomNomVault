@@ -25,6 +25,8 @@ const (
 	FieldRecipeID = "recipe_id"
 	// FieldStorageObjectID holds the string denoting the storage_object_id field in the database.
 	FieldStorageObjectID = "storage_object_id"
+	// FieldThumbnailStorageObjectID holds the string denoting the thumbnail_storage_object_id field in the database.
+	FieldThumbnailStorageObjectID = "thumbnail_storage_object_id"
 	// FieldOriginalFilename holds the string denoting the original_filename field in the database.
 	FieldOriginalFilename = "original_filename"
 	// FieldMimeType holds the string denoting the mime_type field in the database.
@@ -47,6 +49,8 @@ const (
 	EdgeRecipe = "recipe"
 	// EdgeStorageObject holds the string denoting the storage_object edge name in mutations.
 	EdgeStorageObject = "storage_object"
+	// EdgeThumbnailStorageObject holds the string denoting the thumbnail_storage_object edge name in mutations.
+	EdgeThumbnailStorageObject = "thumbnail_storage_object"
 	// Table holds the table name of the mediaasset in the database.
 	Table = "media_assets"
 	// HouseholdTable is the table that holds the household relation/edge.
@@ -70,6 +74,13 @@ const (
 	StorageObjectInverseTable = "stored_objects"
 	// StorageObjectColumn is the table column denoting the storage_object relation/edge.
 	StorageObjectColumn = "storage_object_id"
+	// ThumbnailStorageObjectTable is the table that holds the thumbnail_storage_object relation/edge.
+	ThumbnailStorageObjectTable = "media_assets"
+	// ThumbnailStorageObjectInverseTable is the table name for the StoredObject entity.
+	// It exists in this package in order to avoid circular dependency with the "storedobject" package.
+	ThumbnailStorageObjectInverseTable = "stored_objects"
+	// ThumbnailStorageObjectColumn is the table column denoting the thumbnail_storage_object relation/edge.
+	ThumbnailStorageObjectColumn = "thumbnail_storage_object_id"
 )
 
 // Columns holds all SQL columns for mediaasset fields.
@@ -80,6 +91,7 @@ var Columns = []string{
 	FieldHouseholdID,
 	FieldRecipeID,
 	FieldStorageObjectID,
+	FieldThumbnailStorageObjectID,
 	FieldOriginalFilename,
 	FieldMimeType,
 	FieldMediaType,
@@ -181,6 +193,11 @@ func ByStorageObjectID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStorageObjectID, opts...).ToFunc()
 }
 
+// ByThumbnailStorageObjectID orders the results by the thumbnail_storage_object_id field.
+func ByThumbnailStorageObjectID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldThumbnailStorageObjectID, opts...).ToFunc()
+}
+
 // ByOriginalFilename orders the results by the original_filename field.
 func ByOriginalFilename(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOriginalFilename, opts...).ToFunc()
@@ -241,6 +258,13 @@ func ByStorageObjectField(field string, opts ...sql.OrderTermOption) OrderOption
 		sqlgraph.OrderByNeighborTerms(s, newStorageObjectStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByThumbnailStorageObjectField orders the results by thumbnail_storage_object field.
+func ByThumbnailStorageObjectField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newThumbnailStorageObjectStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newHouseholdStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -260,5 +284,12 @@ func newStorageObjectStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(StorageObjectInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, StorageObjectTable, StorageObjectColumn),
+	)
+}
+func newThumbnailStorageObjectStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ThumbnailStorageObjectInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ThumbnailStorageObjectTable, ThumbnailStorageObjectColumn),
 	)
 }

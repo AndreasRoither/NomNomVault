@@ -571,6 +571,29 @@ func HasMediaAssetsWith(preds ...predicate.MediaAsset) predicate.StoredObject {
 	})
 }
 
+// HasThumbnailMediaAssets applies the HasEdge predicate on the "thumbnail_media_assets" edge.
+func HasThumbnailMediaAssets() predicate.StoredObject {
+	return predicate.StoredObject(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ThumbnailMediaAssetsTable, ThumbnailMediaAssetsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasThumbnailMediaAssetsWith applies the HasEdge predicate on the "thumbnail_media_assets" edge with a given conditions (other predicates).
+func HasThumbnailMediaAssetsWith(preds ...predicate.MediaAsset) predicate.StoredObject {
+	return predicate.StoredObject(func(s *sql.Selector) {
+		step := newThumbnailMediaAssetsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.StoredObject) predicate.StoredObject {
 	return predicate.StoredObject(sql.AndPredicates(predicates...))

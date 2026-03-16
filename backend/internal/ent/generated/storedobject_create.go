@@ -120,6 +120,21 @@ func (_c *StoredObjectCreate) AddMediaAssets(v ...*MediaAsset) *StoredObjectCrea
 	return _c.AddMediaAssetIDs(ids...)
 }
 
+// AddThumbnailMediaAssetIDs adds the "thumbnail_media_assets" edge to the MediaAsset entity by IDs.
+func (_c *StoredObjectCreate) AddThumbnailMediaAssetIDs(ids ...string) *StoredObjectCreate {
+	_c.mutation.AddThumbnailMediaAssetIDs(ids...)
+	return _c
+}
+
+// AddThumbnailMediaAssets adds the "thumbnail_media_assets" edges to the MediaAsset entity.
+func (_c *StoredObjectCreate) AddThumbnailMediaAssets(v ...*MediaAsset) *StoredObjectCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddThumbnailMediaAssetIDs(ids...)
+}
+
 // Mutation returns the StoredObjectMutation object of the builder.
 func (_c *StoredObjectCreate) Mutation() *StoredObjectMutation {
 	return _c.mutation
@@ -299,6 +314,22 @@ func (_c *StoredObjectCreate) createSpec() (*StoredObject, *sqlgraph.CreateSpec)
 			Inverse: false,
 			Table:   storedobject.MediaAssetsTable,
 			Columns: []string{storedobject.MediaAssetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediaasset.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ThumbnailMediaAssetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   storedobject.ThumbnailMediaAssetsTable,
+			Columns: []string{storedobject.ThumbnailMediaAssetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediaasset.FieldID, field.TypeString),

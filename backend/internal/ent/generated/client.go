@@ -847,6 +847,22 @@ func (c *MediaAssetClient) QueryStorageObject(_m *MediaAsset) *StoredObjectQuery
 	return query
 }
 
+// QueryThumbnailStorageObject queries the thumbnail_storage_object edge of a MediaAsset.
+func (c *MediaAssetClient) QueryThumbnailStorageObject(_m *MediaAsset) *StoredObjectQuery {
+	query := (&StoredObjectClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(mediaasset.Table, mediaasset.FieldID, id),
+			sqlgraph.To(storedobject.Table, storedobject.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, mediaasset.ThumbnailStorageObjectTable, mediaasset.ThumbnailStorageObjectColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *MediaAssetClient) Hooks() []Hook {
 	return c.hooks.MediaAsset
@@ -2027,6 +2043,22 @@ func (c *StoredObjectClient) QueryMediaAssets(_m *StoredObject) *MediaAssetQuery
 			sqlgraph.From(storedobject.Table, storedobject.FieldID, id),
 			sqlgraph.To(mediaasset.Table, mediaasset.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, storedobject.MediaAssetsTable, storedobject.MediaAssetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryThumbnailMediaAssets queries the thumbnail_media_assets edge of a StoredObject.
+func (c *StoredObjectClient) QueryThumbnailMediaAssets(_m *StoredObject) *MediaAssetQuery {
+	query := (&MediaAssetClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(storedobject.Table, storedobject.FieldID, id),
+			sqlgraph.To(mediaasset.Table, mediaasset.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, storedobject.ThumbnailMediaAssetsTable, storedobject.ThumbnailMediaAssetsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

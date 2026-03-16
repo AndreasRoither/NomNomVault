@@ -21,12 +21,13 @@ import (
 // StoredObjectQuery is the builder for querying StoredObject entities.
 type StoredObjectQuery struct {
 	config
-	ctx             *QueryContext
-	order           []storedobject.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.StoredObject
-	withHousehold   *HouseholdQuery
-	withMediaAssets *MediaAssetQuery
+	ctx                      *QueryContext
+	order                    []storedobject.OrderOption
+	inters                   []Interceptor
+	predicates               []predicate.StoredObject
+	withHousehold            *HouseholdQuery
+	withMediaAssets          *MediaAssetQuery
+	withThumbnailMediaAssets *MediaAssetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -100,6 +101,28 @@ func (_q *StoredObjectQuery) QueryMediaAssets() *MediaAssetQuery {
 			sqlgraph.From(storedobject.Table, storedobject.FieldID, selector),
 			sqlgraph.To(mediaasset.Table, mediaasset.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, storedobject.MediaAssetsTable, storedobject.MediaAssetsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryThumbnailMediaAssets chains the current query on the "thumbnail_media_assets" edge.
+func (_q *StoredObjectQuery) QueryThumbnailMediaAssets() *MediaAssetQuery {
+	query := (&MediaAssetClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(storedobject.Table, storedobject.FieldID, selector),
+			sqlgraph.To(mediaasset.Table, mediaasset.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, storedobject.ThumbnailMediaAssetsTable, storedobject.ThumbnailMediaAssetsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -294,13 +317,14 @@ func (_q *StoredObjectQuery) Clone() *StoredObjectQuery {
 		return nil
 	}
 	return &StoredObjectQuery{
-		config:          _q.config,
-		ctx:             _q.ctx.Clone(),
-		order:           append([]storedobject.OrderOption{}, _q.order...),
-		inters:          append([]Interceptor{}, _q.inters...),
-		predicates:      append([]predicate.StoredObject{}, _q.predicates...),
-		withHousehold:   _q.withHousehold.Clone(),
-		withMediaAssets: _q.withMediaAssets.Clone(),
+		config:                   _q.config,
+		ctx:                      _q.ctx.Clone(),
+		order:                    append([]storedobject.OrderOption{}, _q.order...),
+		inters:                   append([]Interceptor{}, _q.inters...),
+		predicates:               append([]predicate.StoredObject{}, _q.predicates...),
+		withHousehold:            _q.withHousehold.Clone(),
+		withMediaAssets:          _q.withMediaAssets.Clone(),
+		withThumbnailMediaAssets: _q.withThumbnailMediaAssets.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -326,6 +350,17 @@ func (_q *StoredObjectQuery) WithMediaAssets(opts ...func(*MediaAssetQuery)) *St
 		opt(query)
 	}
 	_q.withMediaAssets = query
+	return _q
+}
+
+// WithThumbnailMediaAssets tells the query-builder to eager-load the nodes that are connected to
+// the "thumbnail_media_assets" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *StoredObjectQuery) WithThumbnailMediaAssets(opts ...func(*MediaAssetQuery)) *StoredObjectQuery {
+	query := (&MediaAssetClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withThumbnailMediaAssets = query
 	return _q
 }
 
@@ -407,9 +442,10 @@ func (_q *StoredObjectQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	var (
 		nodes       = []*StoredObject{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			_q.withHousehold != nil,
 			_q.withMediaAssets != nil,
+			_q.withThumbnailMediaAssets != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -440,6 +476,15 @@ func (_q *StoredObjectQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		if err := _q.loadMediaAssets(ctx, query, nodes,
 			func(n *StoredObject) { n.Edges.MediaAssets = []*MediaAsset{} },
 			func(n *StoredObject, e *MediaAsset) { n.Edges.MediaAssets = append(n.Edges.MediaAssets, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withThumbnailMediaAssets; query != nil {
+		if err := _q.loadThumbnailMediaAssets(ctx, query, nodes,
+			func(n *StoredObject) { n.Edges.ThumbnailMediaAssets = []*MediaAsset{} },
+			func(n *StoredObject, e *MediaAsset) {
+				n.Edges.ThumbnailMediaAssets = append(n.Edges.ThumbnailMediaAssets, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -500,6 +545,39 @@ func (_q *StoredObjectQuery) loadMediaAssets(ctx context.Context, query *MediaAs
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "storage_object_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *StoredObjectQuery) loadThumbnailMediaAssets(ctx context.Context, query *MediaAssetQuery, nodes []*StoredObject, init func(*StoredObject), assign func(*StoredObject, *MediaAsset)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*StoredObject)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(mediaasset.FieldThumbnailStorageObjectID)
+	}
+	query.Where(predicate.MediaAsset(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(storedobject.ThumbnailMediaAssetsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ThumbnailStorageObjectID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "thumbnail_storage_object_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "thumbnail_storage_object_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

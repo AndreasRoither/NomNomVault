@@ -1,9 +1,7 @@
 package httpapi
 
 import (
-	"bytes"
 	"errors"
-	"image"
 	"io"
 	"mime"
 	"net/http"
@@ -11,18 +9,21 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	_ "golang.org/x/image/webp"
-	_ "image/jpeg"
-	_ "image/png"
 
 	"github.com/AndreasRoither/NomNomVault/backend/internal/api/apicontract"
 	authsvc "github.com/AndreasRoither/NomNomVault/backend/internal/auth"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/platform/httpx"
+	platformmedia "github.com/AndreasRoither/NomNomVault/backend/internal/platform/media"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/platform/securitylog"
 	recipesvc "github.com/AndreasRoither/NomNomVault/backend/internal/recipes"
 )
 
 const maxAltTextLength = 500
+
+const (
+	maxImageDimension = 4096
+	maxImagePixels    = 12_000_000
+)
 
 type handler struct {
 	service         *recipesvc.Service
@@ -467,12 +468,19 @@ func (h *handler) uploadRecipeMedia(c *gin.Context) {
 	if err != nil {
 		reason := "unsupported_media_type"
 		status := http.StatusUnsupportedMediaType
-		if errors.Is(err, errMalformedImage) {
+		message := "The uploaded file type is not supported."
+		if errors.Is(err, platformmedia.ErrMalformedImage) {
 			reason = "malformed_image"
 			status = http.StatusBadRequest
+			message = "The uploaded file could not be parsed as a valid image."
+		}
+		if errors.Is(err, platformmedia.ErrImageDimensionsExceeded) {
+			reason = "image_dimensions_exceeded"
+			status = http.StatusBadRequest
+			message = "The uploaded image dimensions exceed the supported limit."
 		}
 		securitylog.Log(c, "media.upload.rejected", map[string]string{"reason": reason})
-		httpx.WriteError(c, status, reason, "The uploaded file type is not supported.", nil)
+		httpx.WriteError(c, status, reason, message, nil)
 		return
 	}
 
@@ -516,6 +524,10 @@ func (h *handler) uploadRecipeMedia(c *gin.Context) {
 // @Summary Fetch recipe media
 // @Description Stream the original media bytes for the requested asset.
 // @Tags recipes
+// Swagger 2 only supports operation-level `produces`, so swag cannot express
+// binary success responses with JSON error envelopes on the same operation.
+// The generated OpenAPI 3 spec is normalized in scripts/openapi-generate.sh
+// until the backend generation pipeline can emit correct per-response content.
 // @Produce octet-stream
 // @Param mediaId path string true "Media ID"
 // @Success 200 {file} file
@@ -535,6 +547,40 @@ func (h *handler) getMediaOriginal(c *gin.Context) {
 		return
 	}
 
+	writeMediaContent(c, media)
+}
+
+// getMediaThumbnail godoc
+// @Summary Fetch recipe media thumbnail
+// @Description Stream the stored thumbnail bytes for the requested asset.
+// @Tags recipes
+// Swagger 2 only supports operation-level `produces`, so swag cannot express
+// binary success responses with JSON error envelopes on the same operation.
+// The generated OpenAPI 3 spec is normalized in scripts/openapi-generate.sh
+// until the backend generation pipeline can emit correct per-response content.
+// @Produce octet-stream
+// @Param mediaId path string true "Media ID"
+// @Success 200 {file} file
+// @Failure 401 {object} apicontract.ErrorResponse
+// @Failure 404 {object} apicontract.ErrorResponse
+// @Router /media/{mediaId}/thumbnail [get]
+func (h *handler) getMediaThumbnail(c *gin.Context) {
+	session, ok := authsvc.SessionFromGin(c)
+	if !ok {
+		httpx.WriteError(c, http.StatusUnauthorized, "unauthenticated", "Authentication is required.", nil)
+		return
+	}
+
+	media, err := h.service.GetMediaThumbnail(c.Request.Context(), session.ActiveHouseholdID, c.Param("mediaId"))
+	if err != nil {
+		httpx.WriteServiceError(c, err)
+		return
+	}
+
+	writeMediaContent(c, media)
+}
+
+func writeMediaContent(c *gin.Context, media recipesvc.MediaContentView) {
 	c.Header("Content-Type", media.MimeType)
 	c.Header("Content-Length", intToString(media.SizeBytes))
 	c.Header("Content-Disposition", mime.FormatMediaType("inline", map[string]string{"filename": sanitizeFilename(media.Filename)}))
@@ -665,33 +711,16 @@ func validationErrors(field string, message string) []apicontract.ValidationErro
 	return []apicontract.ValidationError{{Field: field, Message: message}}
 }
 
-func sniffMimeType(content []byte) string {
-	if len(content) == 0 {
-		return "application/octet-stream"
-	}
-	if len(content) > 512 {
-		return http.DetectContentType(content[:512])
-	}
-	return http.DetectContentType(content)
-}
-
 func intToString(value int64) string {
 	return strconv.FormatInt(value, 10)
 }
 
-var errMalformedImage = errors.New("malformed image")
-
 func validateImageContent(content []byte, allowedMimeTypes map[string]struct{}) (string, error) {
-	mimeType := sniffMimeType(content)
-	if _, ok := allowedMimeTypes[mimeType]; !ok {
-		return "", http.ErrNotSupported
-	}
-
-	if _, _, err := image.DecodeConfig(bytes.NewReader(content)); err != nil {
-		return "", errMalformedImage
-	}
-
-	return mimeType, nil
+	mimeType, _, err := platformmedia.ValidateImage(content, allowedMimeTypes, platformmedia.ValidationLimits{
+		MaxDimension: maxImageDimension,
+		MaxPixels:    maxImagePixels,
+	})
+	return mimeType, err
 }
 
 func isMaxBytesError(err error) bool {

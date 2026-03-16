@@ -24,6 +24,7 @@ import (
 	entschema "github.com/AndreasRoither/NomNomVault/backend/internal/ent/schema"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/platform/clock"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/platform/httpx"
+	platformmedia "github.com/AndreasRoither/NomNomVault/backend/internal/platform/media"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/platform/storage"
 )
 
@@ -471,16 +472,35 @@ func (s *Service) AttachRecipeMedia(ctx context.Context, in AttachRecipeMediaInp
 		return MediaView{}, fmt.Errorf("query recipe for media upload: %w", err)
 	}
 
-	checksum := checksum(in.Content)
+	thumbnailContent, thumbnailMimeType, err := platformmedia.GenerateThumbnail(in.Content, platformmedia.DefaultThumbnailMaxDimension)
+	if err != nil {
+		return MediaView{}, fmt.Errorf("generate thumbnail: %w", err)
+	}
+
+	originalChecksum := checksum(in.Content)
 	object, err := s.store.Put(ctx, storage.PutInput{
 		HouseholdID:      in.HouseholdID,
 		OriginalFilename: in.OriginalFilename,
 		MimeType:         in.MimeType,
-		Checksum:         checksum,
+		Checksum:         originalChecksum,
 		Content:          in.Content,
 	})
 	if err != nil {
 		return MediaView{}, fmt.Errorf("store media object: %w", err)
+	}
+
+	thumbnailObject, err := s.store.Put(ctx, storage.PutInput{
+		HouseholdID:      in.HouseholdID,
+		OriginalFilename: platformmedia.ThumbnailFilename(in.OriginalFilename, thumbnailMimeType),
+		MimeType:         thumbnailMimeType,
+		Checksum:         checksum(thumbnailContent),
+		Content:          thumbnailContent,
+	})
+	if err != nil {
+		if cleanupErr := s.cleanupUnreferencedStoredObjects(ctx, in.HouseholdID, object); cleanupErr != nil {
+			return MediaView{}, fmt.Errorf("store thumbnail object: %w; cleanup failed: %v", err, cleanupErr)
+		}
+		return MediaView{}, fmt.Errorf("store thumbnail object: %w", err)
 	}
 
 	nextSortOrder := len(recipeEntity.Edges.MediaAssets) + 1
@@ -488,6 +508,9 @@ func (s *Service) AttachRecipeMedia(ctx context.Context, in AttachRecipeMediaInp
 
 	tx, err := s.db.Tx(ctx)
 	if err != nil {
+		if cleanupErr := s.cleanupUnreferencedStoredObjects(ctx, in.HouseholdID, object, thumbnailObject); cleanupErr != nil {
+			return MediaView{}, fmt.Errorf("start media tx: %w; cleanup failed: %v", err, cleanupErr)
+		}
 		return MediaView{}, fmt.Errorf("start media tx: %w", err)
 	}
 
@@ -495,6 +518,7 @@ func (s *Service) AttachRecipeMedia(ctx context.Context, in AttachRecipeMediaInp
 		SetHouseholdID(in.HouseholdID).
 		SetRecipeID(recipeEntity.ID).
 		SetStorageObjectID(object.ID).
+		SetThumbnailStorageObjectID(thumbnailObject.ID).
 		SetOriginalFilename(in.OriginalFilename).
 		SetMimeType(in.MimeType).
 		SetMediaType("image").
@@ -506,6 +530,9 @@ func (s *Service) AttachRecipeMedia(ctx context.Context, in AttachRecipeMediaInp
 		Save(ctx)
 	if err != nil {
 		_ = tx.Rollback()
+		if cleanupErr := s.cleanupUnreferencedStoredObjects(ctx, in.HouseholdID, object, thumbnailObject); cleanupErr != nil {
+			return MediaView{}, fmt.Errorf("create media asset: %w; cleanup failed: %v", err, cleanupErr)
+		}
 		return MediaView{}, fmt.Errorf("create media asset: %w", err)
 	}
 
@@ -517,10 +544,16 @@ func (s *Service) AttachRecipeMedia(ctx context.Context, in AttachRecipeMediaInp
 	}
 	if _, err := updateRecipe.Save(ctx); err != nil {
 		_ = tx.Rollback()
+		if cleanupErr := s.cleanupUnreferencedStoredObjects(ctx, in.HouseholdID, object, thumbnailObject); cleanupErr != nil {
+			return MediaView{}, fmt.Errorf("update recipe media references: %w; cleanup failed: %v", err, cleanupErr)
+		}
 		return MediaView{}, fmt.Errorf("update recipe media references: %w", err)
 	}
 
 	if err := tx.Commit(); err != nil {
+		if cleanupErr := s.cleanupUnreferencedStoredObjects(ctx, in.HouseholdID, object, thumbnailObject); cleanupErr != nil {
+			return MediaView{}, fmt.Errorf("commit media tx: %w; cleanup failed: %v", err, cleanupErr)
+		}
 		return MediaView{}, fmt.Errorf("commit media tx: %w", err)
 	}
 
@@ -529,6 +562,15 @@ func (s *Service) AttachRecipeMedia(ctx context.Context, in AttachRecipeMediaInp
 
 // GetMediaOriginal loads the original stored media content.
 func (s *Service) GetMediaOriginal(ctx context.Context, householdID string, mediaID string) (MediaContentView, error) {
+	return s.getMediaContent(ctx, householdID, mediaID, false)
+}
+
+// GetMediaThumbnail loads the thumbnail stored media content.
+func (s *Service) GetMediaThumbnail(ctx context.Context, householdID string, mediaID string) (MediaContentView, error) {
+	return s.getMediaContent(ctx, householdID, mediaID, true)
+}
+
+func (s *Service) getMediaContent(ctx context.Context, householdID string, mediaID string, thumbnail bool) (MediaContentView, error) {
 	mediaEntity, err := s.db.MediaAsset.Query().
 		Where(
 			mediaasset.IDEQ(mediaID),
@@ -543,14 +585,32 @@ func (s *Service) GetMediaOriginal(ctx context.Context, householdID string, medi
 		return MediaContentView{}, fmt.Errorf("query media asset: %w", err)
 	}
 
-	object, err := s.store.Get(ctx, householdID, mediaEntity.StorageObjectID)
+	objectID := mediaEntity.StorageObjectID
+	filename := mediaEntity.OriginalFilename
+	mimeType := mediaEntity.MimeType
+	if thumbnail {
+		if mediaEntity.ThumbnailStorageObjectID == nil {
+			return MediaContentView{}, httpx.StatusError{
+				Status:  http.StatusNotFound,
+				Code:    "media_variant_not_found",
+				Message: "Media variant was not found.",
+			}
+		}
+		objectID = *mediaEntity.ThumbnailStorageObjectID
+	}
+
+	object, err := s.store.Get(ctx, householdID, objectID)
 	if err != nil {
 		return MediaContentView{}, fmt.Errorf("load stored object: %w", err)
 	}
+	if thumbnail {
+		filename = platformmedia.ThumbnailFilename(mediaEntity.OriginalFilename, object.MimeType)
+		mimeType = object.MimeType
+	}
 
 	return MediaContentView{
-		Filename:  mediaEntity.OriginalFilename,
-		MimeType:  mediaEntity.MimeType,
+		Filename:  filename,
+		MimeType:  mimeType,
 		SizeBytes: object.SizeBytes,
 		Content:   object.Content,
 	}, nil
@@ -958,6 +1018,10 @@ func mapMediaAssets(entities []*entgen.MediaAsset) []MediaView {
 
 func mapMediaAsset(entity *entgen.MediaAsset) MediaView {
 	url := fmt.Sprintf("/api/v1/media/%s/original", entity.ID)
+	thumbnailURL := url
+	if entity.ThumbnailStorageObjectID != nil {
+		thumbnailURL = fmt.Sprintf("/api/v1/media/%s/thumbnail", entity.ID)
+	}
 	return MediaView{
 		ID:               entity.ID,
 		OriginalFilename: entity.OriginalFilename,
@@ -967,7 +1031,7 @@ func mapMediaAsset(entity *entgen.MediaAsset) MediaView {
 		Checksum:         entity.Checksum,
 		StoredAt:         entity.StoredAt,
 		URL:              url,
-		ThumbnailURL:     url,
+		ThumbnailURL:     thumbnailURL,
 		AltText:          entity.AltText,
 		SortOrder:        entity.SortOrder,
 	}
@@ -1043,4 +1107,31 @@ func min(left int, right int) int {
 		return left
 	}
 	return right
+}
+
+func (s *Service) cleanupUnreferencedStoredObjects(ctx context.Context, householdID string, objects ...storage.Object) error {
+	for _, object := range objects {
+		if !object.Created || strings.TrimSpace(object.ID) == "" {
+			continue
+		}
+
+		referenced, err := s.db.MediaAsset.Query().
+			Where(mediaasset.Or(
+				mediaasset.StorageObjectIDEQ(object.ID),
+				mediaasset.ThumbnailStorageObjectIDEQ(object.ID),
+			)).
+			Exist(ctx)
+		if err != nil {
+			return fmt.Errorf("check stored object references: %w", err)
+		}
+		if referenced {
+			continue
+		}
+
+		if err := s.store.Delete(ctx, householdID, object.ID); err != nil {
+			return fmt.Errorf("delete stored object: %w", err)
+		}
+	}
+
+	return nil
 }

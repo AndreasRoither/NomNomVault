@@ -77,6 +77,20 @@ func (_c *MediaAssetCreate) SetStorageObjectID(v string) *MediaAssetCreate {
 	return _c
 }
 
+// SetThumbnailStorageObjectID sets the "thumbnail_storage_object_id" field.
+func (_c *MediaAssetCreate) SetThumbnailStorageObjectID(v string) *MediaAssetCreate {
+	_c.mutation.SetThumbnailStorageObjectID(v)
+	return _c
+}
+
+// SetNillableThumbnailStorageObjectID sets the "thumbnail_storage_object_id" field if the given value is not nil.
+func (_c *MediaAssetCreate) SetNillableThumbnailStorageObjectID(v *string) *MediaAssetCreate {
+	if v != nil {
+		_c.SetThumbnailStorageObjectID(*v)
+	}
+	return _c
+}
+
 // SetOriginalFilename sets the "original_filename" field.
 func (_c *MediaAssetCreate) SetOriginalFilename(v string) *MediaAssetCreate {
 	_c.mutation.SetOriginalFilename(v)
@@ -176,6 +190,11 @@ func (_c *MediaAssetCreate) SetRecipe(v *Recipe) *MediaAssetCreate {
 // SetStorageObject sets the "storage_object" edge to the StoredObject entity.
 func (_c *MediaAssetCreate) SetStorageObject(v *StoredObject) *MediaAssetCreate {
 	return _c.SetStorageObjectID(v.ID)
+}
+
+// SetThumbnailStorageObject sets the "thumbnail_storage_object" edge to the StoredObject entity.
+func (_c *MediaAssetCreate) SetThumbnailStorageObject(v *StoredObject) *MediaAssetCreate {
+	return _c.SetThumbnailStorageObjectID(v.ID)
 }
 
 // Mutation returns the MediaAssetMutation object of the builder.
@@ -427,6 +446,23 @@ func (_c *MediaAssetCreate) createSpec() (*MediaAsset, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.StorageObjectID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ThumbnailStorageObjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   mediaasset.ThumbnailStorageObjectTable,
+			Columns: []string{mediaasset.ThumbnailStorageObjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ThumbnailStorageObjectID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

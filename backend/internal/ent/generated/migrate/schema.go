@@ -77,6 +77,7 @@ var (
 		{Name: "household_id", Type: field.TypeString},
 		{Name: "recipe_id", Type: field.TypeString, Nullable: true},
 		{Name: "storage_object_id", Type: field.TypeString},
+		{Name: "thumbnail_storage_object_id", Type: field.TypeString, Nullable: true},
 	}
 	// MediaAssetsTable holds the schema information for the "media_assets" table.
 	MediaAssetsTable = &schema.Table{
@@ -101,6 +102,12 @@ var (
 				Columns:    []*schema.Column{MediaAssetsColumns[13]},
 				RefColumns: []*schema.Column{StoredObjectsColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "media_assets_stored_objects_thumbnail_media_assets",
+				Columns:    []*schema.Column{MediaAssetsColumns[14]},
+				RefColumns: []*schema.Column{StoredObjectsColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -495,6 +502,7 @@ func init() {
 	MediaAssetsTable.ForeignKeys[0].RefTable = HouseholdsTable
 	MediaAssetsTable.ForeignKeys[1].RefTable = RecipesTable
 	MediaAssetsTable.ForeignKeys[2].RefTable = StoredObjectsTable
+	MediaAssetsTable.ForeignKeys[3].RefTable = StoredObjectsTable
 	RecipesTable.ForeignKeys[0].RefTable = HouseholdsTable
 	RecipeIngredientsTable.ForeignKeys[0].RefTable = RecipesTable
 	RecipeNutritionTable.ForeignKeys[0].RefTable = RecipesTable

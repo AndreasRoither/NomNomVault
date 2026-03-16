@@ -11,6 +11,7 @@ type Object struct {
 	MimeType         string
 	SizeBytes        int64
 	Content          []byte
+	Created          bool
 }
 
 // PutInput creates or reuses a stored object.
@@ -26,4 +27,5 @@ type PutInput struct {
 type Store interface {
 	Put(ctx context.Context, in PutInput) (Object, error)
 	Get(ctx context.Context, householdID string, objectID string) (Object, error)
+	Delete(ctx context.Context, householdID string, objectID string) error
 }

@@ -46,9 +46,11 @@ type StoredObjectEdges struct {
 	Household *Household `json:"household,omitempty"`
 	// MediaAssets holds the value of the media_assets edge.
 	MediaAssets []*MediaAsset `json:"media_assets,omitempty"`
+	// ThumbnailMediaAssets holds the value of the thumbnail_media_assets edge.
+	ThumbnailMediaAssets []*MediaAsset `json:"thumbnail_media_assets,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // HouseholdOrErr returns the Household value or an error if the edge
@@ -69,6 +71,15 @@ func (e StoredObjectEdges) MediaAssetsOrErr() ([]*MediaAsset, error) {
 		return e.MediaAssets, nil
 	}
 	return nil, &NotLoadedError{edge: "media_assets"}
+}
+
+// ThumbnailMediaAssetsOrErr returns the ThumbnailMediaAssets value or an error if the edge
+// was not loaded in eager-loading.
+func (e StoredObjectEdges) ThumbnailMediaAssetsOrErr() ([]*MediaAsset, error) {
+	if e.loadedTypes[2] {
+		return e.ThumbnailMediaAssets, nil
+	}
+	return nil, &NotLoadedError{edge: "thumbnail_media_assets"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -174,6 +185,11 @@ func (_m *StoredObject) QueryHousehold() *HouseholdQuery {
 // QueryMediaAssets queries the "media_assets" edge of the StoredObject entity.
 func (_m *StoredObject) QueryMediaAssets() *MediaAssetQuery {
 	return NewStoredObjectClient(_m.config).QueryMediaAssets(_m)
+}
+
+// QueryThumbnailMediaAssets queries the "thumbnail_media_assets" edge of the StoredObject entity.
+func (_m *StoredObject) QueryThumbnailMediaAssets() *MediaAssetQuery {
+	return NewStoredObjectClient(_m.config).QueryThumbnailMediaAssets(_m)
 }
 
 // Update returns a builder for updating this StoredObject.

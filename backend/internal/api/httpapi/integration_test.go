@@ -4,7 +4,11 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
+	"image"
+	"image/color"
+	"image/png"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -519,6 +523,123 @@ func TestMediaDownloadSanitizesFilenameHeader(t *testing.T) {
 	}
 	if strings.Contains(contentDisposition, "\\") {
 		t.Fatalf("expected path separators to be sanitized, got %q", contentDisposition)
+	}
+}
+
+func TestMediaUploadGeneratesStoredThumbnailVariant(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.server.Close()
+
+	client := newHTTPClient(t)
+	csrfToken := registerUser(t, client, env.server.URL, "Thumbnail User", "thumbnail@example.com")
+	recipe := createRecipe(t, client, env.server.URL, csrfToken, "Thumbnail Soup")
+
+	csrfToken = currentCookieValue(t, client, env.server.URL, "/", authsvc.CSRFCookieName)
+	uploadResponse := doMultipartBytes(t, client, env.server.URL+"/api/v1/recipes/"+recipe.ID+"/media", csrfToken, "hero.png", largePNG())
+	if uploadResponse.StatusCode != http.StatusCreated {
+		body, _ := io.ReadAll(uploadResponse.Body)
+		t.Fatalf("expected media upload success, got %d body=%s", uploadResponse.StatusCode, string(body))
+	}
+
+	var mediaBody struct {
+		ID           string `json:"id"`
+		URL          string `json:"url"`
+		ThumbnailURL string `json:"thumbnailUrl"`
+	}
+	if err := json.NewDecoder(uploadResponse.Body).Decode(&mediaBody); err != nil {
+		t.Fatalf("decode media upload response: %v", err)
+	}
+	uploadResponse.Body.Close()
+
+	if !strings.HasSuffix(mediaBody.URL, "/original") {
+		t.Fatalf("expected original url suffix, got %q", mediaBody.URL)
+	}
+	if !strings.HasSuffix(mediaBody.ThumbnailURL, "/thumbnail") {
+		t.Fatalf("expected thumbnail url suffix, got %q", mediaBody.ThumbnailURL)
+	}
+
+	thumbnailResponse := doGET(t, client, env.server.URL+mediaBody.ThumbnailURL)
+	if thumbnailResponse.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(thumbnailResponse.Body)
+		t.Fatalf("expected thumbnail fetch success, got %d body=%s", thumbnailResponse.StatusCode, string(body))
+	}
+	defer thumbnailResponse.Body.Close()
+
+	thumbnailContent, err := io.ReadAll(thumbnailResponse.Body)
+	if err != nil {
+		t.Fatalf("read thumbnail response: %v", err)
+	}
+	config, _, err := image.DecodeConfig(bytes.NewReader(thumbnailContent))
+	if err != nil {
+		t.Fatalf("decode thumbnail config: %v", err)
+	}
+	if config.Width > 512 || config.Height > 512 {
+		t.Fatalf("expected thumbnail dimensions <= 512, got %dx%d", config.Width, config.Height)
+	}
+
+	originalResponse := doGET(t, client, env.server.URL+mediaBody.URL)
+	if originalResponse.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(originalResponse.Body)
+		t.Fatalf("expected original fetch success, got %d body=%s", originalResponse.StatusCode, string(body))
+	}
+	defer originalResponse.Body.Close()
+
+	originalContent, err := io.ReadAll(originalResponse.Body)
+	if err != nil {
+		t.Fatalf("read original response: %v", err)
+	}
+	originalConfig, _, err := image.DecodeConfig(bytes.NewReader(originalContent))
+	if err != nil {
+		t.Fatalf("decode original config: %v", err)
+	}
+	if originalConfig.Width != 1024 || originalConfig.Height != 768 {
+		t.Fatalf("expected original dimensions to remain intact, got %dx%d", originalConfig.Width, originalConfig.Height)
+	}
+}
+
+func TestMediaUploadAcceptsWebP(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.server.Close()
+
+	client := newHTTPClient(t)
+	csrfToken := registerUser(t, client, env.server.URL, "WebP User", "webp@example.com")
+	recipe := createRecipe(t, client, env.server.URL, csrfToken, "WebP Soup")
+
+	csrfToken = currentCookieValue(t, client, env.server.URL, "/", authsvc.CSRFCookieName)
+	response := doMultipartBytes(t, client, env.server.URL+"/api/v1/recipes/"+recipe.ID+"/media", csrfToken, "hero.webp", validWebP())
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusCreated {
+		body, _ := io.ReadAll(response.Body)
+		t.Fatalf("expected webp upload success, got %d body=%s", response.StatusCode, string(body))
+	}
+}
+
+func TestMediaUploadRejectsOversizedImageDimensions(t *testing.T) {
+	env := newTestEnv(t)
+	defer env.server.Close()
+
+	client := newHTTPClient(t)
+	csrfToken := registerUser(t, client, env.server.URL, "Wide User", "wide@example.com")
+	recipe := createRecipe(t, client, env.server.URL, csrfToken, "Wide Soup")
+
+	csrfToken = currentCookieValue(t, client, env.server.URL, "/", authsvc.CSRFCookieName)
+	response := doMultipartBytes(t, client, env.server.URL+"/api/v1/recipes/"+recipe.ID+"/media", csrfToken, "wide.png", tooWidePNG())
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusBadRequest {
+		body, _ := io.ReadAll(response.Body)
+		t.Fatalf("expected oversized dimensions rejection, got %d body=%s", response.StatusCode, string(body))
+	}
+
+	var errorBody struct {
+		Code string `json:"code"`
+	}
+	if err := json.NewDecoder(response.Body).Decode(&errorBody); err != nil {
+		t.Fatalf("decode oversized image response: %v", err)
+	}
+	if errorBody.Code != "image_dimensions_exceeded" {
+		t.Fatalf("expected image_dimensions_exceeded, got %q", errorBody.Code)
 	}
 }
 
@@ -1244,10 +1365,15 @@ func patchRecipeTags(t *testing.T, client *http.Client, serverURL string, recipe
 
 func doMultipart(t *testing.T, client *http.Client, rawURL string, csrfToken string) *http.Response {
 	t.Helper()
-	return doMultipartNamed(t, client, rawURL, csrfToken, "soup.png")
+	return doMultipartBytes(t, client, rawURL, csrfToken, "soup.png", validPNG())
 }
 
 func doMultipartNamed(t *testing.T, client *http.Client, rawURL string, csrfToken string, filename string) *http.Response {
+	t.Helper()
+	return doMultipartBytes(t, client, rawURL, csrfToken, filename, validPNG())
+}
+
+func doMultipartBytes(t *testing.T, client *http.Client, rawURL string, csrfToken string, filename string, content []byte) *http.Response {
 	t.Helper()
 
 	var body bytes.Buffer
@@ -1257,8 +1383,8 @@ func doMultipartNamed(t *testing.T, client *http.Client, rawURL string, csrfToke
 	if err != nil {
 		t.Fatalf("create form file: %v", err)
 	}
-	if _, err := part.Write(validPNG()); err != nil {
-		t.Fatalf("write png bytes: %v", err)
+	if _, err := part.Write(content); err != nil {
+		t.Fatalf("write image bytes: %v", err)
 	}
 	if err := writer.WriteField("altText", "Tomato soup in a bowl"); err != nil {
 		t.Fatalf("write alt text field: %v", err)
@@ -1283,15 +1409,56 @@ func doMultipartNamed(t *testing.T, client *http.Client, rawURL string, csrfToke
 }
 
 func validPNG() []byte {
-	return []byte{
-		0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-		0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-		0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-		0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
-		0x89, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x44, 0x41,
-		0x54, 0x78, 0x9c, 0x63, 0xf8, 0xcf, 0xc0, 0x00,
-		0x00, 0x03, 0x01, 0x01, 0x00, 0xc9, 0xfe, 0x92,
-		0xef, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
-		0x44, 0xae, 0x42, 0x60, 0x82,
+	img := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	img.Set(0, 0, color.RGBA{R: 220, G: 64, B: 64, A: 255})
+
+	var encoded bytes.Buffer
+	if err := png.Encode(&encoded, img); err != nil {
+		panic(err)
 	}
+	return encoded.Bytes()
+}
+
+func largePNG() []byte {
+	img := image.NewRGBA(image.Rect(0, 0, 1024, 768))
+	for y := 0; y < 768; y++ {
+		for x := 0; x < 1024; x++ {
+			img.Set(x, y, color.RGBA{
+				R: uint8((x * 255) / 1023),
+				G: uint8((y * 255) / 767),
+				B: 96,
+				A: 255,
+			})
+		}
+	}
+
+	var encoded bytes.Buffer
+	if err := png.Encode(&encoded, img); err != nil {
+		panic(err)
+	}
+	return encoded.Bytes()
+}
+
+func tooWidePNG() []byte {
+	img := image.NewRGBA(image.Rect(0, 0, 4097, 8))
+	for y := 0; y < 8; y++ {
+		for x := 0; x < 4097; x++ {
+			img.Set(x, y, color.RGBA{R: 180, G: 90, B: 90, A: 255})
+		}
+	}
+
+	var encoded bytes.Buffer
+	if err := png.Encode(&encoded, img); err != nil {
+		panic(err)
+	}
+	return encoded.Bytes()
+}
+
+func validWebP() []byte {
+	encoded := "UklGRkYAAABXRUJQVlA4IDoAAADwAQCdASoCAAIAAgA0JYgCdLoAAwkG+4AA/pwpnW3zlW2e6r0jgkPVYC6Pe4jvoTY9qK+RSLF4AAAA"
+	decoded, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		panic(err)
+	}
+	return decoded
 }

@@ -34,6 +34,8 @@ const (
 	EdgeHousehold = "household"
 	// EdgeMediaAssets holds the string denoting the media_assets edge name in mutations.
 	EdgeMediaAssets = "media_assets"
+	// EdgeThumbnailMediaAssets holds the string denoting the thumbnail_media_assets edge name in mutations.
+	EdgeThumbnailMediaAssets = "thumbnail_media_assets"
 	// Table holds the table name of the storedobject in the database.
 	Table = "stored_objects"
 	// HouseholdTable is the table that holds the household relation/edge.
@@ -50,6 +52,13 @@ const (
 	MediaAssetsInverseTable = "media_assets"
 	// MediaAssetsColumn is the table column denoting the media_assets relation/edge.
 	MediaAssetsColumn = "storage_object_id"
+	// ThumbnailMediaAssetsTable is the table that holds the thumbnail_media_assets relation/edge.
+	ThumbnailMediaAssetsTable = "media_assets"
+	// ThumbnailMediaAssetsInverseTable is the table name for the MediaAsset entity.
+	// It exists in this package in order to avoid circular dependency with the "mediaasset" package.
+	ThumbnailMediaAssetsInverseTable = "media_assets"
+	// ThumbnailMediaAssetsColumn is the table column denoting the thumbnail_media_assets relation/edge.
+	ThumbnailMediaAssetsColumn = "thumbnail_storage_object_id"
 )
 
 // Columns holds all SQL columns for storedobject fields.
@@ -155,6 +164,20 @@ func ByMediaAssets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newMediaAssetsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByThumbnailMediaAssetsCount orders the results by thumbnail_media_assets count.
+func ByThumbnailMediaAssetsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newThumbnailMediaAssetsStep(), opts...)
+	}
+}
+
+// ByThumbnailMediaAssets orders the results by thumbnail_media_assets terms.
+func ByThumbnailMediaAssets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newThumbnailMediaAssetsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newHouseholdStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -167,5 +190,12 @@ func newMediaAssetsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MediaAssetsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, MediaAssetsTable, MediaAssetsColumn),
+	)
+}
+func newThumbnailMediaAssetsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ThumbnailMediaAssetsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ThumbnailMediaAssetsTable, ThumbnailMediaAssetsColumn),
 	)
 }

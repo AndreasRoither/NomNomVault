@@ -94,23 +94,23 @@ func init() {
 	// mediaasset.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	mediaasset.UpdateDefaultUpdatedAt = mediaassetDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// mediaassetDescOriginalFilename is the schema descriptor for original_filename field.
-	mediaassetDescOriginalFilename := mediaassetFields[2].Descriptor()
+	mediaassetDescOriginalFilename := mediaassetFields[3].Descriptor()
 	// mediaasset.OriginalFilenameValidator is a validator for the "original_filename" field. It is called by the builders before save.
 	mediaasset.OriginalFilenameValidator = mediaassetDescOriginalFilename.Validators[0].(func(string) error)
 	// mediaassetDescMimeType is the schema descriptor for mime_type field.
-	mediaassetDescMimeType := mediaassetFields[3].Descriptor()
+	mediaassetDescMimeType := mediaassetFields[4].Descriptor()
 	// mediaasset.MimeTypeValidator is a validator for the "mime_type" field. It is called by the builders before save.
 	mediaasset.MimeTypeValidator = mediaassetDescMimeType.Validators[0].(func(string) error)
 	// mediaassetDescChecksum is the schema descriptor for checksum field.
-	mediaassetDescChecksum := mediaassetFields[6].Descriptor()
+	mediaassetDescChecksum := mediaassetFields[7].Descriptor()
 	// mediaasset.ChecksumValidator is a validator for the "checksum" field. It is called by the builders before save.
 	mediaasset.ChecksumValidator = mediaassetDescChecksum.Validators[0].(func(string) error)
 	// mediaassetDescAltText is the schema descriptor for alt_text field.
-	mediaassetDescAltText := mediaassetFields[8].Descriptor()
+	mediaassetDescAltText := mediaassetFields[9].Descriptor()
 	// mediaasset.DefaultAltText holds the default value on creation for the alt_text field.
 	mediaasset.DefaultAltText = mediaassetDescAltText.Default.(string)
 	// mediaassetDescSortOrder is the schema descriptor for sort_order field.
-	mediaassetDescSortOrder := mediaassetFields[9].Descriptor()
+	mediaassetDescSortOrder := mediaassetFields[10].Descriptor()
 	// mediaasset.DefaultSortOrder holds the default value on creation for the sort_order field.
 	mediaasset.DefaultSortOrder = mediaassetDescSortOrder.Default.(int)
 	// mediaassetDescID is the schema descriptor for id field.

@@ -335,7 +335,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/octet-stream": components["schemas"]["apicontract.ErrorResponse"];
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -344,7 +344,67 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/octet-stream": components["schemas"]["apicontract.ErrorResponse"];
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/{mediaId}/thumbnail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fetch recipe media thumbnail
+         * @description Stream the stored thumbnail bytes for the requested asset.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Media ID */
+                    mediaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/octet-stream": string;
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
                     };
                 };
             };

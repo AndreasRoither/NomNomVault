@@ -38,6 +38,7 @@ func (s *PostgresStore) Put(ctx context.Context, in PutInput) (Object, error) {
 			MimeType:         existing.MimeType,
 			SizeBytes:        existing.SizeBytes,
 			Content:          existing.Content,
+			Created:          false,
 		}, nil
 	}
 	if !entgen.IsNotFound(err) {
@@ -69,6 +70,7 @@ func (s *PostgresStore) Put(ctx context.Context, in PutInput) (Object, error) {
 					MimeType:         existing.MimeType,
 					SizeBytes:        existing.SizeBytes,
 					Content:          existing.Content,
+					Created:          false,
 				}, nil
 			}
 			if !entgen.IsNotFound(queryErr) {
@@ -87,6 +89,7 @@ func (s *PostgresStore) Put(ctx context.Context, in PutInput) (Object, error) {
 		MimeType:         objectEntity.MimeType,
 		SizeBytes:        objectEntity.SizeBytes,
 		Content:          objectEntity.Content,
+		Created:          true,
 	}, nil
 }
 
@@ -111,4 +114,21 @@ func (s *PostgresStore) Get(ctx context.Context, householdID string, objectID st
 		SizeBytes:        objectEntity.SizeBytes,
 		Content:          objectEntity.Content,
 	}, nil
+}
+
+// Delete removes a stored object scoped to one household.
+func (s *PostgresStore) Delete(ctx context.Context, householdID string, objectID string) error {
+	affected, err := s.db.StoredObject.Delete().
+		Where(
+			storedobject.IDEQ(objectID),
+			storedobject.HouseholdIDEQ(householdID),
+		).
+		Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("delete stored object: %w", err)
+	}
+	if affected == 0 {
+		return nil
+	}
+	return nil
 }

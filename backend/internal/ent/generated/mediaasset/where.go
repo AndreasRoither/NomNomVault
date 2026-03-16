@@ -90,6 +90,11 @@ func StorageObjectID(v string) predicate.MediaAsset {
 	return predicate.MediaAsset(sql.FieldEQ(FieldStorageObjectID, v))
 }
 
+// ThumbnailStorageObjectID applies equality check predicate on the "thumbnail_storage_object_id" field. It's identical to ThumbnailStorageObjectIDEQ.
+func ThumbnailStorageObjectID(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldEQ(FieldThumbnailStorageObjectID, v))
+}
+
 // OriginalFilename applies equality check predicate on the "original_filename" field. It's identical to OriginalFilenameEQ.
 func OriginalFilename(v string) predicate.MediaAsset {
 	return predicate.MediaAsset(sql.FieldEQ(FieldOriginalFilename, v))
@@ -408,6 +413,81 @@ func StorageObjectIDEqualFold(v string) predicate.MediaAsset {
 // StorageObjectIDContainsFold applies the ContainsFold predicate on the "storage_object_id" field.
 func StorageObjectIDContainsFold(v string) predicate.MediaAsset {
 	return predicate.MediaAsset(sql.FieldContainsFold(FieldStorageObjectID, v))
+}
+
+// ThumbnailStorageObjectIDEQ applies the EQ predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDEQ(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldEQ(FieldThumbnailStorageObjectID, v))
+}
+
+// ThumbnailStorageObjectIDNEQ applies the NEQ predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDNEQ(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldNEQ(FieldThumbnailStorageObjectID, v))
+}
+
+// ThumbnailStorageObjectIDIn applies the In predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDIn(vs ...string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldIn(FieldThumbnailStorageObjectID, vs...))
+}
+
+// ThumbnailStorageObjectIDNotIn applies the NotIn predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDNotIn(vs ...string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldNotIn(FieldThumbnailStorageObjectID, vs...))
+}
+
+// ThumbnailStorageObjectIDGT applies the GT predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDGT(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldGT(FieldThumbnailStorageObjectID, v))
+}
+
+// ThumbnailStorageObjectIDGTE applies the GTE predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDGTE(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldGTE(FieldThumbnailStorageObjectID, v))
+}
+
+// ThumbnailStorageObjectIDLT applies the LT predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDLT(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldLT(FieldThumbnailStorageObjectID, v))
+}
+
+// ThumbnailStorageObjectIDLTE applies the LTE predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDLTE(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldLTE(FieldThumbnailStorageObjectID, v))
+}
+
+// ThumbnailStorageObjectIDContains applies the Contains predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDContains(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldContains(FieldThumbnailStorageObjectID, v))
+}
+
+// ThumbnailStorageObjectIDHasPrefix applies the HasPrefix predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDHasPrefix(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldHasPrefix(FieldThumbnailStorageObjectID, v))
+}
+
+// ThumbnailStorageObjectIDHasSuffix applies the HasSuffix predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDHasSuffix(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldHasSuffix(FieldThumbnailStorageObjectID, v))
+}
+
+// ThumbnailStorageObjectIDIsNil applies the IsNil predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDIsNil() predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldIsNull(FieldThumbnailStorageObjectID))
+}
+
+// ThumbnailStorageObjectIDNotNil applies the NotNil predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDNotNil() predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldNotNull(FieldThumbnailStorageObjectID))
+}
+
+// ThumbnailStorageObjectIDEqualFold applies the EqualFold predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDEqualFold(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldEqualFold(FieldThumbnailStorageObjectID, v))
+}
+
+// ThumbnailStorageObjectIDContainsFold applies the ContainsFold predicate on the "thumbnail_storage_object_id" field.
+func ThumbnailStorageObjectIDContainsFold(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldContainsFold(FieldThumbnailStorageObjectID, v))
 }
 
 // OriginalFilenameEQ applies the EQ predicate on the "original_filename" field.
@@ -871,6 +951,29 @@ func HasStorageObject() predicate.MediaAsset {
 func HasStorageObjectWith(preds ...predicate.StoredObject) predicate.MediaAsset {
 	return predicate.MediaAsset(func(s *sql.Selector) {
 		step := newStorageObjectStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasThumbnailStorageObject applies the HasEdge predicate on the "thumbnail_storage_object" edge.
+func HasThumbnailStorageObject() predicate.MediaAsset {
+	return predicate.MediaAsset(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ThumbnailStorageObjectTable, ThumbnailStorageObjectColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasThumbnailStorageObjectWith applies the HasEdge predicate on the "thumbnail_storage_object" edge with a given conditions (other predicates).
+func HasThumbnailStorageObjectWith(preds ...predicate.StoredObject) predicate.MediaAsset {
+	return predicate.MediaAsset(func(s *sql.Selector) {
+		step := newThumbnailStorageObjectStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -85,6 +85,26 @@ func (_u *MediaAssetUpdate) SetNillableStorageObjectID(v *string) *MediaAssetUpd
 	return _u
 }
 
+// SetThumbnailStorageObjectID sets the "thumbnail_storage_object_id" field.
+func (_u *MediaAssetUpdate) SetThumbnailStorageObjectID(v string) *MediaAssetUpdate {
+	_u.mutation.SetThumbnailStorageObjectID(v)
+	return _u
+}
+
+// SetNillableThumbnailStorageObjectID sets the "thumbnail_storage_object_id" field if the given value is not nil.
+func (_u *MediaAssetUpdate) SetNillableThumbnailStorageObjectID(v *string) *MediaAssetUpdate {
+	if v != nil {
+		_u.SetThumbnailStorageObjectID(*v)
+	}
+	return _u
+}
+
+// ClearThumbnailStorageObjectID clears the value of the "thumbnail_storage_object_id" field.
+func (_u *MediaAssetUpdate) ClearThumbnailStorageObjectID() *MediaAssetUpdate {
+	_u.mutation.ClearThumbnailStorageObjectID()
+	return _u
+}
+
 // SetOriginalFilename sets the "original_filename" field.
 func (_u *MediaAssetUpdate) SetOriginalFilename(v string) *MediaAssetUpdate {
 	_u.mutation.SetOriginalFilename(v)
@@ -226,6 +246,11 @@ func (_u *MediaAssetUpdate) SetStorageObject(v *StoredObject) *MediaAssetUpdate 
 	return _u.SetStorageObjectID(v.ID)
 }
 
+// SetThumbnailStorageObject sets the "thumbnail_storage_object" edge to the StoredObject entity.
+func (_u *MediaAssetUpdate) SetThumbnailStorageObject(v *StoredObject) *MediaAssetUpdate {
+	return _u.SetThumbnailStorageObjectID(v.ID)
+}
+
 // Mutation returns the MediaAssetMutation object of the builder.
 func (_u *MediaAssetUpdate) Mutation() *MediaAssetMutation {
 	return _u.mutation
@@ -246,6 +271,12 @@ func (_u *MediaAssetUpdate) ClearRecipe() *MediaAssetUpdate {
 // ClearStorageObject clears the "storage_object" edge to the StoredObject entity.
 func (_u *MediaAssetUpdate) ClearStorageObject() *MediaAssetUpdate {
 	_u.mutation.ClearStorageObject()
+	return _u
+}
+
+// ClearThumbnailStorageObject clears the "thumbnail_storage_object" edge to the StoredObject entity.
+func (_u *MediaAssetUpdate) ClearThumbnailStorageObject() *MediaAssetUpdate {
+	_u.mutation.ClearThumbnailStorageObject()
 	return _u
 }
 
@@ -448,6 +479,35 @@ func (_u *MediaAssetUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ThumbnailStorageObjectCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   mediaasset.ThumbnailStorageObjectTable,
+			Columns: []string{mediaasset.ThumbnailStorageObjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ThumbnailStorageObjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   mediaasset.ThumbnailStorageObjectTable,
+			Columns: []string{mediaasset.ThumbnailStorageObjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{mediaasset.Label}
@@ -519,6 +579,26 @@ func (_u *MediaAssetUpdateOne) SetNillableStorageObjectID(v *string) *MediaAsset
 	if v != nil {
 		_u.SetStorageObjectID(*v)
 	}
+	return _u
+}
+
+// SetThumbnailStorageObjectID sets the "thumbnail_storage_object_id" field.
+func (_u *MediaAssetUpdateOne) SetThumbnailStorageObjectID(v string) *MediaAssetUpdateOne {
+	_u.mutation.SetThumbnailStorageObjectID(v)
+	return _u
+}
+
+// SetNillableThumbnailStorageObjectID sets the "thumbnail_storage_object_id" field if the given value is not nil.
+func (_u *MediaAssetUpdateOne) SetNillableThumbnailStorageObjectID(v *string) *MediaAssetUpdateOne {
+	if v != nil {
+		_u.SetThumbnailStorageObjectID(*v)
+	}
+	return _u
+}
+
+// ClearThumbnailStorageObjectID clears the value of the "thumbnail_storage_object_id" field.
+func (_u *MediaAssetUpdateOne) ClearThumbnailStorageObjectID() *MediaAssetUpdateOne {
+	_u.mutation.ClearThumbnailStorageObjectID()
 	return _u
 }
 
@@ -663,6 +743,11 @@ func (_u *MediaAssetUpdateOne) SetStorageObject(v *StoredObject) *MediaAssetUpda
 	return _u.SetStorageObjectID(v.ID)
 }
 
+// SetThumbnailStorageObject sets the "thumbnail_storage_object" edge to the StoredObject entity.
+func (_u *MediaAssetUpdateOne) SetThumbnailStorageObject(v *StoredObject) *MediaAssetUpdateOne {
+	return _u.SetThumbnailStorageObjectID(v.ID)
+}
+
 // Mutation returns the MediaAssetMutation object of the builder.
 func (_u *MediaAssetUpdateOne) Mutation() *MediaAssetMutation {
 	return _u.mutation
@@ -683,6 +768,12 @@ func (_u *MediaAssetUpdateOne) ClearRecipe() *MediaAssetUpdateOne {
 // ClearStorageObject clears the "storage_object" edge to the StoredObject entity.
 func (_u *MediaAssetUpdateOne) ClearStorageObject() *MediaAssetUpdateOne {
 	_u.mutation.ClearStorageObject()
+	return _u
+}
+
+// ClearThumbnailStorageObject clears the "thumbnail_storage_object" edge to the StoredObject entity.
+func (_u *MediaAssetUpdateOne) ClearThumbnailStorageObject() *MediaAssetUpdateOne {
+	_u.mutation.ClearThumbnailStorageObject()
 	return _u
 }
 
@@ -905,6 +996,35 @@ func (_u *MediaAssetUpdateOne) sqlSave(ctx context.Context) (_node *MediaAsset, 
 			Inverse: true,
 			Table:   mediaasset.StorageObjectTable,
 			Columns: []string{mediaasset.StorageObjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ThumbnailStorageObjectCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   mediaasset.ThumbnailStorageObjectTable,
+			Columns: []string{mediaasset.ThumbnailStorageObjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ThumbnailStorageObjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   mediaasset.ThumbnailStorageObjectTable,
+			Columns: []string{mediaasset.ThumbnailStorageObjectColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),

@@ -21,13 +21,14 @@ import (
 // MediaAssetQuery is the builder for querying MediaAsset entities.
 type MediaAssetQuery struct {
 	config
-	ctx               *QueryContext
-	order             []mediaasset.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.MediaAsset
-	withHousehold     *HouseholdQuery
-	withRecipe        *RecipeQuery
-	withStorageObject *StoredObjectQuery
+	ctx                        *QueryContext
+	order                      []mediaasset.OrderOption
+	inters                     []Interceptor
+	predicates                 []predicate.MediaAsset
+	withHousehold              *HouseholdQuery
+	withRecipe                 *RecipeQuery
+	withStorageObject          *StoredObjectQuery
+	withThumbnailStorageObject *StoredObjectQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -123,6 +124,28 @@ func (_q *MediaAssetQuery) QueryStorageObject() *StoredObjectQuery {
 			sqlgraph.From(mediaasset.Table, mediaasset.FieldID, selector),
 			sqlgraph.To(storedobject.Table, storedobject.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, mediaasset.StorageObjectTable, mediaasset.StorageObjectColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryThumbnailStorageObject chains the current query on the "thumbnail_storage_object" edge.
+func (_q *MediaAssetQuery) QueryThumbnailStorageObject() *StoredObjectQuery {
+	query := (&StoredObjectClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(mediaasset.Table, mediaasset.FieldID, selector),
+			sqlgraph.To(storedobject.Table, storedobject.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, mediaasset.ThumbnailStorageObjectTable, mediaasset.ThumbnailStorageObjectColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -317,14 +340,15 @@ func (_q *MediaAssetQuery) Clone() *MediaAssetQuery {
 		return nil
 	}
 	return &MediaAssetQuery{
-		config:            _q.config,
-		ctx:               _q.ctx.Clone(),
-		order:             append([]mediaasset.OrderOption{}, _q.order...),
-		inters:            append([]Interceptor{}, _q.inters...),
-		predicates:        append([]predicate.MediaAsset{}, _q.predicates...),
-		withHousehold:     _q.withHousehold.Clone(),
-		withRecipe:        _q.withRecipe.Clone(),
-		withStorageObject: _q.withStorageObject.Clone(),
+		config:                     _q.config,
+		ctx:                        _q.ctx.Clone(),
+		order:                      append([]mediaasset.OrderOption{}, _q.order...),
+		inters:                     append([]Interceptor{}, _q.inters...),
+		predicates:                 append([]predicate.MediaAsset{}, _q.predicates...),
+		withHousehold:              _q.withHousehold.Clone(),
+		withRecipe:                 _q.withRecipe.Clone(),
+		withStorageObject:          _q.withStorageObject.Clone(),
+		withThumbnailStorageObject: _q.withThumbnailStorageObject.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -361,6 +385,17 @@ func (_q *MediaAssetQuery) WithStorageObject(opts ...func(*StoredObjectQuery)) *
 		opt(query)
 	}
 	_q.withStorageObject = query
+	return _q
+}
+
+// WithThumbnailStorageObject tells the query-builder to eager-load the nodes that are connected to
+// the "thumbnail_storage_object" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *MediaAssetQuery) WithThumbnailStorageObject(opts ...func(*StoredObjectQuery)) *MediaAssetQuery {
+	query := (&StoredObjectClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withThumbnailStorageObject = query
 	return _q
 }
 
@@ -442,10 +477,11 @@ func (_q *MediaAssetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*M
 	var (
 		nodes       = []*MediaAsset{}
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			_q.withHousehold != nil,
 			_q.withRecipe != nil,
 			_q.withStorageObject != nil,
+			_q.withThumbnailStorageObject != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -481,6 +517,12 @@ func (_q *MediaAssetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*M
 	if query := _q.withStorageObject; query != nil {
 		if err := _q.loadStorageObject(ctx, query, nodes, nil,
 			func(n *MediaAsset, e *StoredObject) { n.Edges.StorageObject = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withThumbnailStorageObject; query != nil {
+		if err := _q.loadThumbnailStorageObject(ctx, query, nodes, nil,
+			func(n *MediaAsset, e *StoredObject) { n.Edges.ThumbnailStorageObject = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -577,6 +619,38 @@ func (_q *MediaAssetQuery) loadStorageObject(ctx context.Context, query *StoredO
 	}
 	return nil
 }
+func (_q *MediaAssetQuery) loadThumbnailStorageObject(ctx context.Context, query *StoredObjectQuery, nodes []*MediaAsset, init func(*MediaAsset), assign func(*MediaAsset, *StoredObject)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*MediaAsset)
+	for i := range nodes {
+		if nodes[i].ThumbnailStorageObjectID == nil {
+			continue
+		}
+		fk := *nodes[i].ThumbnailStorageObjectID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(storedobject.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "thumbnail_storage_object_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (_q *MediaAssetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
@@ -611,6 +685,9 @@ func (_q *MediaAssetQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withStorageObject != nil {
 			_spec.Node.AddColumnOnce(mediaasset.FieldStorageObjectID)
+		}
+		if _q.withThumbnailStorageObject != nil {
+			_spec.Node.AddColumnOnce(mediaasset.FieldThumbnailStorageObjectID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

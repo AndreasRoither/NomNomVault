@@ -23,6 +23,7 @@ func RegisterRoutes(
 	reads.GET("/recipes/:recipeId", h.getRecipe)
 	reads.GET("/tags", h.listTags)
 	reads.GET("/media/:mediaId/original", h.getMediaOriginal)
+	reads.GET("/media/:mediaId/thumbnail", h.getMediaThumbnail)
 
 	writes := api.Group("")
 	writes.Use(authMiddleware, csrfMiddleware)

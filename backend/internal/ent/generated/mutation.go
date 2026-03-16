@@ -1810,31 +1810,33 @@ func (m *HouseholdMemberMutation) ResetEdge(name string) error {
 // MediaAssetMutation represents an operation that mutates the MediaAsset nodes in the graph.
 type MediaAssetMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *string
-	created_at            *time.Time
-	updated_at            *time.Time
-	original_filename     *string
-	mime_type             *string
-	media_type            *mediaasset.MediaType
-	size_bytes            *int64
-	addsize_bytes         *int64
-	checksum              *string
-	stored_at             *time.Time
-	alt_text              *string
-	sort_order            *int
-	addsort_order         *int
-	clearedFields         map[string]struct{}
-	household             *string
-	clearedhousehold      bool
-	recipe                *string
-	clearedrecipe         bool
-	storage_object        *string
-	clearedstorage_object bool
-	done                  bool
-	oldValue              func(context.Context) (*MediaAsset, error)
-	predicates            []predicate.MediaAsset
+	op                              Op
+	typ                             string
+	id                              *string
+	created_at                      *time.Time
+	updated_at                      *time.Time
+	original_filename               *string
+	mime_type                       *string
+	media_type                      *mediaasset.MediaType
+	size_bytes                      *int64
+	addsize_bytes                   *int64
+	checksum                        *string
+	stored_at                       *time.Time
+	alt_text                        *string
+	sort_order                      *int
+	addsort_order                   *int
+	clearedFields                   map[string]struct{}
+	household                       *string
+	clearedhousehold                bool
+	recipe                          *string
+	clearedrecipe                   bool
+	storage_object                  *string
+	clearedstorage_object           bool
+	thumbnail_storage_object        *string
+	clearedthumbnail_storage_object bool
+	done                            bool
+	oldValue                        func(context.Context) (*MediaAsset, error)
+	predicates                      []predicate.MediaAsset
 }
 
 var _ ent.Mutation = (*MediaAssetMutation)(nil)
@@ -2132,6 +2134,55 @@ func (m *MediaAssetMutation) OldStorageObjectID(ctx context.Context) (v string, 
 // ResetStorageObjectID resets all changes to the "storage_object_id" field.
 func (m *MediaAssetMutation) ResetStorageObjectID() {
 	m.storage_object = nil
+}
+
+// SetThumbnailStorageObjectID sets the "thumbnail_storage_object_id" field.
+func (m *MediaAssetMutation) SetThumbnailStorageObjectID(s string) {
+	m.thumbnail_storage_object = &s
+}
+
+// ThumbnailStorageObjectID returns the value of the "thumbnail_storage_object_id" field in the mutation.
+func (m *MediaAssetMutation) ThumbnailStorageObjectID() (r string, exists bool) {
+	v := m.thumbnail_storage_object
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldThumbnailStorageObjectID returns the old "thumbnail_storage_object_id" field's value of the MediaAsset entity.
+// If the MediaAsset object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaAssetMutation) OldThumbnailStorageObjectID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldThumbnailStorageObjectID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldThumbnailStorageObjectID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldThumbnailStorageObjectID: %w", err)
+	}
+	return oldValue.ThumbnailStorageObjectID, nil
+}
+
+// ClearThumbnailStorageObjectID clears the value of the "thumbnail_storage_object_id" field.
+func (m *MediaAssetMutation) ClearThumbnailStorageObjectID() {
+	m.thumbnail_storage_object = nil
+	m.clearedFields[mediaasset.FieldThumbnailStorageObjectID] = struct{}{}
+}
+
+// ThumbnailStorageObjectIDCleared returns if the "thumbnail_storage_object_id" field was cleared in this mutation.
+func (m *MediaAssetMutation) ThumbnailStorageObjectIDCleared() bool {
+	_, ok := m.clearedFields[mediaasset.FieldThumbnailStorageObjectID]
+	return ok
+}
+
+// ResetThumbnailStorageObjectID resets all changes to the "thumbnail_storage_object_id" field.
+func (m *MediaAssetMutation) ResetThumbnailStorageObjectID() {
+	m.thumbnail_storage_object = nil
+	delete(m.clearedFields, mediaasset.FieldThumbnailStorageObjectID)
 }
 
 // SetOriginalFilename sets the "original_filename" field.
@@ -2543,6 +2594,33 @@ func (m *MediaAssetMutation) ResetStorageObject() {
 	m.clearedstorage_object = false
 }
 
+// ClearThumbnailStorageObject clears the "thumbnail_storage_object" edge to the StoredObject entity.
+func (m *MediaAssetMutation) ClearThumbnailStorageObject() {
+	m.clearedthumbnail_storage_object = true
+	m.clearedFields[mediaasset.FieldThumbnailStorageObjectID] = struct{}{}
+}
+
+// ThumbnailStorageObjectCleared reports if the "thumbnail_storage_object" edge to the StoredObject entity was cleared.
+func (m *MediaAssetMutation) ThumbnailStorageObjectCleared() bool {
+	return m.ThumbnailStorageObjectIDCleared() || m.clearedthumbnail_storage_object
+}
+
+// ThumbnailStorageObjectIDs returns the "thumbnail_storage_object" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ThumbnailStorageObjectID instead. It exists only for internal usage by the builders.
+func (m *MediaAssetMutation) ThumbnailStorageObjectIDs() (ids []string) {
+	if id := m.thumbnail_storage_object; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetThumbnailStorageObject resets all changes to the "thumbnail_storage_object" edge.
+func (m *MediaAssetMutation) ResetThumbnailStorageObject() {
+	m.thumbnail_storage_object = nil
+	m.clearedthumbnail_storage_object = false
+}
+
 // Where appends a list predicates to the MediaAssetMutation builder.
 func (m *MediaAssetMutation) Where(ps ...predicate.MediaAsset) {
 	m.predicates = append(m.predicates, ps...)
@@ -2577,7 +2655,7 @@ func (m *MediaAssetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MediaAssetMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 14)
 	if m.created_at != nil {
 		fields = append(fields, mediaasset.FieldCreatedAt)
 	}
@@ -2592,6 +2670,9 @@ func (m *MediaAssetMutation) Fields() []string {
 	}
 	if m.storage_object != nil {
 		fields = append(fields, mediaasset.FieldStorageObjectID)
+	}
+	if m.thumbnail_storage_object != nil {
+		fields = append(fields, mediaasset.FieldThumbnailStorageObjectID)
 	}
 	if m.original_filename != nil {
 		fields = append(fields, mediaasset.FieldOriginalFilename)
@@ -2635,6 +2716,8 @@ func (m *MediaAssetMutation) Field(name string) (ent.Value, bool) {
 		return m.RecipeID()
 	case mediaasset.FieldStorageObjectID:
 		return m.StorageObjectID()
+	case mediaasset.FieldThumbnailStorageObjectID:
+		return m.ThumbnailStorageObjectID()
 	case mediaasset.FieldOriginalFilename:
 		return m.OriginalFilename()
 	case mediaasset.FieldMimeType:
@@ -2670,6 +2753,8 @@ func (m *MediaAssetMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldRecipeID(ctx)
 	case mediaasset.FieldStorageObjectID:
 		return m.OldStorageObjectID(ctx)
+	case mediaasset.FieldThumbnailStorageObjectID:
+		return m.OldThumbnailStorageObjectID(ctx)
 	case mediaasset.FieldOriginalFilename:
 		return m.OldOriginalFilename(ctx)
 	case mediaasset.FieldMimeType:
@@ -2729,6 +2814,13 @@ func (m *MediaAssetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStorageObjectID(v)
+		return nil
+	case mediaasset.FieldThumbnailStorageObjectID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetThumbnailStorageObjectID(v)
 		return nil
 	case mediaasset.FieldOriginalFilename:
 		v, ok := value.(string)
@@ -2846,6 +2938,9 @@ func (m *MediaAssetMutation) ClearedFields() []string {
 	if m.FieldCleared(mediaasset.FieldRecipeID) {
 		fields = append(fields, mediaasset.FieldRecipeID)
 	}
+	if m.FieldCleared(mediaasset.FieldThumbnailStorageObjectID) {
+		fields = append(fields, mediaasset.FieldThumbnailStorageObjectID)
+	}
 	return fields
 }
 
@@ -2862,6 +2957,9 @@ func (m *MediaAssetMutation) ClearField(name string) error {
 	switch name {
 	case mediaasset.FieldRecipeID:
 		m.ClearRecipeID()
+		return nil
+	case mediaasset.FieldThumbnailStorageObjectID:
+		m.ClearThumbnailStorageObjectID()
 		return nil
 	}
 	return fmt.Errorf("unknown MediaAsset nullable field %s", name)
@@ -2885,6 +2983,9 @@ func (m *MediaAssetMutation) ResetField(name string) error {
 		return nil
 	case mediaasset.FieldStorageObjectID:
 		m.ResetStorageObjectID()
+		return nil
+	case mediaasset.FieldThumbnailStorageObjectID:
+		m.ResetThumbnailStorageObjectID()
 		return nil
 	case mediaasset.FieldOriginalFilename:
 		m.ResetOriginalFilename()
@@ -2916,7 +3017,7 @@ func (m *MediaAssetMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MediaAssetMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.household != nil {
 		edges = append(edges, mediaasset.EdgeHousehold)
 	}
@@ -2925,6 +3026,9 @@ func (m *MediaAssetMutation) AddedEdges() []string {
 	}
 	if m.storage_object != nil {
 		edges = append(edges, mediaasset.EdgeStorageObject)
+	}
+	if m.thumbnail_storage_object != nil {
+		edges = append(edges, mediaasset.EdgeThumbnailStorageObject)
 	}
 	return edges
 }
@@ -2945,13 +3049,17 @@ func (m *MediaAssetMutation) AddedIDs(name string) []ent.Value {
 		if id := m.storage_object; id != nil {
 			return []ent.Value{*id}
 		}
+	case mediaasset.EdgeThumbnailStorageObject:
+		if id := m.thumbnail_storage_object; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MediaAssetMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	return edges
 }
 
@@ -2963,7 +3071,7 @@ func (m *MediaAssetMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MediaAssetMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedhousehold {
 		edges = append(edges, mediaasset.EdgeHousehold)
 	}
@@ -2972,6 +3080,9 @@ func (m *MediaAssetMutation) ClearedEdges() []string {
 	}
 	if m.clearedstorage_object {
 		edges = append(edges, mediaasset.EdgeStorageObject)
+	}
+	if m.clearedthumbnail_storage_object {
+		edges = append(edges, mediaasset.EdgeThumbnailStorageObject)
 	}
 	return edges
 }
@@ -2986,6 +3097,8 @@ func (m *MediaAssetMutation) EdgeCleared(name string) bool {
 		return m.clearedrecipe
 	case mediaasset.EdgeStorageObject:
 		return m.clearedstorage_object
+	case mediaasset.EdgeThumbnailStorageObject:
+		return m.clearedthumbnail_storage_object
 	}
 	return false
 }
@@ -3003,6 +3116,9 @@ func (m *MediaAssetMutation) ClearEdge(name string) error {
 	case mediaasset.EdgeStorageObject:
 		m.ClearStorageObject()
 		return nil
+	case mediaasset.EdgeThumbnailStorageObject:
+		m.ClearThumbnailStorageObject()
+		return nil
 	}
 	return fmt.Errorf("unknown MediaAsset unique edge %s", name)
 }
@@ -3019,6 +3135,9 @@ func (m *MediaAssetMutation) ResetEdge(name string) error {
 		return nil
 	case mediaasset.EdgeStorageObject:
 		m.ResetStorageObject()
+		return nil
+	case mediaasset.EdgeThumbnailStorageObject:
+		m.ResetThumbnailStorageObject()
 		return nil
 	}
 	return fmt.Errorf("unknown MediaAsset edge %s", name)
@@ -10850,26 +10969,29 @@ func (m *RefreshSessionMutation) ResetEdge(name string) error {
 // StoredObjectMutation represents an operation that mutates the StoredObject nodes in the graph.
 type StoredObjectMutation struct {
 	config
-	op                  Op
-	typ                 string
-	id                  *string
-	created_at          *time.Time
-	updated_at          *time.Time
-	original_filename   *string
-	mime_type           *string
-	size_bytes          *int64
-	addsize_bytes       *int64
-	checksum            *string
-	content             *[]byte
-	clearedFields       map[string]struct{}
-	household           *string
-	clearedhousehold    bool
-	media_assets        map[string]struct{}
-	removedmedia_assets map[string]struct{}
-	clearedmedia_assets bool
-	done                bool
-	oldValue            func(context.Context) (*StoredObject, error)
-	predicates          []predicate.StoredObject
+	op                            Op
+	typ                           string
+	id                            *string
+	created_at                    *time.Time
+	updated_at                    *time.Time
+	original_filename             *string
+	mime_type                     *string
+	size_bytes                    *int64
+	addsize_bytes                 *int64
+	checksum                      *string
+	content                       *[]byte
+	clearedFields                 map[string]struct{}
+	household                     *string
+	clearedhousehold              bool
+	media_assets                  map[string]struct{}
+	removedmedia_assets           map[string]struct{}
+	clearedmedia_assets           bool
+	thumbnail_media_assets        map[string]struct{}
+	removedthumbnail_media_assets map[string]struct{}
+	clearedthumbnail_media_assets bool
+	done                          bool
+	oldValue                      func(context.Context) (*StoredObject, error)
+	predicates                    []predicate.StoredObject
 }
 
 var _ ent.Mutation = (*StoredObjectMutation)(nil)
@@ -11365,6 +11487,60 @@ func (m *StoredObjectMutation) ResetMediaAssets() {
 	m.removedmedia_assets = nil
 }
 
+// AddThumbnailMediaAssetIDs adds the "thumbnail_media_assets" edge to the MediaAsset entity by ids.
+func (m *StoredObjectMutation) AddThumbnailMediaAssetIDs(ids ...string) {
+	if m.thumbnail_media_assets == nil {
+		m.thumbnail_media_assets = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.thumbnail_media_assets[ids[i]] = struct{}{}
+	}
+}
+
+// ClearThumbnailMediaAssets clears the "thumbnail_media_assets" edge to the MediaAsset entity.
+func (m *StoredObjectMutation) ClearThumbnailMediaAssets() {
+	m.clearedthumbnail_media_assets = true
+}
+
+// ThumbnailMediaAssetsCleared reports if the "thumbnail_media_assets" edge to the MediaAsset entity was cleared.
+func (m *StoredObjectMutation) ThumbnailMediaAssetsCleared() bool {
+	return m.clearedthumbnail_media_assets
+}
+
+// RemoveThumbnailMediaAssetIDs removes the "thumbnail_media_assets" edge to the MediaAsset entity by IDs.
+func (m *StoredObjectMutation) RemoveThumbnailMediaAssetIDs(ids ...string) {
+	if m.removedthumbnail_media_assets == nil {
+		m.removedthumbnail_media_assets = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.thumbnail_media_assets, ids[i])
+		m.removedthumbnail_media_assets[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedThumbnailMediaAssets returns the removed IDs of the "thumbnail_media_assets" edge to the MediaAsset entity.
+func (m *StoredObjectMutation) RemovedThumbnailMediaAssetsIDs() (ids []string) {
+	for id := range m.removedthumbnail_media_assets {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ThumbnailMediaAssetsIDs returns the "thumbnail_media_assets" edge IDs in the mutation.
+func (m *StoredObjectMutation) ThumbnailMediaAssetsIDs() (ids []string) {
+	for id := range m.thumbnail_media_assets {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetThumbnailMediaAssets resets all changes to the "thumbnail_media_assets" edge.
+func (m *StoredObjectMutation) ResetThumbnailMediaAssets() {
+	m.thumbnail_media_assets = nil
+	m.clearedthumbnail_media_assets = false
+	m.removedthumbnail_media_assets = nil
+}
+
 // Where appends a list predicates to the StoredObjectMutation builder.
 func (m *StoredObjectMutation) Where(ps ...predicate.StoredObject) {
 	m.predicates = append(m.predicates, ps...)
@@ -11632,12 +11808,15 @@ func (m *StoredObjectMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *StoredObjectMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.household != nil {
 		edges = append(edges, storedobject.EdgeHousehold)
 	}
 	if m.media_assets != nil {
 		edges = append(edges, storedobject.EdgeMediaAssets)
+	}
+	if m.thumbnail_media_assets != nil {
+		edges = append(edges, storedobject.EdgeThumbnailMediaAssets)
 	}
 	return edges
 }
@@ -11656,15 +11835,24 @@ func (m *StoredObjectMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case storedobject.EdgeThumbnailMediaAssets:
+		ids := make([]ent.Value, 0, len(m.thumbnail_media_assets))
+		for id := range m.thumbnail_media_assets {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *StoredObjectMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedmedia_assets != nil {
 		edges = append(edges, storedobject.EdgeMediaAssets)
+	}
+	if m.removedthumbnail_media_assets != nil {
+		edges = append(edges, storedobject.EdgeThumbnailMediaAssets)
 	}
 	return edges
 }
@@ -11679,18 +11867,27 @@ func (m *StoredObjectMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case storedobject.EdgeThumbnailMediaAssets:
+		ids := make([]ent.Value, 0, len(m.removedthumbnail_media_assets))
+		for id := range m.removedthumbnail_media_assets {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *StoredObjectMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedhousehold {
 		edges = append(edges, storedobject.EdgeHousehold)
 	}
 	if m.clearedmedia_assets {
 		edges = append(edges, storedobject.EdgeMediaAssets)
+	}
+	if m.clearedthumbnail_media_assets {
+		edges = append(edges, storedobject.EdgeThumbnailMediaAssets)
 	}
 	return edges
 }
@@ -11703,6 +11900,8 @@ func (m *StoredObjectMutation) EdgeCleared(name string) bool {
 		return m.clearedhousehold
 	case storedobject.EdgeMediaAssets:
 		return m.clearedmedia_assets
+	case storedobject.EdgeThumbnailMediaAssets:
+		return m.clearedthumbnail_media_assets
 	}
 	return false
 }
@@ -11727,6 +11926,9 @@ func (m *StoredObjectMutation) ResetEdge(name string) error {
 		return nil
 	case storedobject.EdgeMediaAssets:
 		m.ResetMediaAssets()
+		return nil
+	case storedobject.EdgeThumbnailMediaAssets:
+		m.ResetThumbnailMediaAssets()
 		return nil
 	}
 	return fmt.Errorf("unknown StoredObject edge %s", name)
