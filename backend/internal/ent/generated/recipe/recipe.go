@@ -29,6 +29,8 @@ const (
 	FieldSourceURL = "source_url"
 	// FieldSourceCapturedAt holds the string denoting the source_captured_at field in the database.
 	FieldSourceCapturedAt = "source_captured_at"
+	// FieldArchivedAt holds the string denoting the archived_at field in the database.
+	FieldArchivedAt = "archived_at"
 	// FieldPrimaryMediaID holds the string denoting the primary_media_id field in the database.
 	FieldPrimaryMediaID = "primary_media_id"
 	// FieldGalleryMediaIds holds the string denoting the gallery_media_ids field in the database.
@@ -130,6 +132,7 @@ var Columns = []string{
 	FieldDescription,
 	FieldSourceURL,
 	FieldSourceCapturedAt,
+	FieldArchivedAt,
 	FieldPrimaryMediaID,
 	FieldGalleryMediaIds,
 	FieldPrepMinutes,
@@ -354,6 +357,11 @@ func BySourceURL(opts ...sql.OrderTermOption) OrderOption {
 // BySourceCapturedAt orders the results by the source_captured_at field.
 func BySourceCapturedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSourceCapturedAt, opts...).ToFunc()
+}
+
+// ByArchivedAt orders the results by the archived_at field.
+func ByArchivedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldArchivedAt, opts...).ToFunc()
 }
 
 // ByPrimaryMediaID orders the results by the primary_media_id field.

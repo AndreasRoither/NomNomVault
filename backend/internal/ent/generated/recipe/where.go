@@ -100,6 +100,11 @@ func SourceCapturedAt(v time.Time) predicate.Recipe {
 	return predicate.Recipe(sql.FieldEQ(FieldSourceCapturedAt, v))
 }
 
+// ArchivedAt applies equality check predicate on the "archived_at" field. It's identical to ArchivedAtEQ.
+func ArchivedAt(v time.Time) predicate.Recipe {
+	return predicate.Recipe(sql.FieldEQ(FieldArchivedAt, v))
+}
+
 // PrimaryMediaID applies equality check predicate on the "primary_media_id" field. It's identical to PrimaryMediaIDEQ.
 func PrimaryMediaID(v string) predicate.Recipe {
 	return predicate.Recipe(sql.FieldEQ(FieldPrimaryMediaID, v))
@@ -523,6 +528,56 @@ func SourceCapturedAtIsNil() predicate.Recipe {
 // SourceCapturedAtNotNil applies the NotNil predicate on the "source_captured_at" field.
 func SourceCapturedAtNotNil() predicate.Recipe {
 	return predicate.Recipe(sql.FieldNotNull(FieldSourceCapturedAt))
+}
+
+// ArchivedAtEQ applies the EQ predicate on the "archived_at" field.
+func ArchivedAtEQ(v time.Time) predicate.Recipe {
+	return predicate.Recipe(sql.FieldEQ(FieldArchivedAt, v))
+}
+
+// ArchivedAtNEQ applies the NEQ predicate on the "archived_at" field.
+func ArchivedAtNEQ(v time.Time) predicate.Recipe {
+	return predicate.Recipe(sql.FieldNEQ(FieldArchivedAt, v))
+}
+
+// ArchivedAtIn applies the In predicate on the "archived_at" field.
+func ArchivedAtIn(vs ...time.Time) predicate.Recipe {
+	return predicate.Recipe(sql.FieldIn(FieldArchivedAt, vs...))
+}
+
+// ArchivedAtNotIn applies the NotIn predicate on the "archived_at" field.
+func ArchivedAtNotIn(vs ...time.Time) predicate.Recipe {
+	return predicate.Recipe(sql.FieldNotIn(FieldArchivedAt, vs...))
+}
+
+// ArchivedAtGT applies the GT predicate on the "archived_at" field.
+func ArchivedAtGT(v time.Time) predicate.Recipe {
+	return predicate.Recipe(sql.FieldGT(FieldArchivedAt, v))
+}
+
+// ArchivedAtGTE applies the GTE predicate on the "archived_at" field.
+func ArchivedAtGTE(v time.Time) predicate.Recipe {
+	return predicate.Recipe(sql.FieldGTE(FieldArchivedAt, v))
+}
+
+// ArchivedAtLT applies the LT predicate on the "archived_at" field.
+func ArchivedAtLT(v time.Time) predicate.Recipe {
+	return predicate.Recipe(sql.FieldLT(FieldArchivedAt, v))
+}
+
+// ArchivedAtLTE applies the LTE predicate on the "archived_at" field.
+func ArchivedAtLTE(v time.Time) predicate.Recipe {
+	return predicate.Recipe(sql.FieldLTE(FieldArchivedAt, v))
+}
+
+// ArchivedAtIsNil applies the IsNil predicate on the "archived_at" field.
+func ArchivedAtIsNil() predicate.Recipe {
+	return predicate.Recipe(sql.FieldIsNull(FieldArchivedAt))
+}
+
+// ArchivedAtNotNil applies the NotNil predicate on the "archived_at" field.
+func ArchivedAtNotNil() predicate.Recipe {
+	return predicate.Recipe(sql.FieldNotNull(FieldArchivedAt))
 }
 
 // PrimaryMediaIDEQ applies the EQ predicate on the "primary_media_id" field.

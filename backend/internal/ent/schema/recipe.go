@@ -23,6 +23,7 @@ func (Recipe) Fields() []ent.Field {
 		field.String("description").Default(""),
 		field.String("source_url").Default(""),
 		field.Time("source_captured_at").Optional().Nillable(),
+		field.Time("archived_at").Optional().Nillable(),
 		field.String("primary_media_id").Optional().Nillable(),
 		field.JSON("gallery_media_ids", []string{}).Optional(),
 		field.Int("prep_minutes").Optional().Nillable(),

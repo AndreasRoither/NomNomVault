@@ -33,6 +33,8 @@ type Recipe struct {
 	SourceURL string `json:"source_url,omitempty"`
 	// SourceCapturedAt holds the value of the "source_captured_at" field.
 	SourceCapturedAt *time.Time `json:"source_captured_at,omitempty"`
+	// ArchivedAt holds the value of the "archived_at" field.
+	ArchivedAt *time.Time `json:"archived_at,omitempty"`
 	// PrimaryMediaID holds the value of the "primary_media_id" field.
 	PrimaryMediaID *string `json:"primary_media_id,omitempty"`
 	// GalleryMediaIds holds the value of the "gallery_media_ids" field.
@@ -164,7 +166,7 @@ func (*Recipe) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case recipe.FieldID, recipe.FieldHouseholdID, recipe.FieldTitle, recipe.FieldDescription, recipe.FieldSourceURL, recipe.FieldPrimaryMediaID, recipe.FieldRegion, recipe.FieldMealType, recipe.FieldDifficulty, recipe.FieldCuisine:
 			values[i] = new(sql.NullString)
-		case recipe.FieldCreatedAt, recipe.FieldUpdatedAt, recipe.FieldSourceCapturedAt, recipe.FieldAggregatedAt:
+		case recipe.FieldCreatedAt, recipe.FieldUpdatedAt, recipe.FieldSourceCapturedAt, recipe.FieldArchivedAt, recipe.FieldAggregatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -229,6 +231,13 @@ func (_m *Recipe) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.SourceCapturedAt = new(time.Time)
 				*_m.SourceCapturedAt = value.Time
+			}
+		case recipe.FieldArchivedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field archived_at", values[i])
+			} else if value.Valid {
+				_m.ArchivedAt = new(time.Time)
+				*_m.ArchivedAt = value.Time
 			}
 		case recipe.FieldPrimaryMediaID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -413,6 +422,11 @@ func (_m *Recipe) String() string {
 	builder.WriteString(", ")
 	if v := _m.SourceCapturedAt; v != nil {
 		builder.WriteString("source_captured_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.ArchivedAt; v != nil {
+		builder.WriteString("archived_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")

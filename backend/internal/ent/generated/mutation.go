@@ -3036,6 +3036,7 @@ type RecipeMutation struct {
 	description              *string
 	source_url               *string
 	source_captured_at       *time.Time
+	archived_at              *time.Time
 	primary_media_id         *string
 	gallery_media_ids        *[]string
 	appendgallery_media_ids  []string
@@ -3449,6 +3450,55 @@ func (m *RecipeMutation) SourceCapturedAtCleared() bool {
 func (m *RecipeMutation) ResetSourceCapturedAt() {
 	m.source_captured_at = nil
 	delete(m.clearedFields, recipe.FieldSourceCapturedAt)
+}
+
+// SetArchivedAt sets the "archived_at" field.
+func (m *RecipeMutation) SetArchivedAt(t time.Time) {
+	m.archived_at = &t
+}
+
+// ArchivedAt returns the value of the "archived_at" field in the mutation.
+func (m *RecipeMutation) ArchivedAt() (r time.Time, exists bool) {
+	v := m.archived_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldArchivedAt returns the old "archived_at" field's value of the Recipe entity.
+// If the Recipe object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RecipeMutation) OldArchivedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldArchivedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldArchivedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldArchivedAt: %w", err)
+	}
+	return oldValue.ArchivedAt, nil
+}
+
+// ClearArchivedAt clears the value of the "archived_at" field.
+func (m *RecipeMutation) ClearArchivedAt() {
+	m.archived_at = nil
+	m.clearedFields[recipe.FieldArchivedAt] = struct{}{}
+}
+
+// ArchivedAtCleared returns if the "archived_at" field was cleared in this mutation.
+func (m *RecipeMutation) ArchivedAtCleared() bool {
+	_, ok := m.clearedFields[recipe.FieldArchivedAt]
+	return ok
+}
+
+// ResetArchivedAt resets all changes to the "archived_at" field.
+func (m *RecipeMutation) ResetArchivedAt() {
+	m.archived_at = nil
+	delete(m.clearedFields, recipe.FieldArchivedAt)
 }
 
 // SetPrimaryMediaID sets the "primary_media_id" field.
@@ -4596,7 +4646,7 @@ func (m *RecipeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RecipeMutation) Fields() []string {
-	fields := make([]string, 0, 20)
+	fields := make([]string, 0, 21)
 	if m.created_at != nil {
 		fields = append(fields, recipe.FieldCreatedAt)
 	}
@@ -4617,6 +4667,9 @@ func (m *RecipeMutation) Fields() []string {
 	}
 	if m.source_captured_at != nil {
 		fields = append(fields, recipe.FieldSourceCapturedAt)
+	}
+	if m.archived_at != nil {
+		fields = append(fields, recipe.FieldArchivedAt)
 	}
 	if m.primary_media_id != nil {
 		fields = append(fields, recipe.FieldPrimaryMediaID)
@@ -4679,6 +4732,8 @@ func (m *RecipeMutation) Field(name string) (ent.Value, bool) {
 		return m.SourceURL()
 	case recipe.FieldSourceCapturedAt:
 		return m.SourceCapturedAt()
+	case recipe.FieldArchivedAt:
+		return m.ArchivedAt()
 	case recipe.FieldPrimaryMediaID:
 		return m.PrimaryMediaID()
 	case recipe.FieldGalleryMediaIds:
@@ -4728,6 +4783,8 @@ func (m *RecipeMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldSourceURL(ctx)
 	case recipe.FieldSourceCapturedAt:
 		return m.OldSourceCapturedAt(ctx)
+	case recipe.FieldArchivedAt:
+		return m.OldArchivedAt(ctx)
 	case recipe.FieldPrimaryMediaID:
 		return m.OldPrimaryMediaID(ctx)
 	case recipe.FieldGalleryMediaIds:
@@ -4811,6 +4868,13 @@ func (m *RecipeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSourceCapturedAt(v)
+		return nil
+	case recipe.FieldArchivedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetArchivedAt(v)
 		return nil
 	case recipe.FieldPrimaryMediaID:
 		v, ok := value.(string)
@@ -4999,6 +5063,9 @@ func (m *RecipeMutation) ClearedFields() []string {
 	if m.FieldCleared(recipe.FieldSourceCapturedAt) {
 		fields = append(fields, recipe.FieldSourceCapturedAt)
 	}
+	if m.FieldCleared(recipe.FieldArchivedAt) {
+		fields = append(fields, recipe.FieldArchivedAt)
+	}
 	if m.FieldCleared(recipe.FieldPrimaryMediaID) {
 		fields = append(fields, recipe.FieldPrimaryMediaID)
 	}
@@ -5051,6 +5118,9 @@ func (m *RecipeMutation) ClearField(name string) error {
 	switch name {
 	case recipe.FieldSourceCapturedAt:
 		m.ClearSourceCapturedAt()
+		return nil
+	case recipe.FieldArchivedAt:
+		m.ClearArchivedAt()
 		return nil
 	case recipe.FieldPrimaryMediaID:
 		m.ClearPrimaryMediaID()
@@ -5116,6 +5186,9 @@ func (m *RecipeMutation) ResetField(name string) error {
 		return nil
 	case recipe.FieldSourceCapturedAt:
 		m.ResetSourceCapturedAt()
+		return nil
+	case recipe.FieldArchivedAt:
+		m.ResetArchivedAt()
 		return nil
 	case recipe.FieldPrimaryMediaID:
 		m.ResetPrimaryMediaID()

@@ -15,7 +15,7 @@ export interface paths {
         put?: never;
         /**
          * Log in with email and password
-         * @description Validate the local login contract and return the active session snapshot.
+         * @description Authenticate a local user and return the active session snapshot.
          */
         post: {
             parameters: {
@@ -42,6 +42,24 @@ export interface paths {
                 };
                 /** @description Bad Request */
                 400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Too Many Requests */
+                429: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -86,6 +104,24 @@ export interface paths {
                     };
                     content?: never;
                 };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -125,6 +161,33 @@ export interface paths {
                         "application/json": components["schemas"]["httpapi.AuthSessionResponse"];
                     };
                 };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Too Many Requests */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -160,8 +223,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -171,6 +234,15 @@ export interface paths {
                 };
                 /** @description Bad Request */
                 400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -225,6 +297,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/media/{mediaId}/original": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fetch recipe media
+         * @description Stream the original media bytes for the requested asset.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Media ID */
+                    mediaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/octet-stream": string;
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/octet-stream": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/octet-stream": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/recipes": {
         parameters: {
             query?: never;
@@ -234,7 +366,7 @@ export interface paths {
         };
         /**
          * List recipes
-         * @description Return the current household recipe list using a cursor pagination envelope.
+         * @description Return the current household recipe list using cursor pagination, search, and tag filters.
          */
         get: {
             parameters: {
@@ -243,6 +375,10 @@ export interface paths {
                     cursor?: string;
                     /** @description Maximum number of recipes to return */
                     limit?: number;
+                    /** @description Case-insensitive recipe search query */
+                    q?: string;
+                    /** @description Repeatable tag slug filters */
+                    tag?: string[];
                 };
                 header?: never;
                 path?: never;
@@ -259,10 +395,83 @@ export interface paths {
                         "application/json": components["schemas"]["httpapi.RecipeListResponse"];
                     };
                 };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
             };
         };
         put?: never;
-        post?: never;
+        /**
+         * Create a recipe
+         * @description Create a recipe for the active household.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Create recipe payload */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["httpapi.CreateRecipeRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpapi.RecipeDetailResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -301,6 +510,15 @@ export interface paths {
                         "application/json": components["schemas"]["httpapi.RecipeDetailResponse"];
                     };
                 };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
                 /** @description Not Found */
                 404: {
                     headers: {
@@ -314,6 +532,421 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update a recipe
+         * @description Replace the editable recipe fields and child collections for the active household.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Recipe ID */
+                    recipeId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Update recipe payload */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["httpapi.UpdateRecipeRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpapi.RecipeDetailResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/recipes/{recipeId}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Archive a recipe
+         * @description Mark a recipe as archived for the active household.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recipes/{recipeId}/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload recipe media
+         * @description Upload an image and attach it to the requested recipe.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Recipe ID */
+                    recipeId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "multipart/form-data": {
+                        /**
+                         * Format: binary
+                         * @description Recipe image file
+                         */
+                        file: string;
+                        /** @description Optional alt text */
+                        altText?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpapi.RecipeMediaItem"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Unsupported Media Type */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recipes/{recipeId}/unarchive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Unarchive a recipe
+         * @description Mark an archived recipe as active again for the active household.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List tags
+         * @description Return all household-scoped recipe tags ordered by name.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpapi.TagListResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Create a tag
+         * @description Create one household-scoped recipe tag.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Create tag payload */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["httpapi.CreateTagRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpapi.RecipeTagItem"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -332,6 +965,7 @@ export interface components {
             code?: string;
             details?: components["schemas"]["apicontract.ValidationError"][];
             message?: string;
+            requestId?: string;
             status?: number;
         };
         "apicontract.ValidationError": {
@@ -366,9 +1000,30 @@ export interface components {
             lastLoginAt?: string;
             role?: string;
         };
+        "httpapi.CreateRecipeIngredientRequest": {
+            name: string;
+            preparation?: string;
+            quantity?: number;
+            sortOrder: number;
+            unit?: string;
+        };
+        "httpapi.CreateRecipeRequest": {
+            cookMinutes?: number;
+            description?: string;
+            ingredients: components["schemas"]["httpapi.CreateRecipeIngredientRequest"][];
+            prepMinutes?: number;
+            servings?: number;
+            sourceUrl?: string;
+            title: string;
+        };
+        "httpapi.CreateTagRequest": {
+            color?: string;
+            name: string;
+        };
         "httpapi.RecipeDetailResponse": {
             ingredients?: components["schemas"]["httpapi.RecipeIngredientItem"][];
             mediaAssets?: components["schemas"]["httpapi.RecipeMediaItem"][];
+            nutritionEntries?: components["schemas"]["httpapi.RecipeNutritionItem"][];
             recipe?: components["schemas"]["httpapi.RecipeSummary"];
             steps?: components["schemas"]["httpapi.RecipeStepItem"][];
             tags?: components["schemas"]["httpapi.RecipeTagItem"][];
@@ -386,13 +1041,30 @@ export interface components {
             page?: components["schemas"]["apicontract.CursorPageInfo"];
         };
         "httpapi.RecipeMediaItem": {
+            altText?: string;
             checksum?: string;
             id?: string;
             mediaType?: string;
             mimeType?: string;
             originalFilename?: string;
             sizeBytes?: number;
+            sortOrder?: number;
             storedAt?: string;
+            thumbnailUrl?: string;
+            url?: string;
+        };
+        "httpapi.RecipeNutritionItem": {
+            carbohydrates?: number;
+            energyKcal?: number;
+            fat?: number;
+            fiber?: number;
+            id?: string;
+            protein?: number;
+            referenceQuantity?: string;
+            salt?: number;
+            saturatedFat?: number;
+            sodium?: number;
+            sugars?: number;
         };
         "httpapi.RecipeStepItem": {
             durationMinutes?: number;
@@ -402,11 +1074,18 @@ export interface components {
             tip?: string;
         };
         "httpapi.RecipeSummary": {
+            allergens?: string[];
+            caloriesPerServe?: number;
             cookMinutes?: number;
+            cuisine?: string;
             description?: string;
+            difficulty?: string;
+            galleryMediaIds?: string[];
             id?: string;
+            mealType?: string;
             prepMinutes?: number;
             primaryMediaId?: string;
+            region?: string;
             servings?: number;
             sourceCapturedAt?: string;
             sourceUrl?: string;
@@ -419,6 +1098,40 @@ export interface components {
             name?: string;
             slug?: string;
             system?: boolean;
+        };
+        "httpapi.TagListResponse": {
+            data?: components["schemas"]["httpapi.RecipeTagItem"][];
+        };
+        "httpapi.UpdateRecipeNutritionRequest": {
+            carbohydrates?: number;
+            energyKcal?: number;
+            fat?: number;
+            fiber?: number;
+            protein?: number;
+            referenceQuantity?: string;
+            salt?: number;
+            saturatedFat?: number;
+            sodium?: number;
+            sugars?: number;
+        };
+        "httpapi.UpdateRecipeRequest": {
+            cookMinutes?: number;
+            description?: string;
+            ingredients: components["schemas"]["httpapi.CreateRecipeIngredientRequest"][];
+            nutritionEntries?: components["schemas"]["httpapi.UpdateRecipeNutritionRequest"][];
+            prepMinutes?: number;
+            servings?: number;
+            sourceUrl?: string;
+            steps?: components["schemas"]["httpapi.UpdateRecipeStepRequest"][];
+            tagIds?: string[];
+            title: string;
+            version: number;
+        };
+        "httpapi.UpdateRecipeStepRequest": {
+            durationMinutes?: number;
+            instruction: string;
+            sortOrder: number;
+            tip?: string;
         };
     };
     responses: never;

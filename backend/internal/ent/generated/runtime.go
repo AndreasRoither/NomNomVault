@@ -145,15 +145,15 @@ func init() {
 	// recipe.DefaultSourceURL holds the default value on creation for the source_url field.
 	recipe.DefaultSourceURL = recipeDescSourceURL.Default.(string)
 	// recipeDescPopularityScore is the schema descriptor for popularity_score field.
-	recipeDescPopularityScore := recipeFields[13].Descriptor()
+	recipeDescPopularityScore := recipeFields[14].Descriptor()
 	// recipe.DefaultPopularityScore holds the default value on creation for the popularity_score field.
 	recipe.DefaultPopularityScore = recipeDescPopularityScore.Default.(float64)
 	// recipeDescAllergens is the schema descriptor for allergens field.
-	recipeDescAllergens := recipeFields[14].Descriptor()
+	recipeDescAllergens := recipeFields[15].Descriptor()
 	// recipe.AllergensValidator is a validator for the "allergens" field. It is called by the builders before save.
 	recipe.AllergensValidator = recipeDescAllergens.Validators[0].(func([]string) error)
 	// recipeDescVersion is the schema descriptor for version field.
-	recipeDescVersion := recipeFields[16].Descriptor()
+	recipeDescVersion := recipeFields[17].Descriptor()
 	// recipe.DefaultVersion holds the default value on creation for the version field.
 	recipe.DefaultVersion = recipeDescVersion.Default.(int)
 	// recipeDescID is the schema descriptor for id field.

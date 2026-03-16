@@ -118,6 +118,26 @@ func (_u *RecipeUpdate) ClearSourceCapturedAt() *RecipeUpdate {
 	return _u
 }
 
+// SetArchivedAt sets the "archived_at" field.
+func (_u *RecipeUpdate) SetArchivedAt(v time.Time) *RecipeUpdate {
+	_u.mutation.SetArchivedAt(v)
+	return _u
+}
+
+// SetNillableArchivedAt sets the "archived_at" field if the given value is not nil.
+func (_u *RecipeUpdate) SetNillableArchivedAt(v *time.Time) *RecipeUpdate {
+	if v != nil {
+		_u.SetArchivedAt(*v)
+	}
+	return _u
+}
+
+// ClearArchivedAt clears the value of the "archived_at" field.
+func (_u *RecipeUpdate) ClearArchivedAt() *RecipeUpdate {
+	_u.mutation.ClearArchivedAt()
+	return _u
+}
+
 // SetPrimaryMediaID sets the "primary_media_id" field.
 func (_u *RecipeUpdate) SetPrimaryMediaID(v string) *RecipeUpdate {
 	_u.mutation.SetPrimaryMediaID(v)
@@ -739,6 +759,12 @@ func (_u *RecipeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.SourceCapturedAtCleared() {
 		_spec.ClearField(recipe.FieldSourceCapturedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.ArchivedAt(); ok {
+		_spec.SetField(recipe.FieldArchivedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ArchivedAtCleared() {
+		_spec.ClearField(recipe.FieldArchivedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.PrimaryMediaID(); ok {
 		_spec.SetField(recipe.FieldPrimaryMediaID, field.TypeString, value)
 	}
@@ -1237,6 +1263,26 @@ func (_u *RecipeUpdateOne) SetNillableSourceCapturedAt(v *time.Time) *RecipeUpda
 // ClearSourceCapturedAt clears the value of the "source_captured_at" field.
 func (_u *RecipeUpdateOne) ClearSourceCapturedAt() *RecipeUpdateOne {
 	_u.mutation.ClearSourceCapturedAt()
+	return _u
+}
+
+// SetArchivedAt sets the "archived_at" field.
+func (_u *RecipeUpdateOne) SetArchivedAt(v time.Time) *RecipeUpdateOne {
+	_u.mutation.SetArchivedAt(v)
+	return _u
+}
+
+// SetNillableArchivedAt sets the "archived_at" field if the given value is not nil.
+func (_u *RecipeUpdateOne) SetNillableArchivedAt(v *time.Time) *RecipeUpdateOne {
+	if v != nil {
+		_u.SetArchivedAt(*v)
+	}
+	return _u
+}
+
+// ClearArchivedAt clears the value of the "archived_at" field.
+func (_u *RecipeUpdateOne) ClearArchivedAt() *RecipeUpdateOne {
+	_u.mutation.ClearArchivedAt()
 	return _u
 }
 
@@ -1890,6 +1936,12 @@ func (_u *RecipeUpdateOne) sqlSave(ctx context.Context) (_node *Recipe, err erro
 	}
 	if _u.mutation.SourceCapturedAtCleared() {
 		_spec.ClearField(recipe.FieldSourceCapturedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ArchivedAt(); ok {
+		_spec.SetField(recipe.FieldArchivedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ArchivedAtCleared() {
+		_spec.ClearField(recipe.FieldArchivedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.PrimaryMediaID(); ok {
 		_spec.SetField(recipe.FieldPrimaryMediaID, field.TypeString, value)

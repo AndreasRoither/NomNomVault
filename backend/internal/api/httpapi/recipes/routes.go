@@ -21,10 +21,15 @@ func RegisterRoutes(
 	reads.Use(authMiddleware)
 	reads.GET("/recipes", h.listRecipes)
 	reads.GET("/recipes/:recipeId", h.getRecipe)
+	reads.GET("/tags", h.listTags)
 	reads.GET("/media/:mediaId/original", h.getMediaOriginal)
 
 	writes := api.Group("")
 	writes.Use(authMiddleware, csrfMiddleware)
 	writes.POST("/recipes", h.createRecipe)
+	writes.PATCH("/recipes/:recipeId", h.patchRecipe)
+	writes.POST("/recipes/:recipeId/archive", h.archiveRecipe)
+	writes.POST("/recipes/:recipeId/unarchive", h.unarchiveRecipe)
 	writes.POST("/recipes/:recipeId/media", h.uploadRecipeMedia)
+	writes.POST("/tags", h.createTag)
 }

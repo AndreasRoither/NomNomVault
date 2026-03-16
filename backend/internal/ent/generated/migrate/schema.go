@@ -120,6 +120,7 @@ var (
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "source_url", Type: field.TypeString, Default: ""},
 		{Name: "source_captured_at", Type: field.TypeTime, Nullable: true},
+		{Name: "archived_at", Type: field.TypeTime, Nullable: true},
 		{Name: "primary_media_id", Type: field.TypeString, Nullable: true},
 		{Name: "gallery_media_ids", Type: field.TypeJSON, Nullable: true},
 		{Name: "prep_minutes", Type: field.TypeInt, Nullable: true},
@@ -143,7 +144,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "recipes_households_recipes",
-				Columns:    []*schema.Column{RecipesColumns[20]},
+				Columns:    []*schema.Column{RecipesColumns[21]},
 				RefColumns: []*schema.Column{HouseholdsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -152,7 +153,7 @@ var (
 			{
 				Name:    "recipe_household_id_title",
 				Unique:  false,
-				Columns: []*schema.Column{RecipesColumns[20], RecipesColumns[3]},
+				Columns: []*schema.Column{RecipesColumns[21], RecipesColumns[3]},
 			},
 		},
 	}

@@ -23,6 +23,13 @@ type RecipeSummaryView struct {
 	Version          int
 }
 
+// RecipeListResult wraps a list page plus pagination metadata.
+type RecipeListResult struct {
+	Items      []RecipeSummaryView
+	NextCursor *string
+	HasMore    bool
+}
+
 // IngredientView is the persisted ingredient representation.
 type IngredientView struct {
 	ID          string
@@ -100,6 +107,28 @@ type CreateRecipeIngredientInput struct {
 	SortOrder   int
 }
 
+// UpdateRecipeStepInput is the replace payload for one recipe step.
+type UpdateRecipeStepInput struct {
+	Instruction     string
+	SortOrder       int
+	DurationMinutes *int
+	Tip             *string
+}
+
+// UpdateRecipeNutritionInput is the replace payload for one nutrition entry.
+type UpdateRecipeNutritionInput struct {
+	ReferenceQuantity *string
+	EnergyKcal        *int
+	Protein           *float64
+	Carbohydrates     *float64
+	Fat               *float64
+	SaturatedFat      *float64
+	Fiber             *float64
+	Sugars            *float64
+	Sodium            *float64
+	Salt              *float64
+}
+
 // CreateRecipeInput creates a household-scoped recipe.
 type CreateRecipeInput struct {
 	HouseholdID string
@@ -119,16 +148,61 @@ type CreateRecipeResult struct {
 	Recipe DetailView
 }
 
+// ListRecipesInput defines the available list and search filters.
+type ListRecipesInput struct {
+	HouseholdID string
+	Cursor      *string
+	Limit       int
+	Query       string
+	TagSlugs    []string
+}
+
+// UpdateRecipeInput replaces the editable fields on a recipe.
+type UpdateRecipeInput struct {
+	HouseholdID      string
+	ActorUserID      string
+	ActorRole        string
+	RecipeID         string
+	ExpectedVersion  int
+	Title            string
+	Description      string
+	SourceURL        string
+	PrepMinutes      *int
+	CookMinutes      *int
+	Servings         *int
+	Ingredients      []CreateRecipeIngredientInput
+	Steps            []UpdateRecipeStepInput
+	NutritionEntries []UpdateRecipeNutritionInput
+	TagIDs           []string
+}
+
+// ArchiveRecipeInput toggles recipe archive state.
+type ArchiveRecipeInput struct {
+	HouseholdID string
+	ActorUserID string
+	ActorRole   string
+	RecipeID    string
+}
+
+// CreateTagInput creates one household-scoped tag.
+type CreateTagInput struct {
+	HouseholdID string
+	ActorUserID string
+	ActorRole   string
+	Name        string
+	Color       string
+}
+
 // AttachRecipeMediaInput uploads and attaches one recipe image.
 type AttachRecipeMediaInput struct {
-	HouseholdID       string
-	ActorUserID       string
-	ActorRole         string
-	RecipeID          string
-	OriginalFilename  string
-	MimeType          string
-	AltText           string
-	Content           []byte
+	HouseholdID      string
+	ActorUserID      string
+	ActorRole        string
+	RecipeID         string
+	OriginalFilename string
+	MimeType         string
+	AltText          string
+	Content          []byte
 }
 
 // MediaContentView is the streamed blob payload.

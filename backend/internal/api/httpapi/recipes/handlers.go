@@ -45,12 +45,15 @@ func newHandler(service *recipesvc.Service, maxUploadBytes int64, allowedMIMEs [
 
 // listRecipes godoc
 // @Summary List recipes
-// @Description Return the current household recipe list using a cursor pagination envelope.
+// @Description Return the current household recipe list using cursor pagination, search, and tag filters.
 // @Tags recipes
 // @Produce json
 // @Param cursor query string false "Cursor token"
 // @Param limit query int false "Maximum number of recipes to return"
+// @Param q query string false "Case-insensitive recipe search query"
+// @Param tag query []string false "Repeatable tag slug filters"
 // @Success 200 {object} RecipeListResponse
+// @Failure 400 {object} apicontract.ErrorResponse
 // @Failure 401 {object} apicontract.ErrorResponse
 // @Router /recipes [get]
 func (h *handler) listRecipes(c *gin.Context) {
@@ -73,24 +76,59 @@ func (h *handler) listRecipes(c *gin.Context) {
 		limit = parsed
 	}
 
-	recipes, err := h.service.ListRecipes(c.Request.Context(), session.ActiveHouseholdID, limit)
+	var cursor *string
+	if rawCursor := strings.TrimSpace(c.Query("cursor")); rawCursor != "" {
+		cursor = &rawCursor
+	}
+
+	result, err := h.service.ListRecipes(c.Request.Context(), recipesvc.ListRecipesInput{
+		HouseholdID: session.ActiveHouseholdID,
+		Cursor:      cursor,
+		Limit:       limit,
+		Query:       strings.TrimSpace(c.Query("q")),
+		TagSlugs:    c.QueryArray("tag"),
+	})
 	if err != nil {
 		httpx.WriteServiceError(c, err)
 		return
 	}
 
-	items := make([]RecipeSummary, 0, len(recipes))
-	for _, recipe := range recipes {
+	items := make([]RecipeSummary, 0, len(result.Items))
+	for _, recipe := range result.Items {
 		items = append(items, mapRecipeSummary(recipe))
 	}
 
 	c.JSON(http.StatusOK, RecipeListResponse{
 		Data: items,
 		Page: apicontract.CursorPageInfo{
-			NextCursor: nil,
-			HasMore:    false,
+			NextCursor: result.NextCursor,
+			HasMore:    result.HasMore,
 		},
 	})
+}
+
+// listTags godoc
+// @Summary List tags
+// @Description Return all household-scoped recipe tags ordered by name.
+// @Tags tags
+// @Produce json
+// @Success 200 {object} TagListResponse
+// @Failure 401 {object} apicontract.ErrorResponse
+// @Router /tags [get]
+func (h *handler) listTags(c *gin.Context) {
+	session, ok := authsvc.SessionFromGin(c)
+	if !ok {
+		httpx.WriteError(c, http.StatusUnauthorized, "unauthenticated", "Authentication is required.", nil)
+		return
+	}
+
+	tags, err := h.service.ListTags(c.Request.Context(), session.ActiveHouseholdID)
+	if err != nil {
+		httpx.WriteServiceError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, TagListResponse{Data: mapTagItems(tags)})
 }
 
 // createRecipe godoc
@@ -149,6 +187,137 @@ func (h *handler) createRecipe(c *gin.Context) {
 	c.JSON(http.StatusCreated, mapRecipeDetailResponse(result.Recipe))
 }
 
+// patchRecipe godoc
+// @Summary Update a recipe
+// @Description Replace the editable recipe fields and child collections for the active household.
+// @Tags recipes
+// @Accept json
+// @Produce json
+// @Param recipeId path string true "Recipe ID"
+// @Param payload body UpdateRecipeRequest true "Update recipe payload"
+// @Success 200 {object} RecipeDetailResponse
+// @Failure 400 {object} apicontract.ErrorResponse
+// @Failure 401 {object} apicontract.ErrorResponse
+// @Failure 403 {object} apicontract.ErrorResponse
+// @Failure 404 {object} apicontract.ErrorResponse
+// @Failure 409 {object} apicontract.ErrorResponse
+// @Router /recipes/{recipeId} [patch]
+func (h *handler) patchRecipe(c *gin.Context) {
+	var request UpdateRecipeRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		httpx.WriteValidationError(c, validationErrors("payload", err.Error()))
+		return
+	}
+
+	session, ok := authsvc.SessionFromGin(c)
+	if !ok {
+		httpx.WriteError(c, http.StatusUnauthorized, "unauthenticated", "Authentication is required.", nil)
+		return
+	}
+
+	ingredients := make([]recipesvc.CreateRecipeIngredientInput, 0, len(request.Ingredients))
+	for _, ingredient := range request.Ingredients {
+		ingredients = append(ingredients, recipesvc.CreateRecipeIngredientInput{
+			Name:        ingredient.Name,
+			Quantity:    ingredient.Quantity,
+			Unit:        ingredient.Unit,
+			Preparation: ingredient.Preparation,
+			SortOrder:   ingredient.SortOrder,
+		})
+	}
+
+	steps := make([]recipesvc.UpdateRecipeStepInput, 0, len(request.Steps))
+	for _, step := range request.Steps {
+		steps = append(steps, recipesvc.UpdateRecipeStepInput{
+			Instruction:     step.Instruction,
+			SortOrder:       step.SortOrder,
+			DurationMinutes: step.DurationMinutes,
+			Tip:             step.Tip,
+		})
+	}
+
+	nutritionEntries := make([]recipesvc.UpdateRecipeNutritionInput, 0, len(request.NutritionEntries))
+	for _, entry := range request.NutritionEntries {
+		nutritionEntries = append(nutritionEntries, recipesvc.UpdateRecipeNutritionInput{
+			ReferenceQuantity: entry.ReferenceQuantity,
+			EnergyKcal:        entry.EnergyKcal,
+			Protein:           entry.Protein,
+			Carbohydrates:     entry.Carbohydrates,
+			Fat:               entry.Fat,
+			SaturatedFat:      entry.SaturatedFat,
+			Fiber:             entry.Fiber,
+			Sugars:            entry.Sugars,
+			Sodium:            entry.Sodium,
+			Salt:              entry.Salt,
+		})
+	}
+
+	detail, err := h.service.UpdateRecipe(c.Request.Context(), recipesvc.UpdateRecipeInput{
+		HouseholdID:      session.ActiveHouseholdID,
+		ActorUserID:      session.UserID,
+		ActorRole:        string(session.HouseholdRole),
+		RecipeID:         c.Param("recipeId"),
+		ExpectedVersion:  request.Version,
+		Title:            request.Title,
+		Description:      request.Description,
+		SourceURL:        request.SourceURL,
+		PrepMinutes:      request.PrepMinutes,
+		CookMinutes:      request.CookMinutes,
+		Servings:         request.Servings,
+		Ingredients:      ingredients,
+		Steps:            steps,
+		NutritionEntries: nutritionEntries,
+		TagIDs:           request.TagIDs,
+	})
+	if err != nil {
+		httpx.WriteServiceError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, mapRecipeDetailResponse(detail))
+}
+
+// createTag godoc
+// @Summary Create a tag
+// @Description Create one household-scoped recipe tag.
+// @Tags tags
+// @Accept json
+// @Produce json
+// @Param payload body CreateTagRequest true "Create tag payload"
+// @Success 201 {object} RecipeTagItem
+// @Failure 400 {object} apicontract.ErrorResponse
+// @Failure 401 {object} apicontract.ErrorResponse
+// @Failure 403 {object} apicontract.ErrorResponse
+// @Failure 409 {object} apicontract.ErrorResponse
+// @Router /tags [post]
+func (h *handler) createTag(c *gin.Context) {
+	var request CreateTagRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		httpx.WriteValidationError(c, validationErrors("payload", err.Error()))
+		return
+	}
+
+	session, ok := authsvc.SessionFromGin(c)
+	if !ok {
+		httpx.WriteError(c, http.StatusUnauthorized, "unauthenticated", "Authentication is required.", nil)
+		return
+	}
+
+	createdTag, err := h.service.CreateTag(c.Request.Context(), recipesvc.CreateTagInput{
+		HouseholdID: session.ActiveHouseholdID,
+		ActorUserID: session.UserID,
+		ActorRole:   string(session.HouseholdRole),
+		Name:        request.Name,
+		Color:       request.Color,
+	})
+	if err != nil {
+		httpx.WriteServiceError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, mapTagItems([]recipesvc.TagView{createdTag})[0])
+}
+
 // getRecipe godoc
 // @Summary Fetch a recipe detail
 // @Description Return the detailed recipe payload for the requested recipe ID.
@@ -156,6 +325,7 @@ func (h *handler) createRecipe(c *gin.Context) {
 // @Produce json
 // @Param recipeId path string true "Recipe ID"
 // @Success 200 {object} RecipeDetailResponse
+// @Failure 401 {object} apicontract.ErrorResponse
 // @Failure 404 {object} apicontract.ErrorResponse
 // @Router /recipes/{recipeId} [get]
 func (h *handler) getRecipe(c *gin.Context) {
@@ -172,6 +342,64 @@ func (h *handler) getRecipe(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, mapRecipeDetailResponse(detail))
+}
+
+// archiveRecipe godoc
+// @Summary Archive a recipe
+// @Description Mark a recipe as archived for the active household.
+// @Tags recipes
+// @Success 204
+// @Failure 401 {object} apicontract.ErrorResponse
+// @Failure 403 {object} apicontract.ErrorResponse
+// @Failure 404 {object} apicontract.ErrorResponse
+// @Router /recipes/{recipeId}/archive [post]
+func (h *handler) archiveRecipe(c *gin.Context) {
+	session, ok := authsvc.SessionFromGin(c)
+	if !ok {
+		httpx.WriteError(c, http.StatusUnauthorized, "unauthenticated", "Authentication is required.", nil)
+		return
+	}
+
+	if err := h.service.ArchiveRecipe(c.Request.Context(), recipesvc.ArchiveRecipeInput{
+		HouseholdID: session.ActiveHouseholdID,
+		ActorUserID: session.UserID,
+		ActorRole:   string(session.HouseholdRole),
+		RecipeID:    c.Param("recipeId"),
+	}); err != nil {
+		httpx.WriteServiceError(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+// unarchiveRecipe godoc
+// @Summary Unarchive a recipe
+// @Description Mark an archived recipe as active again for the active household.
+// @Tags recipes
+// @Success 204
+// @Failure 401 {object} apicontract.ErrorResponse
+// @Failure 403 {object} apicontract.ErrorResponse
+// @Failure 404 {object} apicontract.ErrorResponse
+// @Router /recipes/{recipeId}/unarchive [post]
+func (h *handler) unarchiveRecipe(c *gin.Context) {
+	session, ok := authsvc.SessionFromGin(c)
+	if !ok {
+		httpx.WriteError(c, http.StatusUnauthorized, "unauthenticated", "Authentication is required.", nil)
+		return
+	}
+
+	if err := h.service.UnarchiveRecipe(c.Request.Context(), recipesvc.ArchiveRecipeInput{
+		HouseholdID: session.ActiveHouseholdID,
+		ActorUserID: session.UserID,
+		ActorRole:   string(session.HouseholdRole),
+		RecipeID:    c.Param("recipeId"),
+	}); err != nil {
+		httpx.WriteServiceError(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 // uploadRecipeMedia godoc
@@ -459,55 +687,33 @@ func validateImageContent(content []byte, allowedMimeTypes map[string]struct{}) 
 		return "", http.ErrNotSupported
 	}
 
-	config, format, err := image.DecodeConfig(bytes.NewReader(content))
-	if err != nil {
+	if _, _, err := image.DecodeConfig(bytes.NewReader(content)); err != nil {
 		return "", errMalformedImage
-	}
-	if config.Width <= 0 || config.Height <= 0 {
-		return "", errMalformedImage
-	}
-
-	switch format {
-	case "jpeg":
-		if mimeType != "image/jpeg" {
-			return "", errMalformedImage
-		}
-	case "png":
-		if mimeType != "image/png" {
-			return "", errMalformedImage
-		}
-	case "webp":
-		if mimeType != "image/webp" {
-			return "", errMalformedImage
-		}
-	default:
-		return "", http.ErrNotSupported
 	}
 
 	return mimeType, nil
 }
 
-func sanitizeFilename(filename string) string {
-	filename = strings.TrimSpace(filename)
-	replacer := strings.NewReplacer("/", "_", "\\", "_", "\"", "_", "\r", "_", "\n", "_")
-	filename = replacer.Replace(filename)
-
-	var builder strings.Builder
-	for _, r := range filename {
-		if r < 32 || r == 127 {
-			continue
-		}
-		builder.WriteRune(r)
+func isMaxBytesError(err error) bool {
+	if err == nil {
+		return false
 	}
-
-	cleaned := strings.Trim(strings.Join(strings.Fields(builder.String()), " "), " .")
-	if cleaned == "" {
-		return "download"
-	}
-	return cleaned
+	return strings.Contains(err.Error(), "http: request body too large")
 }
 
-func isMaxBytesError(err error) bool {
-	var maxBytesErr *http.MaxBytesError
-	return errors.As(err, &maxBytesErr)
+func sanitizeFilename(name string) string {
+	sanitized := strings.Map(func(r rune) rune {
+		switch r {
+		case '\r', '\n', 0:
+			return -1
+		case '\\', '/', '"':
+			return '_'
+		default:
+			return r
+		}
+	}, strings.TrimSpace(name))
+	if sanitized == "" {
+		return "upload"
+	}
+	return sanitized
 }

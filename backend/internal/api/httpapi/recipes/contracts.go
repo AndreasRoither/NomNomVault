@@ -101,6 +101,11 @@ type RecipeListResponse struct {
 	Page apicontract.CursorPageInfo `json:"page"`
 }
 
+// TagListResponse is the household-scoped list representation for tags.
+type TagListResponse struct {
+	Data []RecipeTagItem `json:"data"`
+}
+
 // CreateRecipeIngredientRequest is the API payload for one ingredient row.
 type CreateRecipeIngredientRequest struct {
 	Name        string   `json:"name" binding:"required"`
@@ -119,4 +124,47 @@ type CreateRecipeRequest struct {
 	CookMinutes *int                            `json:"cookMinutes,omitempty"`
 	Servings    *int                            `json:"servings,omitempty"`
 	Ingredients []CreateRecipeIngredientRequest `json:"ingredients" binding:"required"`
+}
+
+// UpdateRecipeStepRequest is the replace payload for one recipe step.
+type UpdateRecipeStepRequest struct {
+	Instruction     string  `json:"instruction" binding:"required"`
+	SortOrder       int     `json:"sortOrder" binding:"required"`
+	DurationMinutes *int    `json:"durationMinutes,omitempty"`
+	Tip             *string `json:"tip,omitempty"`
+}
+
+// UpdateRecipeNutritionRequest is the replace payload for one recipe nutrition entry.
+type UpdateRecipeNutritionRequest struct {
+	ReferenceQuantity *string  `json:"referenceQuantity,omitempty"`
+	EnergyKcal        *int     `json:"energyKcal,omitempty"`
+	Protein           *float64 `json:"protein,omitempty"`
+	Carbohydrates     *float64 `json:"carbohydrates,omitempty"`
+	Fat               *float64 `json:"fat,omitempty"`
+	SaturatedFat      *float64 `json:"saturatedFat,omitempty"`
+	Fiber             *float64 `json:"fiber,omitempty"`
+	Sugars            *float64 `json:"sugars,omitempty"`
+	Sodium            *float64 `json:"sodium,omitempty"`
+	Salt              *float64 `json:"salt,omitempty"`
+}
+
+// UpdateRecipeRequest replaces the editable recipe fields and collections.
+type UpdateRecipeRequest struct {
+	Version          int                             `json:"version" binding:"required"`
+	Title            string                          `json:"title" binding:"required"`
+	Description      string                          `json:"description"`
+	SourceURL        string                          `json:"sourceUrl"`
+	PrepMinutes      *int                            `json:"prepMinutes,omitempty"`
+	CookMinutes      *int                            `json:"cookMinutes,omitempty"`
+	Servings         *int                            `json:"servings,omitempty"`
+	Ingredients      []CreateRecipeIngredientRequest `json:"ingredients" binding:"required"`
+	Steps            []UpdateRecipeStepRequest       `json:"steps"`
+	NutritionEntries []UpdateRecipeNutritionRequest  `json:"nutritionEntries"`
+	TagIDs           []string                        `json:"tagIds"`
+}
+
+// CreateTagRequest creates one household-scoped tag.
+type CreateTagRequest struct {
+	Name  string `json:"name" binding:"required"`
+	Color string `json:"color"`
 }

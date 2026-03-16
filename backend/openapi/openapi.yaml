@@ -6,7 +6,7 @@ info:
 paths:
   /auth/login:
     post:
-      description: Validate the local login contract and return the active session snapshot.
+      description: Authenticate a local user and return the active session snapshot.
       requestBody:
         content:
           application/json:
@@ -27,6 +27,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
       summary: Log in with email and password
       tags:
         - auth
@@ -36,6 +48,18 @@ paths:
       responses:
         "204":
           description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
       summary: Log out the current session
       tags:
         - auth
@@ -49,6 +73,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/httpapi.AuthSessionResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
       summary: Refresh the current session
       tags:
         - auth
@@ -63,14 +105,20 @@ paths:
         description: Register payload
         required: true
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/httpapi.AuthSessionResponse"
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
           content:
             application/json:
               schema:
@@ -91,10 +139,43 @@ paths:
       summary: Fetch the active browser session
       tags:
         - auth
+  "/media/{mediaId}/original":
+    get:
+      description: Stream the original media bytes for the requested asset.
+      parameters:
+        - description: Media ID
+          in: path
+          name: mediaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Unauthorized
+          content:
+            application/octet-stream:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/octet-stream:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Fetch recipe media
+      tags:
+        - recipes
   /recipes:
     get:
-      description: Return the current household recipe list using a cursor pagination
-        envelope.
+      description: Return the current household recipe list using cursor pagination,
+        search, and tag filters.
       parameters:
         - description: Cursor token
           in: query
@@ -106,6 +187,20 @@ paths:
           name: limit
           schema:
             type: integer
+        - description: Case-insensitive recipe search query
+          in: query
+          name: q
+          schema:
+            type: string
+        - description: Repeatable tag slug filters
+          in: query
+          name: tag
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         "200":
           description: OK
@@ -113,7 +208,56 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/httpapi.RecipeListResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
       summary: List recipes
+      tags:
+        - recipes
+    post:
+      description: Create a recipe for the active household.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/httpapi.CreateRecipeRequest"
+        description: Create recipe payload
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.RecipeDetailResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Create a recipe
       tags:
         - recipes
   "/recipes/{recipeId}":
@@ -133,6 +277,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/httpapi.RecipeDetailResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
         "404":
           description: Not Found
           content:
@@ -142,6 +292,245 @@ paths:
       summary: Fetch a recipe detail
       tags:
         - recipes
+    patch:
+      description: Replace the editable recipe fields and child collections for the
+        active household.
+      parameters:
+        - description: Recipe ID
+          in: path
+          name: recipeId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/httpapi.UpdateRecipeRequest"
+        description: Update recipe payload
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.RecipeDetailResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Update a recipe
+      tags:
+        - recipes
+  "/recipes/{recipeId}/archive":
+    post:
+      description: Mark a recipe as archived for the active household.
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Archive a recipe
+      tags:
+        - recipes
+  "/recipes/{recipeId}/media":
+    post:
+      description: Upload an image and attach it to the requested recipe.
+      parameters:
+        - description: Recipe ID
+          in: path
+          name: recipeId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: Recipe image file
+                  type: string
+                  format: binary
+                altText:
+                  description: Optional alt text
+                  type: string
+              required:
+                - file
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.RecipeMediaItem"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "415":
+          description: Unsupported Media Type
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Upload recipe media
+      tags:
+        - recipes
+  "/recipes/{recipeId}/unarchive":
+    post:
+      description: Mark an archived recipe as active again for the active household.
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Unarchive a recipe
+      tags:
+        - recipes
+  /tags:
+    get:
+      description: Return all household-scoped recipe tags ordered by name.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.TagListResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: List tags
+      tags:
+        - tags
+    post:
+      description: Create one household-scoped recipe tag.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/httpapi.CreateTagRequest"
+        description: Create tag payload
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.RecipeTagItem"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Create a tag
+      tags:
+        - tags
 servers:
   - url: /api/v1
 components:
@@ -162,6 +551,8 @@ components:
             $ref: "#/components/schemas/apicontract.ValidationError"
           type: array
         message:
+          type: string
+        requestId:
           type: string
         status:
           type: integer
@@ -232,6 +623,53 @@ components:
         role:
           type: string
       type: object
+    httpapi.CreateRecipeIngredientRequest:
+      properties:
+        name:
+          type: string
+        preparation:
+          type: string
+        quantity:
+          type: number
+        sortOrder:
+          type: integer
+        unit:
+          type: string
+      required:
+        - name
+        - sortOrder
+      type: object
+    httpapi.CreateRecipeRequest:
+      properties:
+        cookMinutes:
+          type: integer
+        description:
+          type: string
+        ingredients:
+          items:
+            $ref: "#/components/schemas/httpapi.CreateRecipeIngredientRequest"
+          type: array
+        prepMinutes:
+          type: integer
+        servings:
+          type: integer
+        sourceUrl:
+          type: string
+        title:
+          type: string
+      required:
+        - ingredients
+        - title
+      type: object
+    httpapi.CreateTagRequest:
+      properties:
+        color:
+          type: string
+        name:
+          type: string
+      required:
+        - name
+      type: object
     httpapi.RecipeDetailResponse:
       properties:
         ingredients:
@@ -241,6 +679,10 @@ components:
         mediaAssets:
           items:
             $ref: "#/components/schemas/httpapi.RecipeMediaItem"
+          type: array
+        nutritionEntries:
+          items:
+            $ref: "#/components/schemas/httpapi.RecipeNutritionItem"
           type: array
         recipe:
           $ref: "#/components/schemas/httpapi.RecipeSummary"
@@ -279,6 +721,8 @@ components:
       type: object
     httpapi.RecipeMediaItem:
       properties:
+        altText:
+          type: string
         checksum:
           type: string
         id:
@@ -291,8 +735,39 @@ components:
           type: string
         sizeBytes:
           type: integer
+        sortOrder:
+          type: integer
         storedAt:
           type: string
+        thumbnailUrl:
+          type: string
+        url:
+          type: string
+      type: object
+    httpapi.RecipeNutritionItem:
+      properties:
+        carbohydrates:
+          type: number
+        energyKcal:
+          type: integer
+        fat:
+          type: number
+        fiber:
+          type: number
+        id:
+          type: string
+        protein:
+          type: number
+        referenceQuantity:
+          type: string
+        salt:
+          type: number
+        saturatedFat:
+          type: number
+        sodium:
+          type: number
+        sugars:
+          type: number
       type: object
     httpapi.RecipeStepItem:
       properties:
@@ -309,15 +784,33 @@ components:
       type: object
     httpapi.RecipeSummary:
       properties:
+        allergens:
+          items:
+            type: string
+          type: array
+        caloriesPerServe:
+          type: integer
         cookMinutes:
           type: integer
+        cuisine:
+          type: string
         description:
           type: string
+        difficulty:
+          type: string
+        galleryMediaIds:
+          items:
+            type: string
+          type: array
         id:
+          type: string
+        mealType:
           type: string
         prepMinutes:
           type: integer
         primaryMediaId:
+          type: string
+        region:
           type: string
         servings:
           type: integer
@@ -342,4 +835,85 @@ components:
           type: string
         system:
           type: boolean
+      type: object
+    httpapi.TagListResponse:
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/httpapi.RecipeTagItem"
+          type: array
+      type: object
+    httpapi.UpdateRecipeNutritionRequest:
+      properties:
+        carbohydrates:
+          type: number
+        energyKcal:
+          type: integer
+        fat:
+          type: number
+        fiber:
+          type: number
+        protein:
+          type: number
+        referenceQuantity:
+          type: string
+        salt:
+          type: number
+        saturatedFat:
+          type: number
+        sodium:
+          type: number
+        sugars:
+          type: number
+      type: object
+    httpapi.UpdateRecipeRequest:
+      properties:
+        cookMinutes:
+          type: integer
+        description:
+          type: string
+        ingredients:
+          items:
+            $ref: "#/components/schemas/httpapi.CreateRecipeIngredientRequest"
+          type: array
+        nutritionEntries:
+          items:
+            $ref: "#/components/schemas/httpapi.UpdateRecipeNutritionRequest"
+          type: array
+        prepMinutes:
+          type: integer
+        servings:
+          type: integer
+        sourceUrl:
+          type: string
+        steps:
+          items:
+            $ref: "#/components/schemas/httpapi.UpdateRecipeStepRequest"
+          type: array
+        tagIds:
+          items:
+            type: string
+          type: array
+        title:
+          type: string
+        version:
+          type: integer
+      required:
+        - ingredients
+        - title
+        - version
+      type: object
+    httpapi.UpdateRecipeStepRequest:
+      properties:
+        durationMinutes:
+          type: integer
+        instruction:
+          type: string
+        sortOrder:
+          type: integer
+        tip:
+          type: string
+      required:
+        - instruction
+        - sortOrder
       type: object

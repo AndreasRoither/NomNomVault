@@ -109,6 +109,20 @@ func (_c *RecipeCreate) SetNillableSourceCapturedAt(v *time.Time) *RecipeCreate 
 	return _c
 }
 
+// SetArchivedAt sets the "archived_at" field.
+func (_c *RecipeCreate) SetArchivedAt(v time.Time) *RecipeCreate {
+	_c.mutation.SetArchivedAt(v)
+	return _c
+}
+
+// SetNillableArchivedAt sets the "archived_at" field if the given value is not nil.
+func (_c *RecipeCreate) SetNillableArchivedAt(v *time.Time) *RecipeCreate {
+	if v != nil {
+		_c.SetArchivedAt(*v)
+	}
+	return _c
+}
+
 // SetPrimaryMediaID sets the "primary_media_id" field.
 func (_c *RecipeCreate) SetPrimaryMediaID(v string) *RecipeCreate {
 	_c.mutation.SetPrimaryMediaID(v)
@@ -563,6 +577,10 @@ func (_c *RecipeCreate) createSpec() (*Recipe, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.SourceCapturedAt(); ok {
 		_spec.SetField(recipe.FieldSourceCapturedAt, field.TypeTime, value)
 		_node.SourceCapturedAt = &value
+	}
+	if value, ok := _c.mutation.ArchivedAt(); ok {
+		_spec.SetField(recipe.FieldArchivedAt, field.TypeTime, value)
+		_node.ArchivedAt = &value
 	}
 	if value, ok := _c.mutation.PrimaryMediaID(); ok {
 		_spec.SetField(recipe.FieldPrimaryMediaID, field.TypeString, value)
