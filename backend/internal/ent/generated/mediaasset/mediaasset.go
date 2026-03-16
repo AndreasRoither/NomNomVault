@@ -23,6 +23,8 @@ const (
 	FieldHouseholdID = "household_id"
 	// FieldRecipeID holds the string denoting the recipe_id field in the database.
 	FieldRecipeID = "recipe_id"
+	// FieldStorageObjectID holds the string denoting the storage_object_id field in the database.
+	FieldStorageObjectID = "storage_object_id"
 	// FieldOriginalFilename holds the string denoting the original_filename field in the database.
 	FieldOriginalFilename = "original_filename"
 	// FieldMimeType holds the string denoting the mime_type field in the database.
@@ -35,10 +37,16 @@ const (
 	FieldChecksum = "checksum"
 	// FieldStoredAt holds the string denoting the stored_at field in the database.
 	FieldStoredAt = "stored_at"
+	// FieldAltText holds the string denoting the alt_text field in the database.
+	FieldAltText = "alt_text"
+	// FieldSortOrder holds the string denoting the sort_order field in the database.
+	FieldSortOrder = "sort_order"
 	// EdgeHousehold holds the string denoting the household edge name in mutations.
 	EdgeHousehold = "household"
 	// EdgeRecipe holds the string denoting the recipe edge name in mutations.
 	EdgeRecipe = "recipe"
+	// EdgeStorageObject holds the string denoting the storage_object edge name in mutations.
+	EdgeStorageObject = "storage_object"
 	// Table holds the table name of the mediaasset in the database.
 	Table = "media_assets"
 	// HouseholdTable is the table that holds the household relation/edge.
@@ -55,6 +63,13 @@ const (
 	RecipeInverseTable = "recipes"
 	// RecipeColumn is the table column denoting the recipe relation/edge.
 	RecipeColumn = "recipe_id"
+	// StorageObjectTable is the table that holds the storage_object relation/edge.
+	StorageObjectTable = "media_assets"
+	// StorageObjectInverseTable is the table name for the StoredObject entity.
+	// It exists in this package in order to avoid circular dependency with the "storedobject" package.
+	StorageObjectInverseTable = "stored_objects"
+	// StorageObjectColumn is the table column denoting the storage_object relation/edge.
+	StorageObjectColumn = "storage_object_id"
 )
 
 // Columns holds all SQL columns for mediaasset fields.
@@ -64,12 +79,15 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldHouseholdID,
 	FieldRecipeID,
+	FieldStorageObjectID,
 	FieldOriginalFilename,
 	FieldMimeType,
 	FieldMediaType,
 	FieldSizeBytes,
 	FieldChecksum,
 	FieldStoredAt,
+	FieldAltText,
+	FieldSortOrder,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -95,6 +113,10 @@ var (
 	MimeTypeValidator func(string) error
 	// ChecksumValidator is a validator for the "checksum" field. It is called by the builders before save.
 	ChecksumValidator func(string) error
+	// DefaultAltText holds the default value on creation for the "alt_text" field.
+	DefaultAltText string
+	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
+	DefaultSortOrder int
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 )
@@ -154,6 +176,11 @@ func ByRecipeID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRecipeID, opts...).ToFunc()
 }
 
+// ByStorageObjectID orders the results by the storage_object_id field.
+func ByStorageObjectID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStorageObjectID, opts...).ToFunc()
+}
+
 // ByOriginalFilename orders the results by the original_filename field.
 func ByOriginalFilename(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOriginalFilename, opts...).ToFunc()
@@ -184,6 +211,16 @@ func ByStoredAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStoredAt, opts...).ToFunc()
 }
 
+// ByAltText orders the results by the alt_text field.
+func ByAltText(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAltText, opts...).ToFunc()
+}
+
+// BySortOrder orders the results by the sort_order field.
+func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSortOrder, opts...).ToFunc()
+}
+
 // ByHouseholdField orders the results by household field.
 func ByHouseholdField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -195,6 +232,13 @@ func ByHouseholdField(field string, opts ...sql.OrderTermOption) OrderOption {
 func ByRecipeField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newRecipeStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByStorageObjectField orders the results by storage_object field.
+func ByStorageObjectField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStorageObjectStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newHouseholdStep() *sqlgraph.Step {
@@ -209,5 +253,12 @@ func newRecipeStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(RecipeInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, RecipeTable, RecipeColumn),
+	)
+}
+func newStorageObjectStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StorageObjectInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, StorageObjectTable, StorageObjectColumn),
 	)
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 )
 
 // MediaAsset is the model entity for the MediaAsset schema.
@@ -27,6 +28,8 @@ type MediaAsset struct {
 	HouseholdID string `json:"household_id,omitempty"`
 	// RecipeID holds the value of the "recipe_id" field.
 	RecipeID *string `json:"recipe_id,omitempty"`
+	// StorageObjectID holds the value of the "storage_object_id" field.
+	StorageObjectID string `json:"storage_object_id,omitempty"`
 	// OriginalFilename holds the value of the "original_filename" field.
 	OriginalFilename string `json:"original_filename,omitempty"`
 	// MimeType holds the value of the "mime_type" field.
@@ -39,6 +42,10 @@ type MediaAsset struct {
 	Checksum string `json:"checksum,omitempty"`
 	// StoredAt holds the value of the "stored_at" field.
 	StoredAt time.Time `json:"stored_at,omitempty"`
+	// AltText holds the value of the "alt_text" field.
+	AltText string `json:"alt_text,omitempty"`
+	// SortOrder holds the value of the "sort_order" field.
+	SortOrder int `json:"sort_order,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MediaAssetQuery when eager-loading is set.
 	Edges        MediaAssetEdges `json:"edges"`
@@ -51,9 +58,11 @@ type MediaAssetEdges struct {
 	Household *Household `json:"household,omitempty"`
 	// Recipe holds the value of the recipe edge.
 	Recipe *Recipe `json:"recipe,omitempty"`
+	// StorageObject holds the value of the storage_object edge.
+	StorageObject *StoredObject `json:"storage_object,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // HouseholdOrErr returns the Household value or an error if the edge
@@ -78,14 +87,25 @@ func (e MediaAssetEdges) RecipeOrErr() (*Recipe, error) {
 	return nil, &NotLoadedError{edge: "recipe"}
 }
 
+// StorageObjectOrErr returns the StorageObject value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MediaAssetEdges) StorageObjectOrErr() (*StoredObject, error) {
+	if e.StorageObject != nil {
+		return e.StorageObject, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: storedobject.Label}
+	}
+	return nil, &NotLoadedError{edge: "storage_object"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*MediaAsset) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case mediaasset.FieldSizeBytes:
+		case mediaasset.FieldSizeBytes, mediaasset.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
-		case mediaasset.FieldID, mediaasset.FieldHouseholdID, mediaasset.FieldRecipeID, mediaasset.FieldOriginalFilename, mediaasset.FieldMimeType, mediaasset.FieldMediaType, mediaasset.FieldChecksum:
+		case mediaasset.FieldID, mediaasset.FieldHouseholdID, mediaasset.FieldRecipeID, mediaasset.FieldStorageObjectID, mediaasset.FieldOriginalFilename, mediaasset.FieldMimeType, mediaasset.FieldMediaType, mediaasset.FieldChecksum, mediaasset.FieldAltText:
 			values[i] = new(sql.NullString)
 		case mediaasset.FieldCreatedAt, mediaasset.FieldUpdatedAt, mediaasset.FieldStoredAt:
 			values[i] = new(sql.NullTime)
@@ -135,6 +155,12 @@ func (_m *MediaAsset) assignValues(columns []string, values []any) error {
 				_m.RecipeID = new(string)
 				*_m.RecipeID = value.String
 			}
+		case mediaasset.FieldStorageObjectID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field storage_object_id", values[i])
+			} else if value.Valid {
+				_m.StorageObjectID = value.String
+			}
 		case mediaasset.FieldOriginalFilename:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field original_filename", values[i])
@@ -171,6 +197,18 @@ func (_m *MediaAsset) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.StoredAt = value.Time
 			}
+		case mediaasset.FieldAltText:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field alt_text", values[i])
+			} else if value.Valid {
+				_m.AltText = value.String
+			}
+		case mediaasset.FieldSortOrder:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field sort_order", values[i])
+			} else if value.Valid {
+				_m.SortOrder = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -192,6 +230,11 @@ func (_m *MediaAsset) QueryHousehold() *HouseholdQuery {
 // QueryRecipe queries the "recipe" edge of the MediaAsset entity.
 func (_m *MediaAsset) QueryRecipe() *RecipeQuery {
 	return NewMediaAssetClient(_m.config).QueryRecipe(_m)
+}
+
+// QueryStorageObject queries the "storage_object" edge of the MediaAsset entity.
+func (_m *MediaAsset) QueryStorageObject() *StoredObjectQuery {
+	return NewMediaAssetClient(_m.config).QueryStorageObject(_m)
 }
 
 // Update returns a builder for updating this MediaAsset.
@@ -231,6 +274,9 @@ func (_m *MediaAsset) String() string {
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
+	builder.WriteString("storage_object_id=")
+	builder.WriteString(_m.StorageObjectID)
+	builder.WriteString(", ")
 	builder.WriteString("original_filename=")
 	builder.WriteString(_m.OriginalFilename)
 	builder.WriteString(", ")
@@ -248,6 +294,12 @@ func (_m *MediaAsset) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("stored_at=")
 	builder.WriteString(_m.StoredAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("alt_text=")
+	builder.WriteString(_m.AltText)
+	builder.WriteString(", ")
+	builder.WriteString("sort_order=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SortOrder))
 	builder.WriteByte(')')
 	return builder.String()
 }

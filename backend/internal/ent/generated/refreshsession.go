@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
 )
@@ -24,6 +25,8 @@ type RefreshSession struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
+	// ActiveHouseholdID holds the value of the "active_household_id" field.
+	ActiveHouseholdID string `json:"active_household_id,omitempty"`
 	// TokenHash holds the value of the "token_hash" field.
 	TokenHash string `json:"token_hash,omitempty"`
 	// ExpiresAt holds the value of the "expires_at" field.
@@ -46,9 +49,11 @@ type RefreshSession struct {
 type RefreshSessionEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// ActiveHousehold holds the value of the active_household edge.
+	ActiveHousehold *Household `json:"active_household,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -62,6 +67,17 @@ func (e RefreshSessionEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
+// ActiveHouseholdOrErr returns the ActiveHousehold value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RefreshSessionEdges) ActiveHouseholdOrErr() (*Household, error) {
+	if e.ActiveHousehold != nil {
+		return e.ActiveHousehold, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: household.Label}
+	}
+	return nil, &NotLoadedError{edge: "active_household"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*RefreshSession) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -69,7 +85,7 @@ func (*RefreshSession) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case refreshsession.FieldRevoked:
 			values[i] = new(sql.NullBool)
-		case refreshsession.FieldID, refreshsession.FieldUserID, refreshsession.FieldTokenHash, refreshsession.FieldDeviceInfo, refreshsession.FieldIPAddress:
+		case refreshsession.FieldID, refreshsession.FieldUserID, refreshsession.FieldActiveHouseholdID, refreshsession.FieldTokenHash, refreshsession.FieldDeviceInfo, refreshsession.FieldIPAddress:
 			values[i] = new(sql.NullString)
 		case refreshsession.FieldCreatedAt, refreshsession.FieldUpdatedAt, refreshsession.FieldExpiresAt, refreshsession.FieldLastUsedAt:
 			values[i] = new(sql.NullTime)
@@ -111,6 +127,12 @@ func (_m *RefreshSession) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
 				_m.UserID = value.String
+			}
+		case refreshsession.FieldActiveHouseholdID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field active_household_id", values[i])
+			} else if value.Valid {
+				_m.ActiveHouseholdID = value.String
 			}
 		case refreshsession.FieldTokenHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -169,6 +191,11 @@ func (_m *RefreshSession) QueryUser() *UserQuery {
 	return NewRefreshSessionClient(_m.config).QueryUser(_m)
 }
 
+// QueryActiveHousehold queries the "active_household" edge of the RefreshSession entity.
+func (_m *RefreshSession) QueryActiveHousehold() *HouseholdQuery {
+	return NewRefreshSessionClient(_m.config).QueryActiveHousehold(_m)
+}
+
 // Update returns a builder for updating this RefreshSession.
 // Note that you need to call RefreshSession.Unwrap() before calling this method if this RefreshSession
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -200,6 +227,9 @@ func (_m *RefreshSession) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(_m.UserID)
+	builder.WriteString(", ")
+	builder.WriteString("active_household_id=")
+	builder.WriteString(_m.ActiveHouseholdID)
 	builder.WriteString(", ")
 	builder.WriteString("token_hash=")
 	builder.WriteString(_m.TokenHash)

@@ -24,6 +24,7 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeshare"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipestep"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
 )
@@ -51,6 +52,8 @@ type Client struct {
 	RecipeStep *RecipeStepClient
 	// RefreshSession is the client for interacting with the RefreshSession builders.
 	RefreshSession *RefreshSessionClient
+	// StoredObject is the client for interacting with the StoredObject builders.
+	StoredObject *StoredObjectClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
 	// User is the client for interacting with the User builders.
@@ -75,6 +78,7 @@ func (c *Client) init() {
 	c.RecipeShare = NewRecipeShareClient(c.config)
 	c.RecipeStep = NewRecipeStepClient(c.config)
 	c.RefreshSession = NewRefreshSessionClient(c.config)
+	c.StoredObject = NewStoredObjectClient(c.config)
 	c.Tag = NewTagClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -178,6 +182,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		RecipeShare:      NewRecipeShareClient(cfg),
 		RecipeStep:       NewRecipeStepClient(cfg),
 		RefreshSession:   NewRefreshSessionClient(cfg),
+		StoredObject:     NewStoredObjectClient(cfg),
 		Tag:              NewTagClient(cfg),
 		User:             NewUserClient(cfg),
 	}, nil
@@ -208,6 +213,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		RecipeShare:      NewRecipeShareClient(cfg),
 		RecipeStep:       NewRecipeStepClient(cfg),
 		RefreshSession:   NewRefreshSessionClient(cfg),
+		StoredObject:     NewStoredObjectClient(cfg),
 		Tag:              NewTagClient(cfg),
 		User:             NewUserClient(cfg),
 	}, nil
@@ -240,8 +246,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Household, c.HouseholdMember, c.MediaAsset, c.Recipe, c.RecipeIngredient,
-		c.RecipeNutrition, c.RecipeShare, c.RecipeStep, c.RefreshSession, c.Tag,
-		c.User,
+		c.RecipeNutrition, c.RecipeShare, c.RecipeStep, c.RefreshSession,
+		c.StoredObject, c.Tag, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -252,8 +258,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Household, c.HouseholdMember, c.MediaAsset, c.Recipe, c.RecipeIngredient,
-		c.RecipeNutrition, c.RecipeShare, c.RecipeStep, c.RefreshSession, c.Tag,
-		c.User,
+		c.RecipeNutrition, c.RecipeShare, c.RecipeStep, c.RefreshSession,
+		c.StoredObject, c.Tag, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -280,6 +286,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.RecipeStep.mutate(ctx, m)
 	case *RefreshSessionMutation:
 		return c.RefreshSession.mutate(ctx, m)
+	case *StoredObjectMutation:
+		return c.StoredObject.mutate(ctx, m)
 	case *TagMutation:
 		return c.Tag.mutate(ctx, m)
 	case *UserMutation:
@@ -454,6 +462,38 @@ func (c *HouseholdClient) QueryMediaAssets(_m *Household) *MediaAssetQuery {
 			sqlgraph.From(household.Table, household.FieldID, id),
 			sqlgraph.To(mediaasset.Table, mediaasset.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, household.MediaAssetsTable, household.MediaAssetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryStoredObjects queries the stored_objects edge of a Household.
+func (c *HouseholdClient) QueryStoredObjects(_m *Household) *StoredObjectQuery {
+	query := (&StoredObjectClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(household.Table, household.FieldID, id),
+			sqlgraph.To(storedobject.Table, storedobject.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, household.StoredObjectsTable, household.StoredObjectsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRefreshSessions queries the refresh_sessions edge of a Household.
+func (c *HouseholdClient) QueryRefreshSessions(_m *Household) *RefreshSessionQuery {
+	query := (&RefreshSessionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(household.Table, household.FieldID, id),
+			sqlgraph.To(refreshsession.Table, refreshsession.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, household.RefreshSessionsTable, household.RefreshSessionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -784,6 +824,22 @@ func (c *MediaAssetClient) QueryRecipe(_m *MediaAsset) *RecipeQuery {
 			sqlgraph.From(mediaasset.Table, mediaasset.FieldID, id),
 			sqlgraph.To(recipe.Table, recipe.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, mediaasset.RecipeTable, mediaasset.RecipeColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryStorageObject queries the storage_object edge of a MediaAsset.
+func (c *MediaAssetClient) QueryStorageObject(_m *MediaAsset) *StoredObjectQuery {
+	query := (&StoredObjectClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(mediaasset.Table, mediaasset.FieldID, id),
+			sqlgraph.To(storedobject.Table, storedobject.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, mediaasset.StorageObjectTable, mediaasset.StorageObjectColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1797,6 +1853,22 @@ func (c *RefreshSessionClient) QueryUser(_m *RefreshSession) *UserQuery {
 	return query
 }
 
+// QueryActiveHousehold queries the active_household edge of a RefreshSession.
+func (c *RefreshSessionClient) QueryActiveHousehold(_m *RefreshSession) *HouseholdQuery {
+	query := (&HouseholdClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(refreshsession.Table, refreshsession.FieldID, id),
+			sqlgraph.To(household.Table, household.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, refreshsession.ActiveHouseholdTable, refreshsession.ActiveHouseholdColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *RefreshSessionClient) Hooks() []Hook {
 	return c.hooks.RefreshSession
@@ -1819,6 +1891,171 @@ func (c *RefreshSessionClient) mutate(ctx context.Context, m *RefreshSessionMuta
 		return (&RefreshSessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("generated: unknown RefreshSession mutation op: %q", m.Op())
+	}
+}
+
+// StoredObjectClient is a client for the StoredObject schema.
+type StoredObjectClient struct {
+	config
+}
+
+// NewStoredObjectClient returns a client for the StoredObject from the given config.
+func NewStoredObjectClient(c config) *StoredObjectClient {
+	return &StoredObjectClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `storedobject.Hooks(f(g(h())))`.
+func (c *StoredObjectClient) Use(hooks ...Hook) {
+	c.hooks.StoredObject = append(c.hooks.StoredObject, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `storedobject.Intercept(f(g(h())))`.
+func (c *StoredObjectClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StoredObject = append(c.inters.StoredObject, interceptors...)
+}
+
+// Create returns a builder for creating a StoredObject entity.
+func (c *StoredObjectClient) Create() *StoredObjectCreate {
+	mutation := newStoredObjectMutation(c.config, OpCreate)
+	return &StoredObjectCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StoredObject entities.
+func (c *StoredObjectClient) CreateBulk(builders ...*StoredObjectCreate) *StoredObjectCreateBulk {
+	return &StoredObjectCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StoredObjectClient) MapCreateBulk(slice any, setFunc func(*StoredObjectCreate, int)) *StoredObjectCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StoredObjectCreateBulk{err: fmt.Errorf("calling to StoredObjectClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StoredObjectCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StoredObjectCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StoredObject.
+func (c *StoredObjectClient) Update() *StoredObjectUpdate {
+	mutation := newStoredObjectMutation(c.config, OpUpdate)
+	return &StoredObjectUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StoredObjectClient) UpdateOne(_m *StoredObject) *StoredObjectUpdateOne {
+	mutation := newStoredObjectMutation(c.config, OpUpdateOne, withStoredObject(_m))
+	return &StoredObjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StoredObjectClient) UpdateOneID(id string) *StoredObjectUpdateOne {
+	mutation := newStoredObjectMutation(c.config, OpUpdateOne, withStoredObjectID(id))
+	return &StoredObjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StoredObject.
+func (c *StoredObjectClient) Delete() *StoredObjectDelete {
+	mutation := newStoredObjectMutation(c.config, OpDelete)
+	return &StoredObjectDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StoredObjectClient) DeleteOne(_m *StoredObject) *StoredObjectDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StoredObjectClient) DeleteOneID(id string) *StoredObjectDeleteOne {
+	builder := c.Delete().Where(storedobject.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StoredObjectDeleteOne{builder}
+}
+
+// Query returns a query builder for StoredObject.
+func (c *StoredObjectClient) Query() *StoredObjectQuery {
+	return &StoredObjectQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStoredObject},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StoredObject entity by its id.
+func (c *StoredObjectClient) Get(ctx context.Context, id string) (*StoredObject, error) {
+	return c.Query().Where(storedobject.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StoredObjectClient) GetX(ctx context.Context, id string) *StoredObject {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryHousehold queries the household edge of a StoredObject.
+func (c *StoredObjectClient) QueryHousehold(_m *StoredObject) *HouseholdQuery {
+	query := (&HouseholdClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(storedobject.Table, storedobject.FieldID, id),
+			sqlgraph.To(household.Table, household.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, storedobject.HouseholdTable, storedobject.HouseholdColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMediaAssets queries the media_assets edge of a StoredObject.
+func (c *StoredObjectClient) QueryMediaAssets(_m *StoredObject) *MediaAssetQuery {
+	query := (&MediaAssetClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(storedobject.Table, storedobject.FieldID, id),
+			sqlgraph.To(mediaasset.Table, mediaasset.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, storedobject.MediaAssetsTable, storedobject.MediaAssetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StoredObjectClient) Hooks() []Hook {
+	return c.hooks.StoredObject
+}
+
+// Interceptors returns the client interceptors.
+func (c *StoredObjectClient) Interceptors() []Interceptor {
+	return c.inters.StoredObject
+}
+
+func (c *StoredObjectClient) mutate(ctx context.Context, m *StoredObjectMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StoredObjectCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StoredObjectUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StoredObjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StoredObjectDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("generated: unknown StoredObject mutation op: %q", m.Op())
 	}
 }
 
@@ -2172,11 +2409,12 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 type (
 	hooks struct {
 		Household, HouseholdMember, MediaAsset, Recipe, RecipeIngredient,
-		RecipeNutrition, RecipeShare, RecipeStep, RefreshSession, Tag, User []ent.Hook
+		RecipeNutrition, RecipeShare, RecipeStep, RefreshSession, StoredObject, Tag,
+		User []ent.Hook
 	}
 	inters struct {
 		Household, HouseholdMember, MediaAsset, Recipe, RecipeIngredient,
-		RecipeNutrition, RecipeShare, RecipeStep, RefreshSession, Tag,
+		RecipeNutrition, RecipeShare, RecipeStep, RefreshSession, StoredObject, Tag,
 		User []ent.Interceptor
 	}
 )

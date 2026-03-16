@@ -17,20 +17,24 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 )
 
 // HouseholdQuery is the builder for querying Household entities.
 type HouseholdQuery struct {
 	config
-	ctx             *QueryContext
-	order           []household.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.Household
-	withMembers     *HouseholdMemberQuery
-	withRecipes     *RecipeQuery
-	withTags        *TagQuery
-	withMediaAssets *MediaAssetQuery
+	ctx                 *QueryContext
+	order               []household.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.Household
+	withMembers         *HouseholdMemberQuery
+	withRecipes         *RecipeQuery
+	withTags            *TagQuery
+	withMediaAssets     *MediaAssetQuery
+	withStoredObjects   *StoredObjectQuery
+	withRefreshSessions *RefreshSessionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -148,6 +152,50 @@ func (_q *HouseholdQuery) QueryMediaAssets() *MediaAssetQuery {
 			sqlgraph.From(household.Table, household.FieldID, selector),
 			sqlgraph.To(mediaasset.Table, mediaasset.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, household.MediaAssetsTable, household.MediaAssetsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryStoredObjects chains the current query on the "stored_objects" edge.
+func (_q *HouseholdQuery) QueryStoredObjects() *StoredObjectQuery {
+	query := (&StoredObjectClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(household.Table, household.FieldID, selector),
+			sqlgraph.To(storedobject.Table, storedobject.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, household.StoredObjectsTable, household.StoredObjectsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRefreshSessions chains the current query on the "refresh_sessions" edge.
+func (_q *HouseholdQuery) QueryRefreshSessions() *RefreshSessionQuery {
+	query := (&RefreshSessionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(household.Table, household.FieldID, selector),
+			sqlgraph.To(refreshsession.Table, refreshsession.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, household.RefreshSessionsTable, household.RefreshSessionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -342,15 +390,17 @@ func (_q *HouseholdQuery) Clone() *HouseholdQuery {
 		return nil
 	}
 	return &HouseholdQuery{
-		config:          _q.config,
-		ctx:             _q.ctx.Clone(),
-		order:           append([]household.OrderOption{}, _q.order...),
-		inters:          append([]Interceptor{}, _q.inters...),
-		predicates:      append([]predicate.Household{}, _q.predicates...),
-		withMembers:     _q.withMembers.Clone(),
-		withRecipes:     _q.withRecipes.Clone(),
-		withTags:        _q.withTags.Clone(),
-		withMediaAssets: _q.withMediaAssets.Clone(),
+		config:              _q.config,
+		ctx:                 _q.ctx.Clone(),
+		order:               append([]household.OrderOption{}, _q.order...),
+		inters:              append([]Interceptor{}, _q.inters...),
+		predicates:          append([]predicate.Household{}, _q.predicates...),
+		withMembers:         _q.withMembers.Clone(),
+		withRecipes:         _q.withRecipes.Clone(),
+		withTags:            _q.withTags.Clone(),
+		withMediaAssets:     _q.withMediaAssets.Clone(),
+		withStoredObjects:   _q.withStoredObjects.Clone(),
+		withRefreshSessions: _q.withRefreshSessions.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -398,6 +448,28 @@ func (_q *HouseholdQuery) WithMediaAssets(opts ...func(*MediaAssetQuery)) *House
 		opt(query)
 	}
 	_q.withMediaAssets = query
+	return _q
+}
+
+// WithStoredObjects tells the query-builder to eager-load the nodes that are connected to
+// the "stored_objects" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *HouseholdQuery) WithStoredObjects(opts ...func(*StoredObjectQuery)) *HouseholdQuery {
+	query := (&StoredObjectClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withStoredObjects = query
+	return _q
+}
+
+// WithRefreshSessions tells the query-builder to eager-load the nodes that are connected to
+// the "refresh_sessions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *HouseholdQuery) WithRefreshSessions(opts ...func(*RefreshSessionQuery)) *HouseholdQuery {
+	query := (&RefreshSessionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withRefreshSessions = query
 	return _q
 }
 
@@ -479,11 +551,13 @@ func (_q *HouseholdQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ho
 	var (
 		nodes       = []*Household{}
 		_spec       = _q.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [6]bool{
 			_q.withMembers != nil,
 			_q.withRecipes != nil,
 			_q.withTags != nil,
 			_q.withMediaAssets != nil,
+			_q.withStoredObjects != nil,
+			_q.withRefreshSessions != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -529,6 +603,20 @@ func (_q *HouseholdQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ho
 		if err := _q.loadMediaAssets(ctx, query, nodes,
 			func(n *Household) { n.Edges.MediaAssets = []*MediaAsset{} },
 			func(n *Household, e *MediaAsset) { n.Edges.MediaAssets = append(n.Edges.MediaAssets, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withStoredObjects; query != nil {
+		if err := _q.loadStoredObjects(ctx, query, nodes,
+			func(n *Household) { n.Edges.StoredObjects = []*StoredObject{} },
+			func(n *Household, e *StoredObject) { n.Edges.StoredObjects = append(n.Edges.StoredObjects, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withRefreshSessions; query != nil {
+		if err := _q.loadRefreshSessions(ctx, query, nodes,
+			func(n *Household) { n.Edges.RefreshSessions = []*RefreshSession{} },
+			func(n *Household, e *RefreshSession) { n.Edges.RefreshSessions = append(n.Edges.RefreshSessions, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -650,6 +738,66 @@ func (_q *HouseholdQuery) loadMediaAssets(ctx context.Context, query *MediaAsset
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "household_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *HouseholdQuery) loadStoredObjects(ctx context.Context, query *StoredObjectQuery, nodes []*Household, init func(*Household), assign func(*Household, *StoredObject)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Household)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(storedobject.FieldHouseholdID)
+	}
+	query.Where(predicate.StoredObject(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(household.StoredObjectsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.HouseholdID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "household_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *HouseholdQuery) loadRefreshSessions(ctx context.Context, query *RefreshSessionQuery, nodes []*Household, init func(*Household), assign func(*Household, *RefreshSession)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Household)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(refreshsession.FieldActiveHouseholdID)
+	}
+	query.Where(predicate.RefreshSession(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(household.RefreshSessionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ActiveHouseholdID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "active_household_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

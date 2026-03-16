@@ -472,6 +472,52 @@ func HasMediaAssetsWith(preds ...predicate.MediaAsset) predicate.Household {
 	})
 }
 
+// HasStoredObjects applies the HasEdge predicate on the "stored_objects" edge.
+func HasStoredObjects() predicate.Household {
+	return predicate.Household(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, StoredObjectsTable, StoredObjectsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStoredObjectsWith applies the HasEdge predicate on the "stored_objects" edge with a given conditions (other predicates).
+func HasStoredObjectsWith(preds ...predicate.StoredObject) predicate.Household {
+	return predicate.Household(func(s *sql.Selector) {
+		step := newStoredObjectsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasRefreshSessions applies the HasEdge predicate on the "refresh_sessions" edge.
+func HasRefreshSessions() predicate.Household {
+	return predicate.Household(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RefreshSessionsTable, RefreshSessionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRefreshSessionsWith applies the HasEdge predicate on the "refresh_sessions" edge with a given conditions (other predicates).
+func HasRefreshSessionsWith(preds ...predicate.RefreshSession) predicate.Household {
+	return predicate.Household(func(s *sql.Selector) {
+		step := newRefreshSessionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Household) predicate.Household {
 	return predicate.Household(sql.AndPredicates(predicates...))

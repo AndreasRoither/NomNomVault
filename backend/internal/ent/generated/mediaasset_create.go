@@ -13,6 +13,7 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 )
 
 // MediaAssetCreate is the builder for creating a MediaAsset entity.
@@ -70,6 +71,12 @@ func (_c *MediaAssetCreate) SetNillableRecipeID(v *string) *MediaAssetCreate {
 	return _c
 }
 
+// SetStorageObjectID sets the "storage_object_id" field.
+func (_c *MediaAssetCreate) SetStorageObjectID(v string) *MediaAssetCreate {
+	_c.mutation.SetStorageObjectID(v)
+	return _c
+}
+
 // SetOriginalFilename sets the "original_filename" field.
 func (_c *MediaAssetCreate) SetOriginalFilename(v string) *MediaAssetCreate {
 	_c.mutation.SetOriginalFilename(v)
@@ -114,6 +121,34 @@ func (_c *MediaAssetCreate) SetStoredAt(v time.Time) *MediaAssetCreate {
 	return _c
 }
 
+// SetAltText sets the "alt_text" field.
+func (_c *MediaAssetCreate) SetAltText(v string) *MediaAssetCreate {
+	_c.mutation.SetAltText(v)
+	return _c
+}
+
+// SetNillableAltText sets the "alt_text" field if the given value is not nil.
+func (_c *MediaAssetCreate) SetNillableAltText(v *string) *MediaAssetCreate {
+	if v != nil {
+		_c.SetAltText(*v)
+	}
+	return _c
+}
+
+// SetSortOrder sets the "sort_order" field.
+func (_c *MediaAssetCreate) SetSortOrder(v int) *MediaAssetCreate {
+	_c.mutation.SetSortOrder(v)
+	return _c
+}
+
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_c *MediaAssetCreate) SetNillableSortOrder(v *int) *MediaAssetCreate {
+	if v != nil {
+		_c.SetSortOrder(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *MediaAssetCreate) SetID(v string) *MediaAssetCreate {
 	_c.mutation.SetID(v)
@@ -136,6 +171,11 @@ func (_c *MediaAssetCreate) SetHousehold(v *Household) *MediaAssetCreate {
 // SetRecipe sets the "recipe" edge to the Recipe entity.
 func (_c *MediaAssetCreate) SetRecipe(v *Recipe) *MediaAssetCreate {
 	return _c.SetRecipeID(v.ID)
+}
+
+// SetStorageObject sets the "storage_object" edge to the StoredObject entity.
+func (_c *MediaAssetCreate) SetStorageObject(v *StoredObject) *MediaAssetCreate {
+	return _c.SetStorageObjectID(v.ID)
 }
 
 // Mutation returns the MediaAssetMutation object of the builder.
@@ -185,6 +225,14 @@ func (_c *MediaAssetCreate) defaults() {
 		v := mediaasset.DefaultMediaType
 		_c.mutation.SetMediaType(v)
 	}
+	if _, ok := _c.mutation.AltText(); !ok {
+		v := mediaasset.DefaultAltText
+		_c.mutation.SetAltText(v)
+	}
+	if _, ok := _c.mutation.SortOrder(); !ok {
+		v := mediaasset.DefaultSortOrder
+		_c.mutation.SetSortOrder(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := mediaasset.DefaultID()
 		_c.mutation.SetID(v)
@@ -201,6 +249,9 @@ func (_c *MediaAssetCreate) check() error {
 	}
 	if _, ok := _c.mutation.HouseholdID(); !ok {
 		return &ValidationError{Name: "household_id", err: errors.New(`generated: missing required field "MediaAsset.household_id"`)}
+	}
+	if _, ok := _c.mutation.StorageObjectID(); !ok {
+		return &ValidationError{Name: "storage_object_id", err: errors.New(`generated: missing required field "MediaAsset.storage_object_id"`)}
 	}
 	if _, ok := _c.mutation.OriginalFilename(); !ok {
 		return &ValidationError{Name: "original_filename", err: errors.New(`generated: missing required field "MediaAsset.original_filename"`)}
@@ -240,8 +291,17 @@ func (_c *MediaAssetCreate) check() error {
 	if _, ok := _c.mutation.StoredAt(); !ok {
 		return &ValidationError{Name: "stored_at", err: errors.New(`generated: missing required field "MediaAsset.stored_at"`)}
 	}
+	if _, ok := _c.mutation.AltText(); !ok {
+		return &ValidationError{Name: "alt_text", err: errors.New(`generated: missing required field "MediaAsset.alt_text"`)}
+	}
+	if _, ok := _c.mutation.SortOrder(); !ok {
+		return &ValidationError{Name: "sort_order", err: errors.New(`generated: missing required field "MediaAsset.sort_order"`)}
+	}
 	if len(_c.mutation.HouseholdIDs()) == 0 {
 		return &ValidationError{Name: "household", err: errors.New(`generated: missing required edge "MediaAsset.household"`)}
+	}
+	if len(_c.mutation.StorageObjectIDs()) == 0 {
+		return &ValidationError{Name: "storage_object", err: errors.New(`generated: missing required edge "MediaAsset.storage_object"`)}
 	}
 	return nil
 }
@@ -310,6 +370,14 @@ func (_c *MediaAssetCreate) createSpec() (*MediaAsset, *sqlgraph.CreateSpec) {
 		_spec.SetField(mediaasset.FieldStoredAt, field.TypeTime, value)
 		_node.StoredAt = value
 	}
+	if value, ok := _c.mutation.AltText(); ok {
+		_spec.SetField(mediaasset.FieldAltText, field.TypeString, value)
+		_node.AltText = value
+	}
+	if value, ok := _c.mutation.SortOrder(); ok {
+		_spec.SetField(mediaasset.FieldSortOrder, field.TypeInt, value)
+		_node.SortOrder = value
+	}
 	if nodes := _c.mutation.HouseholdIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -342,6 +410,23 @@ func (_c *MediaAssetCreate) createSpec() (*MediaAsset, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.RecipeID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.StorageObjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   mediaasset.StorageObjectTable,
+			Columns: []string{mediaasset.StorageObjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.StorageObjectID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -10,10 +10,11 @@ type ValidationError struct {
 
 // ErrorResponse standardizes API error payloads.
 type ErrorResponse struct {
-	Status  int               `json:"status"`
-	Code    string            `json:"code"`
-	Message string            `json:"message"`
-	Details []ValidationError `json:"details,omitempty"`
+	Status    int               `json:"status"`
+	Code      string            `json:"code"`
+	Message   string            `json:"message"`
+	RequestID string            `json:"requestId,omitempty"`
+	Details   []ValidationError `json:"details,omitempty"`
 }
 
 // CursorPageInfo describes a cursor-based page boundary.
@@ -23,11 +24,12 @@ type CursorPageInfo struct {
 }
 
 // WriteError writes the standard error envelope.
-func WriteError(context *gin.Context, status int, code string, message string, details []ValidationError) {
+func WriteError(context *gin.Context, status int, code string, message string, requestID string, details []ValidationError) {
 	context.JSON(status, ErrorResponse{
-		Status:  status,
-		Code:    code,
-		Message: message,
-		Details: details,
+		Status:    status,
+		Code:      code,
+		Message:   message,
+		RequestID: requestID,
+		Details:   details,
 	})
 }

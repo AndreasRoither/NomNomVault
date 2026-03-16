@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
@@ -45,6 +46,20 @@ func (_u *RefreshSessionUpdate) SetUserID(v string) *RefreshSessionUpdate {
 func (_u *RefreshSessionUpdate) SetNillableUserID(v *string) *RefreshSessionUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
+	}
+	return _u
+}
+
+// SetActiveHouseholdID sets the "active_household_id" field.
+func (_u *RefreshSessionUpdate) SetActiveHouseholdID(v string) *RefreshSessionUpdate {
+	_u.mutation.SetActiveHouseholdID(v)
+	return _u
+}
+
+// SetNillableActiveHouseholdID sets the "active_household_id" field if the given value is not nil.
+func (_u *RefreshSessionUpdate) SetNillableActiveHouseholdID(v *string) *RefreshSessionUpdate {
+	if v != nil {
+		_u.SetActiveHouseholdID(*v)
 	}
 	return _u
 }
@@ -156,6 +171,11 @@ func (_u *RefreshSessionUpdate) SetUser(v *User) *RefreshSessionUpdate {
 	return _u.SetUserID(v.ID)
 }
 
+// SetActiveHousehold sets the "active_household" edge to the Household entity.
+func (_u *RefreshSessionUpdate) SetActiveHousehold(v *Household) *RefreshSessionUpdate {
+	return _u.SetActiveHouseholdID(v.ID)
+}
+
 // Mutation returns the RefreshSessionMutation object of the builder.
 func (_u *RefreshSessionUpdate) Mutation() *RefreshSessionMutation {
 	return _u.mutation
@@ -164,6 +184,12 @@ func (_u *RefreshSessionUpdate) Mutation() *RefreshSessionMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (_u *RefreshSessionUpdate) ClearUser() *RefreshSessionUpdate {
 	_u.mutation.ClearUser()
+	return _u
+}
+
+// ClearActiveHousehold clears the "active_household" edge to the Household entity.
+func (_u *RefreshSessionUpdate) ClearActiveHousehold() *RefreshSessionUpdate {
+	_u.mutation.ClearActiveHousehold()
 	return _u
 }
 
@@ -212,6 +238,9 @@ func (_u *RefreshSessionUpdate) check() error {
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`generated: clearing a required unique edge "RefreshSession.user"`)
+	}
+	if _u.mutation.ActiveHouseholdCleared() && len(_u.mutation.ActiveHouseholdIDs()) > 0 {
+		return errors.New(`generated: clearing a required unique edge "RefreshSession.active_household"`)
 	}
 	return nil
 }
@@ -287,6 +316,35 @@ func (_u *RefreshSessionUpdate) sqlSave(ctx context.Context) (_node int, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ActiveHouseholdCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   refreshsession.ActiveHouseholdTable,
+			Columns: []string{refreshsession.ActiveHouseholdColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(household.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ActiveHouseholdIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   refreshsession.ActiveHouseholdTable,
+			Columns: []string{refreshsession.ActiveHouseholdColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(household.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{refreshsession.Label}
@@ -323,6 +381,20 @@ func (_u *RefreshSessionUpdateOne) SetUserID(v string) *RefreshSessionUpdateOne 
 func (_u *RefreshSessionUpdateOne) SetNillableUserID(v *string) *RefreshSessionUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
+	}
+	return _u
+}
+
+// SetActiveHouseholdID sets the "active_household_id" field.
+func (_u *RefreshSessionUpdateOne) SetActiveHouseholdID(v string) *RefreshSessionUpdateOne {
+	_u.mutation.SetActiveHouseholdID(v)
+	return _u
+}
+
+// SetNillableActiveHouseholdID sets the "active_household_id" field if the given value is not nil.
+func (_u *RefreshSessionUpdateOne) SetNillableActiveHouseholdID(v *string) *RefreshSessionUpdateOne {
+	if v != nil {
+		_u.SetActiveHouseholdID(*v)
 	}
 	return _u
 }
@@ -434,6 +506,11 @@ func (_u *RefreshSessionUpdateOne) SetUser(v *User) *RefreshSessionUpdateOne {
 	return _u.SetUserID(v.ID)
 }
 
+// SetActiveHousehold sets the "active_household" edge to the Household entity.
+func (_u *RefreshSessionUpdateOne) SetActiveHousehold(v *Household) *RefreshSessionUpdateOne {
+	return _u.SetActiveHouseholdID(v.ID)
+}
+
 // Mutation returns the RefreshSessionMutation object of the builder.
 func (_u *RefreshSessionUpdateOne) Mutation() *RefreshSessionMutation {
 	return _u.mutation
@@ -442,6 +519,12 @@ func (_u *RefreshSessionUpdateOne) Mutation() *RefreshSessionMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (_u *RefreshSessionUpdateOne) ClearUser() *RefreshSessionUpdateOne {
 	_u.mutation.ClearUser()
+	return _u
+}
+
+// ClearActiveHousehold clears the "active_household" edge to the Household entity.
+func (_u *RefreshSessionUpdateOne) ClearActiveHousehold() *RefreshSessionUpdateOne {
+	_u.mutation.ClearActiveHousehold()
 	return _u
 }
 
@@ -503,6 +586,9 @@ func (_u *RefreshSessionUpdateOne) check() error {
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`generated: clearing a required unique edge "RefreshSession.user"`)
+	}
+	if _u.mutation.ActiveHouseholdCleared() && len(_u.mutation.ActiveHouseholdIDs()) > 0 {
+		return errors.New(`generated: clearing a required unique edge "RefreshSession.active_household"`)
 	}
 	return nil
 }
@@ -588,6 +674,35 @@ func (_u *RefreshSessionUpdateOne) sqlSave(ctx context.Context) (_node *RefreshS
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ActiveHouseholdCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   refreshsession.ActiveHouseholdTable,
+			Columns: []string{refreshsession.ActiveHouseholdColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(household.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ActiveHouseholdIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   refreshsession.ActiveHouseholdTable,
+			Columns: []string{refreshsession.ActiveHouseholdColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(household.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -14,6 +14,7 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeshare"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipestep"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/schema"
@@ -93,17 +94,25 @@ func init() {
 	// mediaasset.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	mediaasset.UpdateDefaultUpdatedAt = mediaassetDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// mediaassetDescOriginalFilename is the schema descriptor for original_filename field.
-	mediaassetDescOriginalFilename := mediaassetFields[1].Descriptor()
+	mediaassetDescOriginalFilename := mediaassetFields[2].Descriptor()
 	// mediaasset.OriginalFilenameValidator is a validator for the "original_filename" field. It is called by the builders before save.
 	mediaasset.OriginalFilenameValidator = mediaassetDescOriginalFilename.Validators[0].(func(string) error)
 	// mediaassetDescMimeType is the schema descriptor for mime_type field.
-	mediaassetDescMimeType := mediaassetFields[2].Descriptor()
+	mediaassetDescMimeType := mediaassetFields[3].Descriptor()
 	// mediaasset.MimeTypeValidator is a validator for the "mime_type" field. It is called by the builders before save.
 	mediaasset.MimeTypeValidator = mediaassetDescMimeType.Validators[0].(func(string) error)
 	// mediaassetDescChecksum is the schema descriptor for checksum field.
-	mediaassetDescChecksum := mediaassetFields[5].Descriptor()
+	mediaassetDescChecksum := mediaassetFields[6].Descriptor()
 	// mediaasset.ChecksumValidator is a validator for the "checksum" field. It is called by the builders before save.
 	mediaasset.ChecksumValidator = mediaassetDescChecksum.Validators[0].(func(string) error)
+	// mediaassetDescAltText is the schema descriptor for alt_text field.
+	mediaassetDescAltText := mediaassetFields[8].Descriptor()
+	// mediaasset.DefaultAltText holds the default value on creation for the alt_text field.
+	mediaasset.DefaultAltText = mediaassetDescAltText.Default.(string)
+	// mediaassetDescSortOrder is the schema descriptor for sort_order field.
+	mediaassetDescSortOrder := mediaassetFields[9].Descriptor()
+	// mediaasset.DefaultSortOrder holds the default value on creation for the sort_order field.
+	mediaasset.DefaultSortOrder = mediaassetDescSortOrder.Default.(int)
 	// mediaassetDescID is the schema descriptor for id field.
 	mediaassetDescID := mediaassetMixinFields0[0].Descriptor()
 	// mediaasset.DefaultID holds the default value on creation for the id field.
@@ -259,17 +268,48 @@ func init() {
 	// refreshsession.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	refreshsession.UpdateDefaultUpdatedAt = refreshsessionDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// refreshsessionDescTokenHash is the schema descriptor for token_hash field.
-	refreshsessionDescTokenHash := refreshsessionFields[1].Descriptor()
+	refreshsessionDescTokenHash := refreshsessionFields[2].Descriptor()
 	// refreshsession.TokenHashValidator is a validator for the "token_hash" field. It is called by the builders before save.
 	refreshsession.TokenHashValidator = refreshsessionDescTokenHash.Validators[0].(func(string) error)
 	// refreshsessionDescRevoked is the schema descriptor for revoked field.
-	refreshsessionDescRevoked := refreshsessionFields[3].Descriptor()
+	refreshsessionDescRevoked := refreshsessionFields[4].Descriptor()
 	// refreshsession.DefaultRevoked holds the default value on creation for the revoked field.
 	refreshsession.DefaultRevoked = refreshsessionDescRevoked.Default.(bool)
 	// refreshsessionDescID is the schema descriptor for id field.
 	refreshsessionDescID := refreshsessionMixinFields0[0].Descriptor()
 	// refreshsession.DefaultID holds the default value on creation for the id field.
 	refreshsession.DefaultID = refreshsessionDescID.Default.(func() string)
+	storedobjectMixin := schema.StoredObject{}.Mixin()
+	storedobjectMixinFields0 := storedobjectMixin[0].Fields()
+	_ = storedobjectMixinFields0
+	storedobjectFields := schema.StoredObject{}.Fields()
+	_ = storedobjectFields
+	// storedobjectDescCreatedAt is the schema descriptor for created_at field.
+	storedobjectDescCreatedAt := storedobjectMixinFields0[1].Descriptor()
+	// storedobject.DefaultCreatedAt holds the default value on creation for the created_at field.
+	storedobject.DefaultCreatedAt = storedobjectDescCreatedAt.Default.(func() time.Time)
+	// storedobjectDescUpdatedAt is the schema descriptor for updated_at field.
+	storedobjectDescUpdatedAt := storedobjectMixinFields0[2].Descriptor()
+	// storedobject.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	storedobject.DefaultUpdatedAt = storedobjectDescUpdatedAt.Default.(func() time.Time)
+	// storedobject.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	storedobject.UpdateDefaultUpdatedAt = storedobjectDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// storedobjectDescOriginalFilename is the schema descriptor for original_filename field.
+	storedobjectDescOriginalFilename := storedobjectFields[0].Descriptor()
+	// storedobject.OriginalFilenameValidator is a validator for the "original_filename" field. It is called by the builders before save.
+	storedobject.OriginalFilenameValidator = storedobjectDescOriginalFilename.Validators[0].(func(string) error)
+	// storedobjectDescMimeType is the schema descriptor for mime_type field.
+	storedobjectDescMimeType := storedobjectFields[1].Descriptor()
+	// storedobject.MimeTypeValidator is a validator for the "mime_type" field. It is called by the builders before save.
+	storedobject.MimeTypeValidator = storedobjectDescMimeType.Validators[0].(func(string) error)
+	// storedobjectDescChecksum is the schema descriptor for checksum field.
+	storedobjectDescChecksum := storedobjectFields[3].Descriptor()
+	// storedobject.ChecksumValidator is a validator for the "checksum" field. It is called by the builders before save.
+	storedobject.ChecksumValidator = storedobjectDescChecksum.Validators[0].(func(string) error)
+	// storedobjectDescID is the schema descriptor for id field.
+	storedobjectDescID := storedobjectMixinFields0[0].Descriptor()
+	// storedobject.DefaultID holds the default value on creation for the id field.
+	storedobject.DefaultID = storedobjectDescID.Default.(func() string)
 	tagMixin := schema.Tag{}.Mixin()
 	tagMixinFields0 := tagMixin[0].Fields()
 	_ = tagMixinFields0

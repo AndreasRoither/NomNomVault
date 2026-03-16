@@ -20,6 +20,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldActiveHouseholdID holds the string denoting the active_household_id field in the database.
+	FieldActiveHouseholdID = "active_household_id"
 	// FieldTokenHash holds the string denoting the token_hash field in the database.
 	FieldTokenHash = "token_hash"
 	// FieldExpiresAt holds the string denoting the expires_at field in the database.
@@ -34,6 +36,8 @@ const (
 	FieldLastUsedAt = "last_used_at"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeActiveHousehold holds the string denoting the active_household edge name in mutations.
+	EdgeActiveHousehold = "active_household"
 	// Table holds the table name of the refreshsession in the database.
 	Table = "refresh_sessions"
 	// UserTable is the table that holds the user relation/edge.
@@ -43,6 +47,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
+	// ActiveHouseholdTable is the table that holds the active_household relation/edge.
+	ActiveHouseholdTable = "refresh_sessions"
+	// ActiveHouseholdInverseTable is the table name for the Household entity.
+	// It exists in this package in order to avoid circular dependency with the "household" package.
+	ActiveHouseholdInverseTable = "households"
+	// ActiveHouseholdColumn is the table column denoting the active_household relation/edge.
+	ActiveHouseholdColumn = "active_household_id"
 )
 
 // Columns holds all SQL columns for refreshsession fields.
@@ -51,6 +62,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldUserID,
+	FieldActiveHouseholdID,
 	FieldTokenHash,
 	FieldExpiresAt,
 	FieldRevoked,
@@ -107,6 +119,11 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
+// ByActiveHouseholdID orders the results by the active_household_id field.
+func ByActiveHouseholdID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActiveHouseholdID, opts...).ToFunc()
+}
+
 // ByTokenHash orders the results by the token_hash field.
 func ByTokenHash(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTokenHash, opts...).ToFunc()
@@ -143,10 +160,24 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByActiveHouseholdField orders the results by active_household field.
+func ByActiveHouseholdField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newActiveHouseholdStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+	)
+}
+func newActiveHouseholdStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ActiveHouseholdInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ActiveHouseholdTable, ActiveHouseholdColumn),
 	)
 }

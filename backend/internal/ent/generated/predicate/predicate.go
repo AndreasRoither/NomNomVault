@@ -33,6 +33,9 @@ type RecipeStep func(*sql.Selector)
 // RefreshSession is the predicate function for refreshsession builders.
 type RefreshSession func(*sql.Selector)
 
+// StoredObject is the predicate function for storedobject builders.
+type StoredObject func(*sql.Selector)
+
 // Tag is the predicate function for tag builders.
 type Tag func(*sql.Selector)
 

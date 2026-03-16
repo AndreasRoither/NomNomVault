@@ -30,6 +30,8 @@ type Tx struct {
 	RecipeStep *RecipeStepClient
 	// RefreshSession is the client for interacting with the RefreshSession builders.
 	RefreshSession *RefreshSessionClient
+	// StoredObject is the client for interacting with the StoredObject builders.
+	StoredObject *StoredObjectClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
 	// User is the client for interacting with the User builders.
@@ -174,6 +176,7 @@ func (tx *Tx) init() {
 	tx.RecipeShare = NewRecipeShareClient(tx.config)
 	tx.RecipeStep = NewRecipeStepClient(tx.config)
 	tx.RefreshSession = NewRefreshSessionClient(tx.config)
+	tx.StoredObject = NewStoredObjectClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }

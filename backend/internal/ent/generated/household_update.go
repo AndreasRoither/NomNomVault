@@ -16,6 +16,8 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 )
 
@@ -154,6 +156,36 @@ func (_u *HouseholdUpdate) AddMediaAssets(v ...*MediaAsset) *HouseholdUpdate {
 	return _u.AddMediaAssetIDs(ids...)
 }
 
+// AddStoredObjectIDs adds the "stored_objects" edge to the StoredObject entity by IDs.
+func (_u *HouseholdUpdate) AddStoredObjectIDs(ids ...string) *HouseholdUpdate {
+	_u.mutation.AddStoredObjectIDs(ids...)
+	return _u
+}
+
+// AddStoredObjects adds the "stored_objects" edges to the StoredObject entity.
+func (_u *HouseholdUpdate) AddStoredObjects(v ...*StoredObject) *HouseholdUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddStoredObjectIDs(ids...)
+}
+
+// AddRefreshSessionIDs adds the "refresh_sessions" edge to the RefreshSession entity by IDs.
+func (_u *HouseholdUpdate) AddRefreshSessionIDs(ids ...string) *HouseholdUpdate {
+	_u.mutation.AddRefreshSessionIDs(ids...)
+	return _u
+}
+
+// AddRefreshSessions adds the "refresh_sessions" edges to the RefreshSession entity.
+func (_u *HouseholdUpdate) AddRefreshSessions(v ...*RefreshSession) *HouseholdUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddRefreshSessionIDs(ids...)
+}
+
 // Mutation returns the HouseholdMutation object of the builder.
 func (_u *HouseholdUpdate) Mutation() *HouseholdMutation {
 	return _u.mutation
@@ -241,6 +273,48 @@ func (_u *HouseholdUpdate) RemoveMediaAssets(v ...*MediaAsset) *HouseholdUpdate 
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMediaAssetIDs(ids...)
+}
+
+// ClearStoredObjects clears all "stored_objects" edges to the StoredObject entity.
+func (_u *HouseholdUpdate) ClearStoredObjects() *HouseholdUpdate {
+	_u.mutation.ClearStoredObjects()
+	return _u
+}
+
+// RemoveStoredObjectIDs removes the "stored_objects" edge to StoredObject entities by IDs.
+func (_u *HouseholdUpdate) RemoveStoredObjectIDs(ids ...string) *HouseholdUpdate {
+	_u.mutation.RemoveStoredObjectIDs(ids...)
+	return _u
+}
+
+// RemoveStoredObjects removes "stored_objects" edges to StoredObject entities.
+func (_u *HouseholdUpdate) RemoveStoredObjects(v ...*StoredObject) *HouseholdUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveStoredObjectIDs(ids...)
+}
+
+// ClearRefreshSessions clears all "refresh_sessions" edges to the RefreshSession entity.
+func (_u *HouseholdUpdate) ClearRefreshSessions() *HouseholdUpdate {
+	_u.mutation.ClearRefreshSessions()
+	return _u
+}
+
+// RemoveRefreshSessionIDs removes the "refresh_sessions" edge to RefreshSession entities by IDs.
+func (_u *HouseholdUpdate) RemoveRefreshSessionIDs(ids ...string) *HouseholdUpdate {
+	_u.mutation.RemoveRefreshSessionIDs(ids...)
+	return _u
+}
+
+// RemoveRefreshSessions removes "refresh_sessions" edges to RefreshSession entities.
+func (_u *HouseholdUpdate) RemoveRefreshSessions(v ...*RefreshSession) *HouseholdUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveRefreshSessionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -501,6 +575,96 @@ func (_u *HouseholdUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.StoredObjectsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.StoredObjectsTable,
+			Columns: []string{household.StoredObjectsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedStoredObjectsIDs(); len(nodes) > 0 && !_u.mutation.StoredObjectsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.StoredObjectsTable,
+			Columns: []string{household.StoredObjectsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.StoredObjectsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.StoredObjectsTable,
+			Columns: []string{household.StoredObjectsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.RefreshSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.RefreshSessionsTable,
+			Columns: []string{household.RefreshSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(refreshsession.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedRefreshSessionsIDs(); len(nodes) > 0 && !_u.mutation.RefreshSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.RefreshSessionsTable,
+			Columns: []string{household.RefreshSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(refreshsession.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RefreshSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.RefreshSessionsTable,
+			Columns: []string{household.RefreshSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(refreshsession.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{household.Label}
@@ -643,6 +807,36 @@ func (_u *HouseholdUpdateOne) AddMediaAssets(v ...*MediaAsset) *HouseholdUpdateO
 	return _u.AddMediaAssetIDs(ids...)
 }
 
+// AddStoredObjectIDs adds the "stored_objects" edge to the StoredObject entity by IDs.
+func (_u *HouseholdUpdateOne) AddStoredObjectIDs(ids ...string) *HouseholdUpdateOne {
+	_u.mutation.AddStoredObjectIDs(ids...)
+	return _u
+}
+
+// AddStoredObjects adds the "stored_objects" edges to the StoredObject entity.
+func (_u *HouseholdUpdateOne) AddStoredObjects(v ...*StoredObject) *HouseholdUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddStoredObjectIDs(ids...)
+}
+
+// AddRefreshSessionIDs adds the "refresh_sessions" edge to the RefreshSession entity by IDs.
+func (_u *HouseholdUpdateOne) AddRefreshSessionIDs(ids ...string) *HouseholdUpdateOne {
+	_u.mutation.AddRefreshSessionIDs(ids...)
+	return _u
+}
+
+// AddRefreshSessions adds the "refresh_sessions" edges to the RefreshSession entity.
+func (_u *HouseholdUpdateOne) AddRefreshSessions(v ...*RefreshSession) *HouseholdUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddRefreshSessionIDs(ids...)
+}
+
 // Mutation returns the HouseholdMutation object of the builder.
 func (_u *HouseholdUpdateOne) Mutation() *HouseholdMutation {
 	return _u.mutation
@@ -730,6 +924,48 @@ func (_u *HouseholdUpdateOne) RemoveMediaAssets(v ...*MediaAsset) *HouseholdUpda
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMediaAssetIDs(ids...)
+}
+
+// ClearStoredObjects clears all "stored_objects" edges to the StoredObject entity.
+func (_u *HouseholdUpdateOne) ClearStoredObjects() *HouseholdUpdateOne {
+	_u.mutation.ClearStoredObjects()
+	return _u
+}
+
+// RemoveStoredObjectIDs removes the "stored_objects" edge to StoredObject entities by IDs.
+func (_u *HouseholdUpdateOne) RemoveStoredObjectIDs(ids ...string) *HouseholdUpdateOne {
+	_u.mutation.RemoveStoredObjectIDs(ids...)
+	return _u
+}
+
+// RemoveStoredObjects removes "stored_objects" edges to StoredObject entities.
+func (_u *HouseholdUpdateOne) RemoveStoredObjects(v ...*StoredObject) *HouseholdUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveStoredObjectIDs(ids...)
+}
+
+// ClearRefreshSessions clears all "refresh_sessions" edges to the RefreshSession entity.
+func (_u *HouseholdUpdateOne) ClearRefreshSessions() *HouseholdUpdateOne {
+	_u.mutation.ClearRefreshSessions()
+	return _u
+}
+
+// RemoveRefreshSessionIDs removes the "refresh_sessions" edge to RefreshSession entities by IDs.
+func (_u *HouseholdUpdateOne) RemoveRefreshSessionIDs(ids ...string) *HouseholdUpdateOne {
+	_u.mutation.RemoveRefreshSessionIDs(ids...)
+	return _u
+}
+
+// RemoveRefreshSessions removes "refresh_sessions" edges to RefreshSession entities.
+func (_u *HouseholdUpdateOne) RemoveRefreshSessions(v ...*RefreshSession) *HouseholdUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveRefreshSessionIDs(ids...)
 }
 
 // Where appends a list predicates to the HouseholdUpdate builder.
@@ -1013,6 +1249,96 @@ func (_u *HouseholdUpdateOne) sqlSave(ctx context.Context) (_node *Household, er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediaasset.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.StoredObjectsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.StoredObjectsTable,
+			Columns: []string{household.StoredObjectsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedStoredObjectsIDs(); len(nodes) > 0 && !_u.mutation.StoredObjectsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.StoredObjectsTable,
+			Columns: []string{household.StoredObjectsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.StoredObjectsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.StoredObjectsTable,
+			Columns: []string{household.StoredObjectsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.RefreshSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.RefreshSessionsTable,
+			Columns: []string{household.RefreshSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(refreshsession.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedRefreshSessionsIDs(); len(nodes) > 0 && !_u.mutation.RefreshSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.RefreshSessionsTable,
+			Columns: []string{household.RefreshSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(refreshsession.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RefreshSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.RefreshSessionsTable,
+			Columns: []string{household.RefreshSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(refreshsession.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

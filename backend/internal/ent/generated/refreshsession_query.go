@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
@@ -19,11 +20,12 @@ import (
 // RefreshSessionQuery is the builder for querying RefreshSession entities.
 type RefreshSessionQuery struct {
 	config
-	ctx        *QueryContext
-	order      []refreshsession.OrderOption
-	inters     []Interceptor
-	predicates []predicate.RefreshSession
-	withUser   *UserQuery
+	ctx                 *QueryContext
+	order               []refreshsession.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.RefreshSession
+	withUser            *UserQuery
+	withActiveHousehold *HouseholdQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,6 +77,28 @@ func (_q *RefreshSessionQuery) QueryUser() *UserQuery {
 			sqlgraph.From(refreshsession.Table, refreshsession.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, refreshsession.UserTable, refreshsession.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryActiveHousehold chains the current query on the "active_household" edge.
+func (_q *RefreshSessionQuery) QueryActiveHousehold() *HouseholdQuery {
+	query := (&HouseholdClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(refreshsession.Table, refreshsession.FieldID, selector),
+			sqlgraph.To(household.Table, household.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, refreshsession.ActiveHouseholdTable, refreshsession.ActiveHouseholdColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -269,12 +293,13 @@ func (_q *RefreshSessionQuery) Clone() *RefreshSessionQuery {
 		return nil
 	}
 	return &RefreshSessionQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]refreshsession.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.RefreshSession{}, _q.predicates...),
-		withUser:   _q.withUser.Clone(),
+		config:              _q.config,
+		ctx:                 _q.ctx.Clone(),
+		order:               append([]refreshsession.OrderOption{}, _q.order...),
+		inters:              append([]Interceptor{}, _q.inters...),
+		predicates:          append([]predicate.RefreshSession{}, _q.predicates...),
+		withUser:            _q.withUser.Clone(),
+		withActiveHousehold: _q.withActiveHousehold.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -289,6 +314,17 @@ func (_q *RefreshSessionQuery) WithUser(opts ...func(*UserQuery)) *RefreshSessio
 		opt(query)
 	}
 	_q.withUser = query
+	return _q
+}
+
+// WithActiveHousehold tells the query-builder to eager-load the nodes that are connected to
+// the "active_household" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *RefreshSessionQuery) WithActiveHousehold(opts ...func(*HouseholdQuery)) *RefreshSessionQuery {
+	query := (&HouseholdClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withActiveHousehold = query
 	return _q
 }
 
@@ -370,8 +406,9 @@ func (_q *RefreshSessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	var (
 		nodes       = []*RefreshSession{}
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			_q.withUser != nil,
+			_q.withActiveHousehold != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -395,6 +432,12 @@ func (_q *RefreshSessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	if query := _q.withUser; query != nil {
 		if err := _q.loadUser(ctx, query, nodes, nil,
 			func(n *RefreshSession, e *User) { n.Edges.User = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withActiveHousehold; query != nil {
+		if err := _q.loadActiveHousehold(ctx, query, nodes, nil,
+			func(n *RefreshSession, e *Household) { n.Edges.ActiveHousehold = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -430,6 +473,35 @@ func (_q *RefreshSessionQuery) loadUser(ctx context.Context, query *UserQuery, n
 	}
 	return nil
 }
+func (_q *RefreshSessionQuery) loadActiveHousehold(ctx context.Context, query *HouseholdQuery, nodes []*RefreshSession, init func(*RefreshSession), assign func(*RefreshSession, *Household)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*RefreshSession)
+	for i := range nodes {
+		fk := nodes[i].ActiveHouseholdID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(household.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "active_household_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (_q *RefreshSessionQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
@@ -458,6 +530,9 @@ func (_q *RefreshSessionQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withUser != nil {
 			_spec.Node.AddColumnOnce(refreshsession.FieldUserID)
+		}
+		if _q.withActiveHousehold != nil {
+			_spec.Node.AddColumnOnce(refreshsession.FieldActiveHouseholdID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

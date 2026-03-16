@@ -14,6 +14,8 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/householdmember"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 )
 
@@ -164,6 +166,36 @@ func (_c *HouseholdCreate) AddMediaAssets(v ...*MediaAsset) *HouseholdCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddMediaAssetIDs(ids...)
+}
+
+// AddStoredObjectIDs adds the "stored_objects" edge to the StoredObject entity by IDs.
+func (_c *HouseholdCreate) AddStoredObjectIDs(ids ...string) *HouseholdCreate {
+	_c.mutation.AddStoredObjectIDs(ids...)
+	return _c
+}
+
+// AddStoredObjects adds the "stored_objects" edges to the StoredObject entity.
+func (_c *HouseholdCreate) AddStoredObjects(v ...*StoredObject) *HouseholdCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddStoredObjectIDs(ids...)
+}
+
+// AddRefreshSessionIDs adds the "refresh_sessions" edge to the RefreshSession entity by IDs.
+func (_c *HouseholdCreate) AddRefreshSessionIDs(ids ...string) *HouseholdCreate {
+	_c.mutation.AddRefreshSessionIDs(ids...)
+	return _c
+}
+
+// AddRefreshSessions adds the "refresh_sessions" edges to the RefreshSession entity.
+func (_c *HouseholdCreate) AddRefreshSessions(v ...*RefreshSession) *HouseholdCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddRefreshSessionIDs(ids...)
 }
 
 // Mutation returns the HouseholdMutation object of the builder.
@@ -369,6 +401,38 @@ func (_c *HouseholdCreate) createSpec() (*Household, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediaasset.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.StoredObjectsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.StoredObjectsTable,
+			Columns: []string{household.StoredObjectsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.RefreshSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   household.RefreshSessionsTable,
+			Columns: []string{household.RefreshSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(refreshsession.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

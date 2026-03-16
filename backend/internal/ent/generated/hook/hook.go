@@ -117,6 +117,18 @@ func (f RefreshSessionFunc) Mutate(ctx context.Context, m generated.Mutation) (g
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *generated.RefreshSessionMutation", m)
 }
 
+// The StoredObjectFunc type is an adapter to allow the use of ordinary
+// function as StoredObject mutator.
+type StoredObjectFunc func(context.Context, *generated.StoredObjectMutation) (generated.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StoredObjectFunc) Mutate(ctx context.Context, m generated.Mutation) (generated.Value, error) {
+	if mv, ok := m.(*generated.StoredObjectMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *generated.StoredObjectMutation", m)
+}
+
 // The TagFunc type is an adapter to allow the use of ordinary
 // function as Tag mutator.
 type TagFunc func(context.Context, *generated.TagMutation) (generated.Value, error)

@@ -45,9 +45,13 @@ type HouseholdEdges struct {
 	Tags []*Tag `json:"tags,omitempty"`
 	// MediaAssets holds the value of the media_assets edge.
 	MediaAssets []*MediaAsset `json:"media_assets,omitempty"`
+	// StoredObjects holds the value of the stored_objects edge.
+	StoredObjects []*StoredObject `json:"stored_objects,omitempty"`
+	// RefreshSessions holds the value of the refresh_sessions edge.
+	RefreshSessions []*RefreshSession `json:"refresh_sessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [6]bool
 }
 
 // MembersOrErr returns the Members value or an error if the edge
@@ -84,6 +88,24 @@ func (e HouseholdEdges) MediaAssetsOrErr() ([]*MediaAsset, error) {
 		return e.MediaAssets, nil
 	}
 	return nil, &NotLoadedError{edge: "media_assets"}
+}
+
+// StoredObjectsOrErr returns the StoredObjects value or an error if the edge
+// was not loaded in eager-loading.
+func (e HouseholdEdges) StoredObjectsOrErr() ([]*StoredObject, error) {
+	if e.loadedTypes[4] {
+		return e.StoredObjects, nil
+	}
+	return nil, &NotLoadedError{edge: "stored_objects"}
+}
+
+// RefreshSessionsOrErr returns the RefreshSessions value or an error if the edge
+// was not loaded in eager-loading.
+func (e HouseholdEdges) RefreshSessionsOrErr() ([]*RefreshSession, error) {
+	if e.loadedTypes[5] {
+		return e.RefreshSessions, nil
+	}
+	return nil, &NotLoadedError{edge: "refresh_sessions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -185,6 +207,16 @@ func (_m *Household) QueryTags() *TagQuery {
 // QueryMediaAssets queries the "media_assets" edge of the Household entity.
 func (_m *Household) QueryMediaAssets() *MediaAssetQuery {
 	return NewHouseholdClient(_m.config).QueryMediaAssets(_m)
+}
+
+// QueryStoredObjects queries the "stored_objects" edge of the Household entity.
+func (_m *Household) QueryStoredObjects() *StoredObjectQuery {
+	return NewHouseholdClient(_m.config).QueryStoredObjects(_m)
+}
+
+// QueryRefreshSessions queries the "refresh_sessions" edge of the Household entity.
+func (_m *Household) QueryRefreshSessions() *RefreshSessionQuery {
+	return NewHouseholdClient(_m.config).QueryRefreshSessions(_m)
 }
 
 // Update returns a builder for updating this Household.

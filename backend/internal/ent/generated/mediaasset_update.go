@@ -15,6 +15,7 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/mediaasset"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/predicate"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipe"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 )
 
 // MediaAssetUpdate is the builder for updating MediaAsset entities.
@@ -67,6 +68,20 @@ func (_u *MediaAssetUpdate) SetNillableRecipeID(v *string) *MediaAssetUpdate {
 // ClearRecipeID clears the value of the "recipe_id" field.
 func (_u *MediaAssetUpdate) ClearRecipeID() *MediaAssetUpdate {
 	_u.mutation.ClearRecipeID()
+	return _u
+}
+
+// SetStorageObjectID sets the "storage_object_id" field.
+func (_u *MediaAssetUpdate) SetStorageObjectID(v string) *MediaAssetUpdate {
+	_u.mutation.SetStorageObjectID(v)
+	return _u
+}
+
+// SetNillableStorageObjectID sets the "storage_object_id" field if the given value is not nil.
+func (_u *MediaAssetUpdate) SetNillableStorageObjectID(v *string) *MediaAssetUpdate {
+	if v != nil {
+		_u.SetStorageObjectID(*v)
+	}
 	return _u
 }
 
@@ -161,6 +176,41 @@ func (_u *MediaAssetUpdate) SetNillableStoredAt(v *time.Time) *MediaAssetUpdate 
 	return _u
 }
 
+// SetAltText sets the "alt_text" field.
+func (_u *MediaAssetUpdate) SetAltText(v string) *MediaAssetUpdate {
+	_u.mutation.SetAltText(v)
+	return _u
+}
+
+// SetNillableAltText sets the "alt_text" field if the given value is not nil.
+func (_u *MediaAssetUpdate) SetNillableAltText(v *string) *MediaAssetUpdate {
+	if v != nil {
+		_u.SetAltText(*v)
+	}
+	return _u
+}
+
+// SetSortOrder sets the "sort_order" field.
+func (_u *MediaAssetUpdate) SetSortOrder(v int) *MediaAssetUpdate {
+	_u.mutation.ResetSortOrder()
+	_u.mutation.SetSortOrder(v)
+	return _u
+}
+
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_u *MediaAssetUpdate) SetNillableSortOrder(v *int) *MediaAssetUpdate {
+	if v != nil {
+		_u.SetSortOrder(*v)
+	}
+	return _u
+}
+
+// AddSortOrder adds value to the "sort_order" field.
+func (_u *MediaAssetUpdate) AddSortOrder(v int) *MediaAssetUpdate {
+	_u.mutation.AddSortOrder(v)
+	return _u
+}
+
 // SetHousehold sets the "household" edge to the Household entity.
 func (_u *MediaAssetUpdate) SetHousehold(v *Household) *MediaAssetUpdate {
 	return _u.SetHouseholdID(v.ID)
@@ -169,6 +219,11 @@ func (_u *MediaAssetUpdate) SetHousehold(v *Household) *MediaAssetUpdate {
 // SetRecipe sets the "recipe" edge to the Recipe entity.
 func (_u *MediaAssetUpdate) SetRecipe(v *Recipe) *MediaAssetUpdate {
 	return _u.SetRecipeID(v.ID)
+}
+
+// SetStorageObject sets the "storage_object" edge to the StoredObject entity.
+func (_u *MediaAssetUpdate) SetStorageObject(v *StoredObject) *MediaAssetUpdate {
+	return _u.SetStorageObjectID(v.ID)
 }
 
 // Mutation returns the MediaAssetMutation object of the builder.
@@ -185,6 +240,12 @@ func (_u *MediaAssetUpdate) ClearHousehold() *MediaAssetUpdate {
 // ClearRecipe clears the "recipe" edge to the Recipe entity.
 func (_u *MediaAssetUpdate) ClearRecipe() *MediaAssetUpdate {
 	_u.mutation.ClearRecipe()
+	return _u
+}
+
+// ClearStorageObject clears the "storage_object" edge to the StoredObject entity.
+func (_u *MediaAssetUpdate) ClearStorageObject() *MediaAssetUpdate {
+	_u.mutation.ClearStorageObject()
 	return _u
 }
 
@@ -249,6 +310,9 @@ func (_u *MediaAssetUpdate) check() error {
 	if _u.mutation.HouseholdCleared() && len(_u.mutation.HouseholdIDs()) > 0 {
 		return errors.New(`generated: clearing a required unique edge "MediaAsset.household"`)
 	}
+	if _u.mutation.StorageObjectCleared() && len(_u.mutation.StorageObjectIDs()) > 0 {
+		return errors.New(`generated: clearing a required unique edge "MediaAsset.storage_object"`)
+	}
 	return nil
 }
 
@@ -287,6 +351,15 @@ func (_u *MediaAssetUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if value, ok := _u.mutation.StoredAt(); ok {
 		_spec.SetField(mediaasset.FieldStoredAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.AltText(); ok {
+		_spec.SetField(mediaasset.FieldAltText, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SortOrder(); ok {
+		_spec.SetField(mediaasset.FieldSortOrder, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSortOrder(); ok {
+		_spec.AddField(mediaasset.FieldSortOrder, field.TypeInt, value)
 	}
 	if _u.mutation.HouseholdCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -339,6 +412,35 @@ func (_u *MediaAssetUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(recipe.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.StorageObjectCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   mediaasset.StorageObjectTable,
+			Columns: []string{mediaasset.StorageObjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.StorageObjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   mediaasset.StorageObjectTable,
+			Columns: []string{mediaasset.StorageObjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -403,6 +505,20 @@ func (_u *MediaAssetUpdateOne) SetNillableRecipeID(v *string) *MediaAssetUpdateO
 // ClearRecipeID clears the value of the "recipe_id" field.
 func (_u *MediaAssetUpdateOne) ClearRecipeID() *MediaAssetUpdateOne {
 	_u.mutation.ClearRecipeID()
+	return _u
+}
+
+// SetStorageObjectID sets the "storage_object_id" field.
+func (_u *MediaAssetUpdateOne) SetStorageObjectID(v string) *MediaAssetUpdateOne {
+	_u.mutation.SetStorageObjectID(v)
+	return _u
+}
+
+// SetNillableStorageObjectID sets the "storage_object_id" field if the given value is not nil.
+func (_u *MediaAssetUpdateOne) SetNillableStorageObjectID(v *string) *MediaAssetUpdateOne {
+	if v != nil {
+		_u.SetStorageObjectID(*v)
+	}
 	return _u
 }
 
@@ -497,6 +613,41 @@ func (_u *MediaAssetUpdateOne) SetNillableStoredAt(v *time.Time) *MediaAssetUpda
 	return _u
 }
 
+// SetAltText sets the "alt_text" field.
+func (_u *MediaAssetUpdateOne) SetAltText(v string) *MediaAssetUpdateOne {
+	_u.mutation.SetAltText(v)
+	return _u
+}
+
+// SetNillableAltText sets the "alt_text" field if the given value is not nil.
+func (_u *MediaAssetUpdateOne) SetNillableAltText(v *string) *MediaAssetUpdateOne {
+	if v != nil {
+		_u.SetAltText(*v)
+	}
+	return _u
+}
+
+// SetSortOrder sets the "sort_order" field.
+func (_u *MediaAssetUpdateOne) SetSortOrder(v int) *MediaAssetUpdateOne {
+	_u.mutation.ResetSortOrder()
+	_u.mutation.SetSortOrder(v)
+	return _u
+}
+
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_u *MediaAssetUpdateOne) SetNillableSortOrder(v *int) *MediaAssetUpdateOne {
+	if v != nil {
+		_u.SetSortOrder(*v)
+	}
+	return _u
+}
+
+// AddSortOrder adds value to the "sort_order" field.
+func (_u *MediaAssetUpdateOne) AddSortOrder(v int) *MediaAssetUpdateOne {
+	_u.mutation.AddSortOrder(v)
+	return _u
+}
+
 // SetHousehold sets the "household" edge to the Household entity.
 func (_u *MediaAssetUpdateOne) SetHousehold(v *Household) *MediaAssetUpdateOne {
 	return _u.SetHouseholdID(v.ID)
@@ -505,6 +656,11 @@ func (_u *MediaAssetUpdateOne) SetHousehold(v *Household) *MediaAssetUpdateOne {
 // SetRecipe sets the "recipe" edge to the Recipe entity.
 func (_u *MediaAssetUpdateOne) SetRecipe(v *Recipe) *MediaAssetUpdateOne {
 	return _u.SetRecipeID(v.ID)
+}
+
+// SetStorageObject sets the "storage_object" edge to the StoredObject entity.
+func (_u *MediaAssetUpdateOne) SetStorageObject(v *StoredObject) *MediaAssetUpdateOne {
+	return _u.SetStorageObjectID(v.ID)
 }
 
 // Mutation returns the MediaAssetMutation object of the builder.
@@ -521,6 +677,12 @@ func (_u *MediaAssetUpdateOne) ClearHousehold() *MediaAssetUpdateOne {
 // ClearRecipe clears the "recipe" edge to the Recipe entity.
 func (_u *MediaAssetUpdateOne) ClearRecipe() *MediaAssetUpdateOne {
 	_u.mutation.ClearRecipe()
+	return _u
+}
+
+// ClearStorageObject clears the "storage_object" edge to the StoredObject entity.
+func (_u *MediaAssetUpdateOne) ClearStorageObject() *MediaAssetUpdateOne {
+	_u.mutation.ClearStorageObject()
 	return _u
 }
 
@@ -598,6 +760,9 @@ func (_u *MediaAssetUpdateOne) check() error {
 	if _u.mutation.HouseholdCleared() && len(_u.mutation.HouseholdIDs()) > 0 {
 		return errors.New(`generated: clearing a required unique edge "MediaAsset.household"`)
 	}
+	if _u.mutation.StorageObjectCleared() && len(_u.mutation.StorageObjectIDs()) > 0 {
+		return errors.New(`generated: clearing a required unique edge "MediaAsset.storage_object"`)
+	}
 	return nil
 }
 
@@ -654,6 +819,15 @@ func (_u *MediaAssetUpdateOne) sqlSave(ctx context.Context) (_node *MediaAsset, 
 	if value, ok := _u.mutation.StoredAt(); ok {
 		_spec.SetField(mediaasset.FieldStoredAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.AltText(); ok {
+		_spec.SetField(mediaasset.FieldAltText, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SortOrder(); ok {
+		_spec.SetField(mediaasset.FieldSortOrder, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSortOrder(); ok {
+		_spec.AddField(mediaasset.FieldSortOrder, field.TypeInt, value)
+	}
 	if _u.mutation.HouseholdCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -705,6 +879,35 @@ func (_u *MediaAssetUpdateOne) sqlSave(ctx context.Context) (_node *MediaAsset, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(recipe.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.StorageObjectCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   mediaasset.StorageObjectTable,
+			Columns: []string{mediaasset.StorageObjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.StorageObjectIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   mediaasset.StorageObjectTable,
+			Columns: []string{mediaasset.StorageObjectColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(storedobject.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

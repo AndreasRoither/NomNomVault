@@ -85,6 +85,11 @@ func RecipeID(v string) predicate.MediaAsset {
 	return predicate.MediaAsset(sql.FieldEQ(FieldRecipeID, v))
 }
 
+// StorageObjectID applies equality check predicate on the "storage_object_id" field. It's identical to StorageObjectIDEQ.
+func StorageObjectID(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldEQ(FieldStorageObjectID, v))
+}
+
 // OriginalFilename applies equality check predicate on the "original_filename" field. It's identical to OriginalFilenameEQ.
 func OriginalFilename(v string) predicate.MediaAsset {
 	return predicate.MediaAsset(sql.FieldEQ(FieldOriginalFilename, v))
@@ -108,6 +113,16 @@ func Checksum(v string) predicate.MediaAsset {
 // StoredAt applies equality check predicate on the "stored_at" field. It's identical to StoredAtEQ.
 func StoredAt(v time.Time) predicate.MediaAsset {
 	return predicate.MediaAsset(sql.FieldEQ(FieldStoredAt, v))
+}
+
+// AltText applies equality check predicate on the "alt_text" field. It's identical to AltTextEQ.
+func AltText(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldEQ(FieldAltText, v))
+}
+
+// SortOrder applies equality check predicate on the "sort_order" field. It's identical to SortOrderEQ.
+func SortOrder(v int) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldEQ(FieldSortOrder, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -328,6 +343,71 @@ func RecipeIDEqualFold(v string) predicate.MediaAsset {
 // RecipeIDContainsFold applies the ContainsFold predicate on the "recipe_id" field.
 func RecipeIDContainsFold(v string) predicate.MediaAsset {
 	return predicate.MediaAsset(sql.FieldContainsFold(FieldRecipeID, v))
+}
+
+// StorageObjectIDEQ applies the EQ predicate on the "storage_object_id" field.
+func StorageObjectIDEQ(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldEQ(FieldStorageObjectID, v))
+}
+
+// StorageObjectIDNEQ applies the NEQ predicate on the "storage_object_id" field.
+func StorageObjectIDNEQ(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldNEQ(FieldStorageObjectID, v))
+}
+
+// StorageObjectIDIn applies the In predicate on the "storage_object_id" field.
+func StorageObjectIDIn(vs ...string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldIn(FieldStorageObjectID, vs...))
+}
+
+// StorageObjectIDNotIn applies the NotIn predicate on the "storage_object_id" field.
+func StorageObjectIDNotIn(vs ...string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldNotIn(FieldStorageObjectID, vs...))
+}
+
+// StorageObjectIDGT applies the GT predicate on the "storage_object_id" field.
+func StorageObjectIDGT(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldGT(FieldStorageObjectID, v))
+}
+
+// StorageObjectIDGTE applies the GTE predicate on the "storage_object_id" field.
+func StorageObjectIDGTE(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldGTE(FieldStorageObjectID, v))
+}
+
+// StorageObjectIDLT applies the LT predicate on the "storage_object_id" field.
+func StorageObjectIDLT(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldLT(FieldStorageObjectID, v))
+}
+
+// StorageObjectIDLTE applies the LTE predicate on the "storage_object_id" field.
+func StorageObjectIDLTE(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldLTE(FieldStorageObjectID, v))
+}
+
+// StorageObjectIDContains applies the Contains predicate on the "storage_object_id" field.
+func StorageObjectIDContains(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldContains(FieldStorageObjectID, v))
+}
+
+// StorageObjectIDHasPrefix applies the HasPrefix predicate on the "storage_object_id" field.
+func StorageObjectIDHasPrefix(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldHasPrefix(FieldStorageObjectID, v))
+}
+
+// StorageObjectIDHasSuffix applies the HasSuffix predicate on the "storage_object_id" field.
+func StorageObjectIDHasSuffix(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldHasSuffix(FieldStorageObjectID, v))
+}
+
+// StorageObjectIDEqualFold applies the EqualFold predicate on the "storage_object_id" field.
+func StorageObjectIDEqualFold(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldEqualFold(FieldStorageObjectID, v))
+}
+
+// StorageObjectIDContainsFold applies the ContainsFold predicate on the "storage_object_id" field.
+func StorageObjectIDContainsFold(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldContainsFold(FieldStorageObjectID, v))
 }
 
 // OriginalFilenameEQ applies the EQ predicate on the "original_filename" field.
@@ -625,6 +705,111 @@ func StoredAtLTE(v time.Time) predicate.MediaAsset {
 	return predicate.MediaAsset(sql.FieldLTE(FieldStoredAt, v))
 }
 
+// AltTextEQ applies the EQ predicate on the "alt_text" field.
+func AltTextEQ(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldEQ(FieldAltText, v))
+}
+
+// AltTextNEQ applies the NEQ predicate on the "alt_text" field.
+func AltTextNEQ(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldNEQ(FieldAltText, v))
+}
+
+// AltTextIn applies the In predicate on the "alt_text" field.
+func AltTextIn(vs ...string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldIn(FieldAltText, vs...))
+}
+
+// AltTextNotIn applies the NotIn predicate on the "alt_text" field.
+func AltTextNotIn(vs ...string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldNotIn(FieldAltText, vs...))
+}
+
+// AltTextGT applies the GT predicate on the "alt_text" field.
+func AltTextGT(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldGT(FieldAltText, v))
+}
+
+// AltTextGTE applies the GTE predicate on the "alt_text" field.
+func AltTextGTE(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldGTE(FieldAltText, v))
+}
+
+// AltTextLT applies the LT predicate on the "alt_text" field.
+func AltTextLT(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldLT(FieldAltText, v))
+}
+
+// AltTextLTE applies the LTE predicate on the "alt_text" field.
+func AltTextLTE(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldLTE(FieldAltText, v))
+}
+
+// AltTextContains applies the Contains predicate on the "alt_text" field.
+func AltTextContains(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldContains(FieldAltText, v))
+}
+
+// AltTextHasPrefix applies the HasPrefix predicate on the "alt_text" field.
+func AltTextHasPrefix(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldHasPrefix(FieldAltText, v))
+}
+
+// AltTextHasSuffix applies the HasSuffix predicate on the "alt_text" field.
+func AltTextHasSuffix(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldHasSuffix(FieldAltText, v))
+}
+
+// AltTextEqualFold applies the EqualFold predicate on the "alt_text" field.
+func AltTextEqualFold(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldEqualFold(FieldAltText, v))
+}
+
+// AltTextContainsFold applies the ContainsFold predicate on the "alt_text" field.
+func AltTextContainsFold(v string) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldContainsFold(FieldAltText, v))
+}
+
+// SortOrderEQ applies the EQ predicate on the "sort_order" field.
+func SortOrderEQ(v int) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldEQ(FieldSortOrder, v))
+}
+
+// SortOrderNEQ applies the NEQ predicate on the "sort_order" field.
+func SortOrderNEQ(v int) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldNEQ(FieldSortOrder, v))
+}
+
+// SortOrderIn applies the In predicate on the "sort_order" field.
+func SortOrderIn(vs ...int) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldIn(FieldSortOrder, vs...))
+}
+
+// SortOrderNotIn applies the NotIn predicate on the "sort_order" field.
+func SortOrderNotIn(vs ...int) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldNotIn(FieldSortOrder, vs...))
+}
+
+// SortOrderGT applies the GT predicate on the "sort_order" field.
+func SortOrderGT(v int) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldGT(FieldSortOrder, v))
+}
+
+// SortOrderGTE applies the GTE predicate on the "sort_order" field.
+func SortOrderGTE(v int) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldGTE(FieldSortOrder, v))
+}
+
+// SortOrderLT applies the LT predicate on the "sort_order" field.
+func SortOrderLT(v int) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldLT(FieldSortOrder, v))
+}
+
+// SortOrderLTE applies the LTE predicate on the "sort_order" field.
+func SortOrderLTE(v int) predicate.MediaAsset {
+	return predicate.MediaAsset(sql.FieldLTE(FieldSortOrder, v))
+}
+
 // HasHousehold applies the HasEdge predicate on the "household" edge.
 func HasHousehold() predicate.MediaAsset {
 	return predicate.MediaAsset(func(s *sql.Selector) {
@@ -663,6 +848,29 @@ func HasRecipe() predicate.MediaAsset {
 func HasRecipeWith(preds ...predicate.Recipe) predicate.MediaAsset {
 	return predicate.MediaAsset(func(s *sql.Selector) {
 		step := newRecipeStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasStorageObject applies the HasEdge predicate on the "storage_object" edge.
+func HasStorageObject() predicate.MediaAsset {
+	return predicate.MediaAsset(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, StorageObjectTable, StorageObjectColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStorageObjectWith applies the HasEdge predicate on the "storage_object" edge with a given conditions (other predicates).
+func HasStorageObjectWith(preds ...predicate.StoredObject) predicate.MediaAsset {
+	return predicate.MediaAsset(func(s *sql.Selector) {
+		step := newStorageObjectStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

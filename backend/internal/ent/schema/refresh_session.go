@@ -19,6 +19,7 @@ func (RefreshSession) Mixin() []ent.Mixin {
 func (RefreshSession) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("user_id"),
+		field.String("active_household_id"),
 		field.String("token_hash").NotEmpty().Unique(),
 		field.Time("expires_at"),
 		field.Bool("revoked").Default(false),
@@ -31,12 +32,14 @@ func (RefreshSession) Fields() []ent.Field {
 func (RefreshSession) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("refresh_sessions").Field("user_id").Unique().Required(),
+		edge.From("active_household", Household.Type).Ref("refresh_sessions").Field("active_household_id").Unique().Required(),
 	}
 }
 
 func (RefreshSession) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("user_id", "revoked"),
+		index.Fields("active_household_id"),
 		index.Fields("expires_at"),
 	}
 }

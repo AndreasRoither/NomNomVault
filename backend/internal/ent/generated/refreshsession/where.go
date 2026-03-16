@@ -80,6 +80,11 @@ func UserID(v string) predicate.RefreshSession {
 	return predicate.RefreshSession(sql.FieldEQ(FieldUserID, v))
 }
 
+// ActiveHouseholdID applies equality check predicate on the "active_household_id" field. It's identical to ActiveHouseholdIDEQ.
+func ActiveHouseholdID(v string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldEQ(FieldActiveHouseholdID, v))
+}
+
 // TokenHash applies equality check predicate on the "token_hash" field. It's identical to TokenHashEQ.
 func TokenHash(v string) predicate.RefreshSession {
 	return predicate.RefreshSession(sql.FieldEQ(FieldTokenHash, v))
@@ -253,6 +258,71 @@ func UserIDEqualFold(v string) predicate.RefreshSession {
 // UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
 func UserIDContainsFold(v string) predicate.RefreshSession {
 	return predicate.RefreshSession(sql.FieldContainsFold(FieldUserID, v))
+}
+
+// ActiveHouseholdIDEQ applies the EQ predicate on the "active_household_id" field.
+func ActiveHouseholdIDEQ(v string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldEQ(FieldActiveHouseholdID, v))
+}
+
+// ActiveHouseholdIDNEQ applies the NEQ predicate on the "active_household_id" field.
+func ActiveHouseholdIDNEQ(v string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldNEQ(FieldActiveHouseholdID, v))
+}
+
+// ActiveHouseholdIDIn applies the In predicate on the "active_household_id" field.
+func ActiveHouseholdIDIn(vs ...string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldIn(FieldActiveHouseholdID, vs...))
+}
+
+// ActiveHouseholdIDNotIn applies the NotIn predicate on the "active_household_id" field.
+func ActiveHouseholdIDNotIn(vs ...string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldNotIn(FieldActiveHouseholdID, vs...))
+}
+
+// ActiveHouseholdIDGT applies the GT predicate on the "active_household_id" field.
+func ActiveHouseholdIDGT(v string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldGT(FieldActiveHouseholdID, v))
+}
+
+// ActiveHouseholdIDGTE applies the GTE predicate on the "active_household_id" field.
+func ActiveHouseholdIDGTE(v string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldGTE(FieldActiveHouseholdID, v))
+}
+
+// ActiveHouseholdIDLT applies the LT predicate on the "active_household_id" field.
+func ActiveHouseholdIDLT(v string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldLT(FieldActiveHouseholdID, v))
+}
+
+// ActiveHouseholdIDLTE applies the LTE predicate on the "active_household_id" field.
+func ActiveHouseholdIDLTE(v string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldLTE(FieldActiveHouseholdID, v))
+}
+
+// ActiveHouseholdIDContains applies the Contains predicate on the "active_household_id" field.
+func ActiveHouseholdIDContains(v string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldContains(FieldActiveHouseholdID, v))
+}
+
+// ActiveHouseholdIDHasPrefix applies the HasPrefix predicate on the "active_household_id" field.
+func ActiveHouseholdIDHasPrefix(v string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldHasPrefix(FieldActiveHouseholdID, v))
+}
+
+// ActiveHouseholdIDHasSuffix applies the HasSuffix predicate on the "active_household_id" field.
+func ActiveHouseholdIDHasSuffix(v string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldHasSuffix(FieldActiveHouseholdID, v))
+}
+
+// ActiveHouseholdIDEqualFold applies the EqualFold predicate on the "active_household_id" field.
+func ActiveHouseholdIDEqualFold(v string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldEqualFold(FieldActiveHouseholdID, v))
+}
+
+// ActiveHouseholdIDContainsFold applies the ContainsFold predicate on the "active_household_id" field.
+func ActiveHouseholdIDContainsFold(v string) predicate.RefreshSession {
+	return predicate.RefreshSession(sql.FieldContainsFold(FieldActiveHouseholdID, v))
 }
 
 // TokenHashEQ applies the EQ predicate on the "token_hash" field.
@@ -585,6 +655,29 @@ func HasUser() predicate.RefreshSession {
 func HasUserWith(preds ...predicate.User) predicate.RefreshSession {
 	return predicate.RefreshSession(func(s *sql.Selector) {
 		step := newUserStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasActiveHousehold applies the HasEdge predicate on the "active_household" edge.
+func HasActiveHousehold() predicate.RefreshSession {
+	return predicate.RefreshSession(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ActiveHouseholdTable, ActiveHouseholdColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasActiveHouseholdWith applies the HasEdge predicate on the "active_household" edge with a given conditions (other predicates).
+func HasActiveHouseholdWith(preds ...predicate.Household) predicate.RefreshSession {
+	return predicate.RefreshSession(func(s *sql.Selector) {
+		step := newActiveHouseholdStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

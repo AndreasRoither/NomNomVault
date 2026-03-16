@@ -34,6 +34,10 @@ const (
 	EdgeTags = "tags"
 	// EdgeMediaAssets holds the string denoting the media_assets edge name in mutations.
 	EdgeMediaAssets = "media_assets"
+	// EdgeStoredObjects holds the string denoting the stored_objects edge name in mutations.
+	EdgeStoredObjects = "stored_objects"
+	// EdgeRefreshSessions holds the string denoting the refresh_sessions edge name in mutations.
+	EdgeRefreshSessions = "refresh_sessions"
 	// Table holds the table name of the household in the database.
 	Table = "households"
 	// MembersTable is the table that holds the members relation/edge.
@@ -64,6 +68,20 @@ const (
 	MediaAssetsInverseTable = "media_assets"
 	// MediaAssetsColumn is the table column denoting the media_assets relation/edge.
 	MediaAssetsColumn = "household_id"
+	// StoredObjectsTable is the table that holds the stored_objects relation/edge.
+	StoredObjectsTable = "stored_objects"
+	// StoredObjectsInverseTable is the table name for the StoredObject entity.
+	// It exists in this package in order to avoid circular dependency with the "storedobject" package.
+	StoredObjectsInverseTable = "stored_objects"
+	// StoredObjectsColumn is the table column denoting the stored_objects relation/edge.
+	StoredObjectsColumn = "household_id"
+	// RefreshSessionsTable is the table that holds the refresh_sessions relation/edge.
+	RefreshSessionsTable = "refresh_sessions"
+	// RefreshSessionsInverseTable is the table name for the RefreshSession entity.
+	// It exists in this package in order to avoid circular dependency with the "refreshsession" package.
+	RefreshSessionsInverseTable = "refresh_sessions"
+	// RefreshSessionsColumn is the table column denoting the refresh_sessions relation/edge.
+	RefreshSessionsColumn = "active_household_id"
 )
 
 // Columns holds all SQL columns for household fields.
@@ -199,6 +217,34 @@ func ByMediaAssets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newMediaAssetsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByStoredObjectsCount orders the results by stored_objects count.
+func ByStoredObjectsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newStoredObjectsStep(), opts...)
+	}
+}
+
+// ByStoredObjects orders the results by stored_objects terms.
+func ByStoredObjects(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStoredObjectsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByRefreshSessionsCount orders the results by refresh_sessions count.
+func ByRefreshSessionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRefreshSessionsStep(), opts...)
+	}
+}
+
+// ByRefreshSessions orders the results by refresh_sessions terms.
+func ByRefreshSessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRefreshSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newMembersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -225,5 +271,19 @@ func newMediaAssetsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MediaAssetsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, MediaAssetsTable, MediaAssetsColumn),
+	)
+}
+func newStoredObjectsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StoredObjectsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, StoredObjectsTable, StoredObjectsColumn),
+	)
+}
+func newRefreshSessionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RefreshSessionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, RefreshSessionsTable, RefreshSessionsColumn),
 	)
 }

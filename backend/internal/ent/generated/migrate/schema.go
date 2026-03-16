@@ -72,8 +72,11 @@ var (
 		{Name: "size_bytes", Type: field.TypeInt64},
 		{Name: "checksum", Type: field.TypeString},
 		{Name: "stored_at", Type: field.TypeTime},
+		{Name: "alt_text", Type: field.TypeString, Default: ""},
+		{Name: "sort_order", Type: field.TypeInt, Default: 1},
 		{Name: "household_id", Type: field.TypeString},
 		{Name: "recipe_id", Type: field.TypeString, Nullable: true},
+		{Name: "storage_object_id", Type: field.TypeString},
 	}
 	// MediaAssetsTable holds the schema information for the "media_assets" table.
 	MediaAssetsTable = &schema.Table{
@@ -83,22 +86,28 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "media_assets_households_media_assets",
-				Columns:    []*schema.Column{MediaAssetsColumns[9]},
+				Columns:    []*schema.Column{MediaAssetsColumns[11]},
 				RefColumns: []*schema.Column{HouseholdsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "media_assets_recipes_media_assets",
-				Columns:    []*schema.Column{MediaAssetsColumns[10]},
+				Columns:    []*schema.Column{MediaAssetsColumns[12]},
 				RefColumns: []*schema.Column{RecipesColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "media_assets_stored_objects_media_assets",
+				Columns:    []*schema.Column{MediaAssetsColumns[13]},
+				RefColumns: []*schema.Column{StoredObjectsColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "mediaasset_household_id_checksum",
-				Unique:  true,
-				Columns: []*schema.Column{MediaAssetsColumns[9], MediaAssetsColumns[7]},
+				Name:    "mediaasset_recipe_id_sort_order",
+				Unique:  false,
+				Columns: []*schema.Column{MediaAssetsColumns[12], MediaAssetsColumns[10]},
 			},
 		},
 	}
@@ -313,6 +322,7 @@ var (
 		{Name: "device_info", Type: field.TypeString, Nullable: true},
 		{Name: "ip_address", Type: field.TypeString, Nullable: true},
 		{Name: "last_used_at", Type: field.TypeTime, Nullable: true},
+		{Name: "active_household_id", Type: field.TypeString},
 		{Name: "user_id", Type: field.TypeString},
 	}
 	// RefreshSessionsTable holds the schema information for the "refresh_sessions" table.
@@ -322,8 +332,14 @@ var (
 		PrimaryKey: []*schema.Column{RefreshSessionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "refresh_sessions_users_refresh_sessions",
+				Symbol:     "refresh_sessions_households_refresh_sessions",
 				Columns:    []*schema.Column{RefreshSessionsColumns[9]},
+				RefColumns: []*schema.Column{HouseholdsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "refresh_sessions_users_refresh_sessions",
+				Columns:    []*schema.Column{RefreshSessionsColumns[10]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -332,12 +348,50 @@ var (
 			{
 				Name:    "refreshsession_user_id_revoked",
 				Unique:  false,
-				Columns: []*schema.Column{RefreshSessionsColumns[9], RefreshSessionsColumns[5]},
+				Columns: []*schema.Column{RefreshSessionsColumns[10], RefreshSessionsColumns[5]},
+			},
+			{
+				Name:    "refreshsession_active_household_id",
+				Unique:  false,
+				Columns: []*schema.Column{RefreshSessionsColumns[9]},
 			},
 			{
 				Name:    "refreshsession_expires_at",
 				Unique:  false,
 				Columns: []*schema.Column{RefreshSessionsColumns[4]},
+			},
+		},
+	}
+	// StoredObjectsColumns holds the columns for the "stored_objects" table.
+	StoredObjectsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "original_filename", Type: field.TypeString},
+		{Name: "mime_type", Type: field.TypeString},
+		{Name: "size_bytes", Type: field.TypeInt64},
+		{Name: "checksum", Type: field.TypeString},
+		{Name: "content", Type: field.TypeBytes},
+		{Name: "household_id", Type: field.TypeString},
+	}
+	// StoredObjectsTable holds the schema information for the "stored_objects" table.
+	StoredObjectsTable = &schema.Table{
+		Name:       "stored_objects",
+		Columns:    StoredObjectsColumns,
+		PrimaryKey: []*schema.Column{StoredObjectsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "stored_objects_households_stored_objects",
+				Columns:    []*schema.Column{StoredObjectsColumns[8]},
+				RefColumns: []*schema.Column{HouseholdsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "storedobject_household_id_checksum",
+				Unique:  true,
+				Columns: []*schema.Column{StoredObjectsColumns[8], StoredObjectsColumns[6]},
 			},
 		},
 	}
@@ -427,6 +481,7 @@ var (
 		RecipeSharesTable,
 		RecipeStepsTable,
 		RefreshSessionsTable,
+		StoredObjectsTable,
 		TagsTable,
 		UsersTable,
 		RecipeTagsTable,
@@ -438,6 +493,7 @@ func init() {
 	HouseholdMembersTable.ForeignKeys[1].RefTable = UsersTable
 	MediaAssetsTable.ForeignKeys[0].RefTable = HouseholdsTable
 	MediaAssetsTable.ForeignKeys[1].RefTable = RecipesTable
+	MediaAssetsTable.ForeignKeys[2].RefTable = StoredObjectsTable
 	RecipesTable.ForeignKeys[0].RefTable = HouseholdsTable
 	RecipeIngredientsTable.ForeignKeys[0].RefTable = RecipesTable
 	RecipeNutritionTable.ForeignKeys[0].RefTable = RecipesTable
@@ -447,7 +503,9 @@ func init() {
 	RecipeSharesTable.ForeignKeys[0].RefTable = RecipesTable
 	RecipeSharesTable.ForeignKeys[1].RefTable = UsersTable
 	RecipeStepsTable.ForeignKeys[0].RefTable = RecipesTable
-	RefreshSessionsTable.ForeignKeys[0].RefTable = UsersTable
+	RefreshSessionsTable.ForeignKeys[0].RefTable = HouseholdsTable
+	RefreshSessionsTable.ForeignKeys[1].RefTable = UsersTable
+	StoredObjectsTable.ForeignKeys[0].RefTable = HouseholdsTable
 	TagsTable.ForeignKeys[0].RefTable = HouseholdsTable
 	RecipeTagsTable.ForeignKeys[0].RefTable = RecipesTable
 	RecipeTagsTable.ForeignKeys[1].RefTable = TagsTable

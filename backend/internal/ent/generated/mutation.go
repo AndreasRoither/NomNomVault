@@ -21,6 +21,7 @@ import (
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipeshare"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/recipestep"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/storedobject"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/tag"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
 )
@@ -43,6 +44,7 @@ const (
 	TypeRecipeShare      = "RecipeShare"
 	TypeRecipeStep       = "RecipeStep"
 	TypeRefreshSession   = "RefreshSession"
+	TypeStoredObject     = "StoredObject"
 	TypeTag              = "Tag"
 	TypeUser             = "User"
 )
@@ -50,31 +52,37 @@ const (
 // HouseholdMutation represents an operation that mutates the Household nodes in the graph.
 type HouseholdMutation struct {
 	config
-	op                  Op
-	typ                 string
-	id                  *string
-	created_at          *time.Time
-	updated_at          *time.Time
-	name                *string
-	slug                *string
-	description         *string
-	active              *bool
-	clearedFields       map[string]struct{}
-	members             map[string]struct{}
-	removedmembers      map[string]struct{}
-	clearedmembers      bool
-	recipes             map[string]struct{}
-	removedrecipes      map[string]struct{}
-	clearedrecipes      bool
-	tags                map[string]struct{}
-	removedtags         map[string]struct{}
-	clearedtags         bool
-	media_assets        map[string]struct{}
-	removedmedia_assets map[string]struct{}
-	clearedmedia_assets bool
-	done                bool
-	oldValue            func(context.Context) (*Household, error)
-	predicates          []predicate.Household
+	op                      Op
+	typ                     string
+	id                      *string
+	created_at              *time.Time
+	updated_at              *time.Time
+	name                    *string
+	slug                    *string
+	description             *string
+	active                  *bool
+	clearedFields           map[string]struct{}
+	members                 map[string]struct{}
+	removedmembers          map[string]struct{}
+	clearedmembers          bool
+	recipes                 map[string]struct{}
+	removedrecipes          map[string]struct{}
+	clearedrecipes          bool
+	tags                    map[string]struct{}
+	removedtags             map[string]struct{}
+	clearedtags             bool
+	media_assets            map[string]struct{}
+	removedmedia_assets     map[string]struct{}
+	clearedmedia_assets     bool
+	stored_objects          map[string]struct{}
+	removedstored_objects   map[string]struct{}
+	clearedstored_objects   bool
+	refresh_sessions        map[string]struct{}
+	removedrefresh_sessions map[string]struct{}
+	clearedrefresh_sessions bool
+	done                    bool
+	oldValue                func(context.Context) (*Household, error)
+	predicates              []predicate.Household
 }
 
 var _ ent.Mutation = (*HouseholdMutation)(nil)
@@ -613,6 +621,114 @@ func (m *HouseholdMutation) ResetMediaAssets() {
 	m.removedmedia_assets = nil
 }
 
+// AddStoredObjectIDs adds the "stored_objects" edge to the StoredObject entity by ids.
+func (m *HouseholdMutation) AddStoredObjectIDs(ids ...string) {
+	if m.stored_objects == nil {
+		m.stored_objects = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.stored_objects[ids[i]] = struct{}{}
+	}
+}
+
+// ClearStoredObjects clears the "stored_objects" edge to the StoredObject entity.
+func (m *HouseholdMutation) ClearStoredObjects() {
+	m.clearedstored_objects = true
+}
+
+// StoredObjectsCleared reports if the "stored_objects" edge to the StoredObject entity was cleared.
+func (m *HouseholdMutation) StoredObjectsCleared() bool {
+	return m.clearedstored_objects
+}
+
+// RemoveStoredObjectIDs removes the "stored_objects" edge to the StoredObject entity by IDs.
+func (m *HouseholdMutation) RemoveStoredObjectIDs(ids ...string) {
+	if m.removedstored_objects == nil {
+		m.removedstored_objects = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.stored_objects, ids[i])
+		m.removedstored_objects[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedStoredObjects returns the removed IDs of the "stored_objects" edge to the StoredObject entity.
+func (m *HouseholdMutation) RemovedStoredObjectsIDs() (ids []string) {
+	for id := range m.removedstored_objects {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// StoredObjectsIDs returns the "stored_objects" edge IDs in the mutation.
+func (m *HouseholdMutation) StoredObjectsIDs() (ids []string) {
+	for id := range m.stored_objects {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetStoredObjects resets all changes to the "stored_objects" edge.
+func (m *HouseholdMutation) ResetStoredObjects() {
+	m.stored_objects = nil
+	m.clearedstored_objects = false
+	m.removedstored_objects = nil
+}
+
+// AddRefreshSessionIDs adds the "refresh_sessions" edge to the RefreshSession entity by ids.
+func (m *HouseholdMutation) AddRefreshSessionIDs(ids ...string) {
+	if m.refresh_sessions == nil {
+		m.refresh_sessions = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.refresh_sessions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearRefreshSessions clears the "refresh_sessions" edge to the RefreshSession entity.
+func (m *HouseholdMutation) ClearRefreshSessions() {
+	m.clearedrefresh_sessions = true
+}
+
+// RefreshSessionsCleared reports if the "refresh_sessions" edge to the RefreshSession entity was cleared.
+func (m *HouseholdMutation) RefreshSessionsCleared() bool {
+	return m.clearedrefresh_sessions
+}
+
+// RemoveRefreshSessionIDs removes the "refresh_sessions" edge to the RefreshSession entity by IDs.
+func (m *HouseholdMutation) RemoveRefreshSessionIDs(ids ...string) {
+	if m.removedrefresh_sessions == nil {
+		m.removedrefresh_sessions = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.refresh_sessions, ids[i])
+		m.removedrefresh_sessions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRefreshSessions returns the removed IDs of the "refresh_sessions" edge to the RefreshSession entity.
+func (m *HouseholdMutation) RemovedRefreshSessionsIDs() (ids []string) {
+	for id := range m.removedrefresh_sessions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// RefreshSessionsIDs returns the "refresh_sessions" edge IDs in the mutation.
+func (m *HouseholdMutation) RefreshSessionsIDs() (ids []string) {
+	for id := range m.refresh_sessions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetRefreshSessions resets all changes to the "refresh_sessions" edge.
+func (m *HouseholdMutation) ResetRefreshSessions() {
+	m.refresh_sessions = nil
+	m.clearedrefresh_sessions = false
+	m.removedrefresh_sessions = nil
+}
+
 // Where appends a list predicates to the HouseholdMutation builder.
 func (m *HouseholdMutation) Where(ps ...predicate.Household) {
 	m.predicates = append(m.predicates, ps...)
@@ -831,7 +947,7 @@ func (m *HouseholdMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *HouseholdMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 6)
 	if m.members != nil {
 		edges = append(edges, household.EdgeMembers)
 	}
@@ -843,6 +959,12 @@ func (m *HouseholdMutation) AddedEdges() []string {
 	}
 	if m.media_assets != nil {
 		edges = append(edges, household.EdgeMediaAssets)
+	}
+	if m.stored_objects != nil {
+		edges = append(edges, household.EdgeStoredObjects)
+	}
+	if m.refresh_sessions != nil {
+		edges = append(edges, household.EdgeRefreshSessions)
 	}
 	return edges
 }
@@ -875,13 +997,25 @@ func (m *HouseholdMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case household.EdgeStoredObjects:
+		ids := make([]ent.Value, 0, len(m.stored_objects))
+		for id := range m.stored_objects {
+			ids = append(ids, id)
+		}
+		return ids
+	case household.EdgeRefreshSessions:
+		ids := make([]ent.Value, 0, len(m.refresh_sessions))
+		for id := range m.refresh_sessions {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *HouseholdMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 6)
 	if m.removedmembers != nil {
 		edges = append(edges, household.EdgeMembers)
 	}
@@ -893,6 +1027,12 @@ func (m *HouseholdMutation) RemovedEdges() []string {
 	}
 	if m.removedmedia_assets != nil {
 		edges = append(edges, household.EdgeMediaAssets)
+	}
+	if m.removedstored_objects != nil {
+		edges = append(edges, household.EdgeStoredObjects)
+	}
+	if m.removedrefresh_sessions != nil {
+		edges = append(edges, household.EdgeRefreshSessions)
 	}
 	return edges
 }
@@ -925,13 +1065,25 @@ func (m *HouseholdMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case household.EdgeStoredObjects:
+		ids := make([]ent.Value, 0, len(m.removedstored_objects))
+		for id := range m.removedstored_objects {
+			ids = append(ids, id)
+		}
+		return ids
+	case household.EdgeRefreshSessions:
+		ids := make([]ent.Value, 0, len(m.removedrefresh_sessions))
+		for id := range m.removedrefresh_sessions {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *HouseholdMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 6)
 	if m.clearedmembers {
 		edges = append(edges, household.EdgeMembers)
 	}
@@ -943,6 +1095,12 @@ func (m *HouseholdMutation) ClearedEdges() []string {
 	}
 	if m.clearedmedia_assets {
 		edges = append(edges, household.EdgeMediaAssets)
+	}
+	if m.clearedstored_objects {
+		edges = append(edges, household.EdgeStoredObjects)
+	}
+	if m.clearedrefresh_sessions {
+		edges = append(edges, household.EdgeRefreshSessions)
 	}
 	return edges
 }
@@ -959,6 +1117,10 @@ func (m *HouseholdMutation) EdgeCleared(name string) bool {
 		return m.clearedtags
 	case household.EdgeMediaAssets:
 		return m.clearedmedia_assets
+	case household.EdgeStoredObjects:
+		return m.clearedstored_objects
+	case household.EdgeRefreshSessions:
+		return m.clearedrefresh_sessions
 	}
 	return false
 }
@@ -986,6 +1148,12 @@ func (m *HouseholdMutation) ResetEdge(name string) error {
 		return nil
 	case household.EdgeMediaAssets:
 		m.ResetMediaAssets()
+		return nil
+	case household.EdgeStoredObjects:
+		m.ResetStoredObjects()
+		return nil
+	case household.EdgeRefreshSessions:
+		m.ResetRefreshSessions()
 		return nil
 	}
 	return fmt.Errorf("unknown Household edge %s", name)
@@ -1642,26 +1810,31 @@ func (m *HouseholdMemberMutation) ResetEdge(name string) error {
 // MediaAssetMutation represents an operation that mutates the MediaAsset nodes in the graph.
 type MediaAssetMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *string
-	created_at        *time.Time
-	updated_at        *time.Time
-	original_filename *string
-	mime_type         *string
-	media_type        *mediaasset.MediaType
-	size_bytes        *int64
-	addsize_bytes     *int64
-	checksum          *string
-	stored_at         *time.Time
-	clearedFields     map[string]struct{}
-	household         *string
-	clearedhousehold  bool
-	recipe            *string
-	clearedrecipe     bool
-	done              bool
-	oldValue          func(context.Context) (*MediaAsset, error)
-	predicates        []predicate.MediaAsset
+	op                    Op
+	typ                   string
+	id                    *string
+	created_at            *time.Time
+	updated_at            *time.Time
+	original_filename     *string
+	mime_type             *string
+	media_type            *mediaasset.MediaType
+	size_bytes            *int64
+	addsize_bytes         *int64
+	checksum              *string
+	stored_at             *time.Time
+	alt_text              *string
+	sort_order            *int
+	addsort_order         *int
+	clearedFields         map[string]struct{}
+	household             *string
+	clearedhousehold      bool
+	recipe                *string
+	clearedrecipe         bool
+	storage_object        *string
+	clearedstorage_object bool
+	done                  bool
+	oldValue              func(context.Context) (*MediaAsset, error)
+	predicates            []predicate.MediaAsset
 }
 
 var _ ent.Mutation = (*MediaAssetMutation)(nil)
@@ -1925,6 +2098,42 @@ func (m *MediaAssetMutation) ResetRecipeID() {
 	delete(m.clearedFields, mediaasset.FieldRecipeID)
 }
 
+// SetStorageObjectID sets the "storage_object_id" field.
+func (m *MediaAssetMutation) SetStorageObjectID(s string) {
+	m.storage_object = &s
+}
+
+// StorageObjectID returns the value of the "storage_object_id" field in the mutation.
+func (m *MediaAssetMutation) StorageObjectID() (r string, exists bool) {
+	v := m.storage_object
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStorageObjectID returns the old "storage_object_id" field's value of the MediaAsset entity.
+// If the MediaAsset object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaAssetMutation) OldStorageObjectID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStorageObjectID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStorageObjectID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStorageObjectID: %w", err)
+	}
+	return oldValue.StorageObjectID, nil
+}
+
+// ResetStorageObjectID resets all changes to the "storage_object_id" field.
+func (m *MediaAssetMutation) ResetStorageObjectID() {
+	m.storage_object = nil
+}
+
 // SetOriginalFilename sets the "original_filename" field.
 func (m *MediaAssetMutation) SetOriginalFilename(s string) {
 	m.original_filename = &s
@@ -2161,6 +2370,98 @@ func (m *MediaAssetMutation) ResetStoredAt() {
 	m.stored_at = nil
 }
 
+// SetAltText sets the "alt_text" field.
+func (m *MediaAssetMutation) SetAltText(s string) {
+	m.alt_text = &s
+}
+
+// AltText returns the value of the "alt_text" field in the mutation.
+func (m *MediaAssetMutation) AltText() (r string, exists bool) {
+	v := m.alt_text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAltText returns the old "alt_text" field's value of the MediaAsset entity.
+// If the MediaAsset object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaAssetMutation) OldAltText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAltText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAltText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAltText: %w", err)
+	}
+	return oldValue.AltText, nil
+}
+
+// ResetAltText resets all changes to the "alt_text" field.
+func (m *MediaAssetMutation) ResetAltText() {
+	m.alt_text = nil
+}
+
+// SetSortOrder sets the "sort_order" field.
+func (m *MediaAssetMutation) SetSortOrder(i int) {
+	m.sort_order = &i
+	m.addsort_order = nil
+}
+
+// SortOrder returns the value of the "sort_order" field in the mutation.
+func (m *MediaAssetMutation) SortOrder() (r int, exists bool) {
+	v := m.sort_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSortOrder returns the old "sort_order" field's value of the MediaAsset entity.
+// If the MediaAsset object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaAssetMutation) OldSortOrder(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSortOrder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSortOrder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSortOrder: %w", err)
+	}
+	return oldValue.SortOrder, nil
+}
+
+// AddSortOrder adds i to the "sort_order" field.
+func (m *MediaAssetMutation) AddSortOrder(i int) {
+	if m.addsort_order != nil {
+		*m.addsort_order += i
+	} else {
+		m.addsort_order = &i
+	}
+}
+
+// AddedSortOrder returns the value that was added to the "sort_order" field in this mutation.
+func (m *MediaAssetMutation) AddedSortOrder() (r int, exists bool) {
+	v := m.addsort_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSortOrder resets all changes to the "sort_order" field.
+func (m *MediaAssetMutation) ResetSortOrder() {
+	m.sort_order = nil
+	m.addsort_order = nil
+}
+
 // ClearHousehold clears the "household" edge to the Household entity.
 func (m *MediaAssetMutation) ClearHousehold() {
 	m.clearedhousehold = true
@@ -2215,6 +2516,33 @@ func (m *MediaAssetMutation) ResetRecipe() {
 	m.clearedrecipe = false
 }
 
+// ClearStorageObject clears the "storage_object" edge to the StoredObject entity.
+func (m *MediaAssetMutation) ClearStorageObject() {
+	m.clearedstorage_object = true
+	m.clearedFields[mediaasset.FieldStorageObjectID] = struct{}{}
+}
+
+// StorageObjectCleared reports if the "storage_object" edge to the StoredObject entity was cleared.
+func (m *MediaAssetMutation) StorageObjectCleared() bool {
+	return m.clearedstorage_object
+}
+
+// StorageObjectIDs returns the "storage_object" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// StorageObjectID instead. It exists only for internal usage by the builders.
+func (m *MediaAssetMutation) StorageObjectIDs() (ids []string) {
+	if id := m.storage_object; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetStorageObject resets all changes to the "storage_object" edge.
+func (m *MediaAssetMutation) ResetStorageObject() {
+	m.storage_object = nil
+	m.clearedstorage_object = false
+}
+
 // Where appends a list predicates to the MediaAssetMutation builder.
 func (m *MediaAssetMutation) Where(ps ...predicate.MediaAsset) {
 	m.predicates = append(m.predicates, ps...)
@@ -2249,7 +2577,7 @@ func (m *MediaAssetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MediaAssetMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, mediaasset.FieldCreatedAt)
 	}
@@ -2261,6 +2589,9 @@ func (m *MediaAssetMutation) Fields() []string {
 	}
 	if m.recipe != nil {
 		fields = append(fields, mediaasset.FieldRecipeID)
+	}
+	if m.storage_object != nil {
+		fields = append(fields, mediaasset.FieldStorageObjectID)
 	}
 	if m.original_filename != nil {
 		fields = append(fields, mediaasset.FieldOriginalFilename)
@@ -2280,6 +2611,12 @@ func (m *MediaAssetMutation) Fields() []string {
 	if m.stored_at != nil {
 		fields = append(fields, mediaasset.FieldStoredAt)
 	}
+	if m.alt_text != nil {
+		fields = append(fields, mediaasset.FieldAltText)
+	}
+	if m.sort_order != nil {
+		fields = append(fields, mediaasset.FieldSortOrder)
+	}
 	return fields
 }
 
@@ -2296,6 +2633,8 @@ func (m *MediaAssetMutation) Field(name string) (ent.Value, bool) {
 		return m.HouseholdID()
 	case mediaasset.FieldRecipeID:
 		return m.RecipeID()
+	case mediaasset.FieldStorageObjectID:
+		return m.StorageObjectID()
 	case mediaasset.FieldOriginalFilename:
 		return m.OriginalFilename()
 	case mediaasset.FieldMimeType:
@@ -2308,6 +2647,10 @@ func (m *MediaAssetMutation) Field(name string) (ent.Value, bool) {
 		return m.Checksum()
 	case mediaasset.FieldStoredAt:
 		return m.StoredAt()
+	case mediaasset.FieldAltText:
+		return m.AltText()
+	case mediaasset.FieldSortOrder:
+		return m.SortOrder()
 	}
 	return nil, false
 }
@@ -2325,6 +2668,8 @@ func (m *MediaAssetMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldHouseholdID(ctx)
 	case mediaasset.FieldRecipeID:
 		return m.OldRecipeID(ctx)
+	case mediaasset.FieldStorageObjectID:
+		return m.OldStorageObjectID(ctx)
 	case mediaasset.FieldOriginalFilename:
 		return m.OldOriginalFilename(ctx)
 	case mediaasset.FieldMimeType:
@@ -2337,6 +2682,10 @@ func (m *MediaAssetMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldChecksum(ctx)
 	case mediaasset.FieldStoredAt:
 		return m.OldStoredAt(ctx)
+	case mediaasset.FieldAltText:
+		return m.OldAltText(ctx)
+	case mediaasset.FieldSortOrder:
+		return m.OldSortOrder(ctx)
 	}
 	return nil, fmt.Errorf("unknown MediaAsset field %s", name)
 }
@@ -2373,6 +2722,13 @@ func (m *MediaAssetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRecipeID(v)
+		return nil
+	case mediaasset.FieldStorageObjectID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStorageObjectID(v)
 		return nil
 	case mediaasset.FieldOriginalFilename:
 		v, ok := value.(string)
@@ -2416,6 +2772,20 @@ func (m *MediaAssetMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStoredAt(v)
 		return nil
+	case mediaasset.FieldAltText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAltText(v)
+		return nil
+	case mediaasset.FieldSortOrder:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSortOrder(v)
+		return nil
 	}
 	return fmt.Errorf("unknown MediaAsset field %s", name)
 }
@@ -2427,6 +2797,9 @@ func (m *MediaAssetMutation) AddedFields() []string {
 	if m.addsize_bytes != nil {
 		fields = append(fields, mediaasset.FieldSizeBytes)
 	}
+	if m.addsort_order != nil {
+		fields = append(fields, mediaasset.FieldSortOrder)
+	}
 	return fields
 }
 
@@ -2437,6 +2810,8 @@ func (m *MediaAssetMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case mediaasset.FieldSizeBytes:
 		return m.AddedSizeBytes()
+	case mediaasset.FieldSortOrder:
+		return m.AddedSortOrder()
 	}
 	return nil, false
 }
@@ -2452,6 +2827,13 @@ func (m *MediaAssetMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddSizeBytes(v)
+		return nil
+	case mediaasset.FieldSortOrder:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSortOrder(v)
 		return nil
 	}
 	return fmt.Errorf("unknown MediaAsset numeric field %s", name)
@@ -2501,6 +2883,9 @@ func (m *MediaAssetMutation) ResetField(name string) error {
 	case mediaasset.FieldRecipeID:
 		m.ResetRecipeID()
 		return nil
+	case mediaasset.FieldStorageObjectID:
+		m.ResetStorageObjectID()
+		return nil
 	case mediaasset.FieldOriginalFilename:
 		m.ResetOriginalFilename()
 		return nil
@@ -2519,18 +2904,27 @@ func (m *MediaAssetMutation) ResetField(name string) error {
 	case mediaasset.FieldStoredAt:
 		m.ResetStoredAt()
 		return nil
+	case mediaasset.FieldAltText:
+		m.ResetAltText()
+		return nil
+	case mediaasset.FieldSortOrder:
+		m.ResetSortOrder()
+		return nil
 	}
 	return fmt.Errorf("unknown MediaAsset field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MediaAssetMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.household != nil {
 		edges = append(edges, mediaasset.EdgeHousehold)
 	}
 	if m.recipe != nil {
 		edges = append(edges, mediaasset.EdgeRecipe)
+	}
+	if m.storage_object != nil {
+		edges = append(edges, mediaasset.EdgeStorageObject)
 	}
 	return edges
 }
@@ -2547,13 +2941,17 @@ func (m *MediaAssetMutation) AddedIDs(name string) []ent.Value {
 		if id := m.recipe; id != nil {
 			return []ent.Value{*id}
 		}
+	case mediaasset.EdgeStorageObject:
+		if id := m.storage_object; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MediaAssetMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -2565,12 +2963,15 @@ func (m *MediaAssetMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MediaAssetMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedhousehold {
 		edges = append(edges, mediaasset.EdgeHousehold)
 	}
 	if m.clearedrecipe {
 		edges = append(edges, mediaasset.EdgeRecipe)
+	}
+	if m.clearedstorage_object {
+		edges = append(edges, mediaasset.EdgeStorageObject)
 	}
 	return edges
 }
@@ -2583,6 +2984,8 @@ func (m *MediaAssetMutation) EdgeCleared(name string) bool {
 		return m.clearedhousehold
 	case mediaasset.EdgeRecipe:
 		return m.clearedrecipe
+	case mediaasset.EdgeStorageObject:
+		return m.clearedstorage_object
 	}
 	return false
 }
@@ -2597,6 +3000,9 @@ func (m *MediaAssetMutation) ClearEdge(name string) error {
 	case mediaasset.EdgeRecipe:
 		m.ClearRecipe()
 		return nil
+	case mediaasset.EdgeStorageObject:
+		m.ClearStorageObject()
+		return nil
 	}
 	return fmt.Errorf("unknown MediaAsset unique edge %s", name)
 }
@@ -2610,6 +3016,9 @@ func (m *MediaAssetMutation) ResetEdge(name string) error {
 		return nil
 	case mediaasset.EdgeRecipe:
 		m.ResetRecipe()
+		return nil
+	case mediaasset.EdgeStorageObject:
+		m.ResetStorageObject()
 		return nil
 	}
 	return fmt.Errorf("unknown MediaAsset edge %s", name)
@@ -9390,23 +9799,25 @@ func (m *RecipeStepMutation) ResetEdge(name string) error {
 // RefreshSessionMutation represents an operation that mutates the RefreshSession nodes in the graph.
 type RefreshSessionMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *string
-	created_at    *time.Time
-	updated_at    *time.Time
-	token_hash    *string
-	expires_at    *time.Time
-	revoked       *bool
-	device_info   *string
-	ip_address    *string
-	last_used_at  *time.Time
-	clearedFields map[string]struct{}
-	user          *string
-	cleareduser   bool
-	done          bool
-	oldValue      func(context.Context) (*RefreshSession, error)
-	predicates    []predicate.RefreshSession
+	op                      Op
+	typ                     string
+	id                      *string
+	created_at              *time.Time
+	updated_at              *time.Time
+	token_hash              *string
+	expires_at              *time.Time
+	revoked                 *bool
+	device_info             *string
+	ip_address              *string
+	last_used_at            *time.Time
+	clearedFields           map[string]struct{}
+	user                    *string
+	cleareduser             bool
+	active_household        *string
+	clearedactive_household bool
+	done                    bool
+	oldValue                func(context.Context) (*RefreshSession, error)
+	predicates              []predicate.RefreshSession
 }
 
 var _ ent.Mutation = (*RefreshSessionMutation)(nil)
@@ -9619,6 +10030,42 @@ func (m *RefreshSessionMutation) OldUserID(ctx context.Context) (v string, err e
 // ResetUserID resets all changes to the "user_id" field.
 func (m *RefreshSessionMutation) ResetUserID() {
 	m.user = nil
+}
+
+// SetActiveHouseholdID sets the "active_household_id" field.
+func (m *RefreshSessionMutation) SetActiveHouseholdID(s string) {
+	m.active_household = &s
+}
+
+// ActiveHouseholdID returns the value of the "active_household_id" field in the mutation.
+func (m *RefreshSessionMutation) ActiveHouseholdID() (r string, exists bool) {
+	v := m.active_household
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActiveHouseholdID returns the old "active_household_id" field's value of the RefreshSession entity.
+// If the RefreshSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RefreshSessionMutation) OldActiveHouseholdID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActiveHouseholdID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActiveHouseholdID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActiveHouseholdID: %w", err)
+	}
+	return oldValue.ActiveHouseholdID, nil
+}
+
+// ResetActiveHouseholdID resets all changes to the "active_household_id" field.
+func (m *RefreshSessionMutation) ResetActiveHouseholdID() {
+	m.active_household = nil
 }
 
 // SetTokenHash sets the "token_hash" field.
@@ -9903,6 +10350,33 @@ func (m *RefreshSessionMutation) ResetUser() {
 	m.cleareduser = false
 }
 
+// ClearActiveHousehold clears the "active_household" edge to the Household entity.
+func (m *RefreshSessionMutation) ClearActiveHousehold() {
+	m.clearedactive_household = true
+	m.clearedFields[refreshsession.FieldActiveHouseholdID] = struct{}{}
+}
+
+// ActiveHouseholdCleared reports if the "active_household" edge to the Household entity was cleared.
+func (m *RefreshSessionMutation) ActiveHouseholdCleared() bool {
+	return m.clearedactive_household
+}
+
+// ActiveHouseholdIDs returns the "active_household" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ActiveHouseholdID instead. It exists only for internal usage by the builders.
+func (m *RefreshSessionMutation) ActiveHouseholdIDs() (ids []string) {
+	if id := m.active_household; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetActiveHousehold resets all changes to the "active_household" edge.
+func (m *RefreshSessionMutation) ResetActiveHousehold() {
+	m.active_household = nil
+	m.clearedactive_household = false
+}
+
 // Where appends a list predicates to the RefreshSessionMutation builder.
 func (m *RefreshSessionMutation) Where(ps ...predicate.RefreshSession) {
 	m.predicates = append(m.predicates, ps...)
@@ -9937,7 +10411,7 @@ func (m *RefreshSessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RefreshSessionMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, refreshsession.FieldCreatedAt)
 	}
@@ -9946,6 +10420,9 @@ func (m *RefreshSessionMutation) Fields() []string {
 	}
 	if m.user != nil {
 		fields = append(fields, refreshsession.FieldUserID)
+	}
+	if m.active_household != nil {
+		fields = append(fields, refreshsession.FieldActiveHouseholdID)
 	}
 	if m.token_hash != nil {
 		fields = append(fields, refreshsession.FieldTokenHash)
@@ -9979,6 +10456,8 @@ func (m *RefreshSessionMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case refreshsession.FieldUserID:
 		return m.UserID()
+	case refreshsession.FieldActiveHouseholdID:
+		return m.ActiveHouseholdID()
 	case refreshsession.FieldTokenHash:
 		return m.TokenHash()
 	case refreshsession.FieldExpiresAt:
@@ -10006,6 +10485,8 @@ func (m *RefreshSessionMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldUpdatedAt(ctx)
 	case refreshsession.FieldUserID:
 		return m.OldUserID(ctx)
+	case refreshsession.FieldActiveHouseholdID:
+		return m.OldActiveHouseholdID(ctx)
 	case refreshsession.FieldTokenHash:
 		return m.OldTokenHash(ctx)
 	case refreshsession.FieldExpiresAt:
@@ -10047,6 +10528,13 @@ func (m *RefreshSessionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserID(v)
+		return nil
+	case refreshsession.FieldActiveHouseholdID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActiveHouseholdID(v)
 		return nil
 	case refreshsession.FieldTokenHash:
 		v, ok := value.(string)
@@ -10169,6 +10657,9 @@ func (m *RefreshSessionMutation) ResetField(name string) error {
 	case refreshsession.FieldUserID:
 		m.ResetUserID()
 		return nil
+	case refreshsession.FieldActiveHouseholdID:
+		m.ResetActiveHouseholdID()
+		return nil
 	case refreshsession.FieldTokenHash:
 		m.ResetTokenHash()
 		return nil
@@ -10193,9 +10684,12 @@ func (m *RefreshSessionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RefreshSessionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.user != nil {
 		edges = append(edges, refreshsession.EdgeUser)
+	}
+	if m.active_household != nil {
+		edges = append(edges, refreshsession.EdgeActiveHousehold)
 	}
 	return edges
 }
@@ -10208,13 +10702,17 @@ func (m *RefreshSessionMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
+	case refreshsession.EdgeActiveHousehold:
+		if id := m.active_household; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RefreshSessionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -10226,9 +10724,12 @@ func (m *RefreshSessionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RefreshSessionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.cleareduser {
 		edges = append(edges, refreshsession.EdgeUser)
+	}
+	if m.clearedactive_household {
+		edges = append(edges, refreshsession.EdgeActiveHousehold)
 	}
 	return edges
 }
@@ -10239,6 +10740,8 @@ func (m *RefreshSessionMutation) EdgeCleared(name string) bool {
 	switch name {
 	case refreshsession.EdgeUser:
 		return m.cleareduser
+	case refreshsession.EdgeActiveHousehold:
+		return m.clearedactive_household
 	}
 	return false
 }
@@ -10249,6 +10752,9 @@ func (m *RefreshSessionMutation) ClearEdge(name string) error {
 	switch name {
 	case refreshsession.EdgeUser:
 		m.ClearUser()
+		return nil
+	case refreshsession.EdgeActiveHousehold:
+		m.ClearActiveHousehold()
 		return nil
 	}
 	return fmt.Errorf("unknown RefreshSession unique edge %s", name)
@@ -10261,8 +10767,896 @@ func (m *RefreshSessionMutation) ResetEdge(name string) error {
 	case refreshsession.EdgeUser:
 		m.ResetUser()
 		return nil
+	case refreshsession.EdgeActiveHousehold:
+		m.ResetActiveHousehold()
+		return nil
 	}
 	return fmt.Errorf("unknown RefreshSession edge %s", name)
+}
+
+// StoredObjectMutation represents an operation that mutates the StoredObject nodes in the graph.
+type StoredObjectMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *string
+	created_at          *time.Time
+	updated_at          *time.Time
+	original_filename   *string
+	mime_type           *string
+	size_bytes          *int64
+	addsize_bytes       *int64
+	checksum            *string
+	content             *[]byte
+	clearedFields       map[string]struct{}
+	household           *string
+	clearedhousehold    bool
+	media_assets        map[string]struct{}
+	removedmedia_assets map[string]struct{}
+	clearedmedia_assets bool
+	done                bool
+	oldValue            func(context.Context) (*StoredObject, error)
+	predicates          []predicate.StoredObject
+}
+
+var _ ent.Mutation = (*StoredObjectMutation)(nil)
+
+// storedobjectOption allows management of the mutation configuration using functional options.
+type storedobjectOption func(*StoredObjectMutation)
+
+// newStoredObjectMutation creates new mutation for the StoredObject entity.
+func newStoredObjectMutation(c config, op Op, opts ...storedobjectOption) *StoredObjectMutation {
+	m := &StoredObjectMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeStoredObject,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withStoredObjectID sets the ID field of the mutation.
+func withStoredObjectID(id string) storedobjectOption {
+	return func(m *StoredObjectMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *StoredObject
+		)
+		m.oldValue = func(ctx context.Context) (*StoredObject, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().StoredObject.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withStoredObject sets the old StoredObject of the mutation.
+func withStoredObject(node *StoredObject) storedobjectOption {
+	return func(m *StoredObjectMutation) {
+		m.oldValue = func(context.Context) (*StoredObject, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m StoredObjectMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m StoredObjectMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("generated: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of StoredObject entities.
+func (m *StoredObjectMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *StoredObjectMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *StoredObjectMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().StoredObject.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *StoredObjectMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *StoredObjectMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the StoredObject entity.
+// If the StoredObject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoredObjectMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *StoredObjectMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *StoredObjectMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *StoredObjectMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the StoredObject entity.
+// If the StoredObject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoredObjectMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *StoredObjectMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetHouseholdID sets the "household_id" field.
+func (m *StoredObjectMutation) SetHouseholdID(s string) {
+	m.household = &s
+}
+
+// HouseholdID returns the value of the "household_id" field in the mutation.
+func (m *StoredObjectMutation) HouseholdID() (r string, exists bool) {
+	v := m.household
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHouseholdID returns the old "household_id" field's value of the StoredObject entity.
+// If the StoredObject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoredObjectMutation) OldHouseholdID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHouseholdID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHouseholdID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHouseholdID: %w", err)
+	}
+	return oldValue.HouseholdID, nil
+}
+
+// ResetHouseholdID resets all changes to the "household_id" field.
+func (m *StoredObjectMutation) ResetHouseholdID() {
+	m.household = nil
+}
+
+// SetOriginalFilename sets the "original_filename" field.
+func (m *StoredObjectMutation) SetOriginalFilename(s string) {
+	m.original_filename = &s
+}
+
+// OriginalFilename returns the value of the "original_filename" field in the mutation.
+func (m *StoredObjectMutation) OriginalFilename() (r string, exists bool) {
+	v := m.original_filename
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOriginalFilename returns the old "original_filename" field's value of the StoredObject entity.
+// If the StoredObject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoredObjectMutation) OldOriginalFilename(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOriginalFilename is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOriginalFilename requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOriginalFilename: %w", err)
+	}
+	return oldValue.OriginalFilename, nil
+}
+
+// ResetOriginalFilename resets all changes to the "original_filename" field.
+func (m *StoredObjectMutation) ResetOriginalFilename() {
+	m.original_filename = nil
+}
+
+// SetMimeType sets the "mime_type" field.
+func (m *StoredObjectMutation) SetMimeType(s string) {
+	m.mime_type = &s
+}
+
+// MimeType returns the value of the "mime_type" field in the mutation.
+func (m *StoredObjectMutation) MimeType() (r string, exists bool) {
+	v := m.mime_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMimeType returns the old "mime_type" field's value of the StoredObject entity.
+// If the StoredObject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoredObjectMutation) OldMimeType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMimeType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMimeType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMimeType: %w", err)
+	}
+	return oldValue.MimeType, nil
+}
+
+// ResetMimeType resets all changes to the "mime_type" field.
+func (m *StoredObjectMutation) ResetMimeType() {
+	m.mime_type = nil
+}
+
+// SetSizeBytes sets the "size_bytes" field.
+func (m *StoredObjectMutation) SetSizeBytes(i int64) {
+	m.size_bytes = &i
+	m.addsize_bytes = nil
+}
+
+// SizeBytes returns the value of the "size_bytes" field in the mutation.
+func (m *StoredObjectMutation) SizeBytes() (r int64, exists bool) {
+	v := m.size_bytes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSizeBytes returns the old "size_bytes" field's value of the StoredObject entity.
+// If the StoredObject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoredObjectMutation) OldSizeBytes(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSizeBytes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSizeBytes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSizeBytes: %w", err)
+	}
+	return oldValue.SizeBytes, nil
+}
+
+// AddSizeBytes adds i to the "size_bytes" field.
+func (m *StoredObjectMutation) AddSizeBytes(i int64) {
+	if m.addsize_bytes != nil {
+		*m.addsize_bytes += i
+	} else {
+		m.addsize_bytes = &i
+	}
+}
+
+// AddedSizeBytes returns the value that was added to the "size_bytes" field in this mutation.
+func (m *StoredObjectMutation) AddedSizeBytes() (r int64, exists bool) {
+	v := m.addsize_bytes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSizeBytes resets all changes to the "size_bytes" field.
+func (m *StoredObjectMutation) ResetSizeBytes() {
+	m.size_bytes = nil
+	m.addsize_bytes = nil
+}
+
+// SetChecksum sets the "checksum" field.
+func (m *StoredObjectMutation) SetChecksum(s string) {
+	m.checksum = &s
+}
+
+// Checksum returns the value of the "checksum" field in the mutation.
+func (m *StoredObjectMutation) Checksum() (r string, exists bool) {
+	v := m.checksum
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChecksum returns the old "checksum" field's value of the StoredObject entity.
+// If the StoredObject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoredObjectMutation) OldChecksum(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChecksum is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChecksum requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChecksum: %w", err)
+	}
+	return oldValue.Checksum, nil
+}
+
+// ResetChecksum resets all changes to the "checksum" field.
+func (m *StoredObjectMutation) ResetChecksum() {
+	m.checksum = nil
+}
+
+// SetContent sets the "content" field.
+func (m *StoredObjectMutation) SetContent(b []byte) {
+	m.content = &b
+}
+
+// Content returns the value of the "content" field in the mutation.
+func (m *StoredObjectMutation) Content() (r []byte, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "content" field's value of the StoredObject entity.
+// If the StoredObject object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoredObjectMutation) OldContent(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ResetContent resets all changes to the "content" field.
+func (m *StoredObjectMutation) ResetContent() {
+	m.content = nil
+}
+
+// ClearHousehold clears the "household" edge to the Household entity.
+func (m *StoredObjectMutation) ClearHousehold() {
+	m.clearedhousehold = true
+	m.clearedFields[storedobject.FieldHouseholdID] = struct{}{}
+}
+
+// HouseholdCleared reports if the "household" edge to the Household entity was cleared.
+func (m *StoredObjectMutation) HouseholdCleared() bool {
+	return m.clearedhousehold
+}
+
+// HouseholdIDs returns the "household" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// HouseholdID instead. It exists only for internal usage by the builders.
+func (m *StoredObjectMutation) HouseholdIDs() (ids []string) {
+	if id := m.household; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetHousehold resets all changes to the "household" edge.
+func (m *StoredObjectMutation) ResetHousehold() {
+	m.household = nil
+	m.clearedhousehold = false
+}
+
+// AddMediaAssetIDs adds the "media_assets" edge to the MediaAsset entity by ids.
+func (m *StoredObjectMutation) AddMediaAssetIDs(ids ...string) {
+	if m.media_assets == nil {
+		m.media_assets = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.media_assets[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMediaAssets clears the "media_assets" edge to the MediaAsset entity.
+func (m *StoredObjectMutation) ClearMediaAssets() {
+	m.clearedmedia_assets = true
+}
+
+// MediaAssetsCleared reports if the "media_assets" edge to the MediaAsset entity was cleared.
+func (m *StoredObjectMutation) MediaAssetsCleared() bool {
+	return m.clearedmedia_assets
+}
+
+// RemoveMediaAssetIDs removes the "media_assets" edge to the MediaAsset entity by IDs.
+func (m *StoredObjectMutation) RemoveMediaAssetIDs(ids ...string) {
+	if m.removedmedia_assets == nil {
+		m.removedmedia_assets = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.media_assets, ids[i])
+		m.removedmedia_assets[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMediaAssets returns the removed IDs of the "media_assets" edge to the MediaAsset entity.
+func (m *StoredObjectMutation) RemovedMediaAssetsIDs() (ids []string) {
+	for id := range m.removedmedia_assets {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MediaAssetsIDs returns the "media_assets" edge IDs in the mutation.
+func (m *StoredObjectMutation) MediaAssetsIDs() (ids []string) {
+	for id := range m.media_assets {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMediaAssets resets all changes to the "media_assets" edge.
+func (m *StoredObjectMutation) ResetMediaAssets() {
+	m.media_assets = nil
+	m.clearedmedia_assets = false
+	m.removedmedia_assets = nil
+}
+
+// Where appends a list predicates to the StoredObjectMutation builder.
+func (m *StoredObjectMutation) Where(ps ...predicate.StoredObject) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the StoredObjectMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *StoredObjectMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.StoredObject, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *StoredObjectMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *StoredObjectMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (StoredObject).
+func (m *StoredObjectMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *StoredObjectMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, storedobject.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, storedobject.FieldUpdatedAt)
+	}
+	if m.household != nil {
+		fields = append(fields, storedobject.FieldHouseholdID)
+	}
+	if m.original_filename != nil {
+		fields = append(fields, storedobject.FieldOriginalFilename)
+	}
+	if m.mime_type != nil {
+		fields = append(fields, storedobject.FieldMimeType)
+	}
+	if m.size_bytes != nil {
+		fields = append(fields, storedobject.FieldSizeBytes)
+	}
+	if m.checksum != nil {
+		fields = append(fields, storedobject.FieldChecksum)
+	}
+	if m.content != nil {
+		fields = append(fields, storedobject.FieldContent)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *StoredObjectMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case storedobject.FieldCreatedAt:
+		return m.CreatedAt()
+	case storedobject.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case storedobject.FieldHouseholdID:
+		return m.HouseholdID()
+	case storedobject.FieldOriginalFilename:
+		return m.OriginalFilename()
+	case storedobject.FieldMimeType:
+		return m.MimeType()
+	case storedobject.FieldSizeBytes:
+		return m.SizeBytes()
+	case storedobject.FieldChecksum:
+		return m.Checksum()
+	case storedobject.FieldContent:
+		return m.Content()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *StoredObjectMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case storedobject.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case storedobject.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case storedobject.FieldHouseholdID:
+		return m.OldHouseholdID(ctx)
+	case storedobject.FieldOriginalFilename:
+		return m.OldOriginalFilename(ctx)
+	case storedobject.FieldMimeType:
+		return m.OldMimeType(ctx)
+	case storedobject.FieldSizeBytes:
+		return m.OldSizeBytes(ctx)
+	case storedobject.FieldChecksum:
+		return m.OldChecksum(ctx)
+	case storedobject.FieldContent:
+		return m.OldContent(ctx)
+	}
+	return nil, fmt.Errorf("unknown StoredObject field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *StoredObjectMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case storedobject.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case storedobject.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case storedobject.FieldHouseholdID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHouseholdID(v)
+		return nil
+	case storedobject.FieldOriginalFilename:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOriginalFilename(v)
+		return nil
+	case storedobject.FieldMimeType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMimeType(v)
+		return nil
+	case storedobject.FieldSizeBytes:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSizeBytes(v)
+		return nil
+	case storedobject.FieldChecksum:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChecksum(v)
+		return nil
+	case storedobject.FieldContent:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
+		return nil
+	}
+	return fmt.Errorf("unknown StoredObject field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *StoredObjectMutation) AddedFields() []string {
+	var fields []string
+	if m.addsize_bytes != nil {
+		fields = append(fields, storedobject.FieldSizeBytes)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *StoredObjectMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case storedobject.FieldSizeBytes:
+		return m.AddedSizeBytes()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *StoredObjectMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case storedobject.FieldSizeBytes:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSizeBytes(v)
+		return nil
+	}
+	return fmt.Errorf("unknown StoredObject numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *StoredObjectMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *StoredObjectMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *StoredObjectMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown StoredObject nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *StoredObjectMutation) ResetField(name string) error {
+	switch name {
+	case storedobject.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case storedobject.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case storedobject.FieldHouseholdID:
+		m.ResetHouseholdID()
+		return nil
+	case storedobject.FieldOriginalFilename:
+		m.ResetOriginalFilename()
+		return nil
+	case storedobject.FieldMimeType:
+		m.ResetMimeType()
+		return nil
+	case storedobject.FieldSizeBytes:
+		m.ResetSizeBytes()
+		return nil
+	case storedobject.FieldChecksum:
+		m.ResetChecksum()
+		return nil
+	case storedobject.FieldContent:
+		m.ResetContent()
+		return nil
+	}
+	return fmt.Errorf("unknown StoredObject field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *StoredObjectMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.household != nil {
+		edges = append(edges, storedobject.EdgeHousehold)
+	}
+	if m.media_assets != nil {
+		edges = append(edges, storedobject.EdgeMediaAssets)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *StoredObjectMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case storedobject.EdgeHousehold:
+		if id := m.household; id != nil {
+			return []ent.Value{*id}
+		}
+	case storedobject.EdgeMediaAssets:
+		ids := make([]ent.Value, 0, len(m.media_assets))
+		for id := range m.media_assets {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *StoredObjectMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedmedia_assets != nil {
+		edges = append(edges, storedobject.EdgeMediaAssets)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *StoredObjectMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case storedobject.EdgeMediaAssets:
+		ids := make([]ent.Value, 0, len(m.removedmedia_assets))
+		for id := range m.removedmedia_assets {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *StoredObjectMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedhousehold {
+		edges = append(edges, storedobject.EdgeHousehold)
+	}
+	if m.clearedmedia_assets {
+		edges = append(edges, storedobject.EdgeMediaAssets)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *StoredObjectMutation) EdgeCleared(name string) bool {
+	switch name {
+	case storedobject.EdgeHousehold:
+		return m.clearedhousehold
+	case storedobject.EdgeMediaAssets:
+		return m.clearedmedia_assets
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *StoredObjectMutation) ClearEdge(name string) error {
+	switch name {
+	case storedobject.EdgeHousehold:
+		m.ClearHousehold()
+		return nil
+	}
+	return fmt.Errorf("unknown StoredObject unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *StoredObjectMutation) ResetEdge(name string) error {
+	switch name {
+	case storedobject.EdgeHousehold:
+		m.ResetHousehold()
+		return nil
+	case storedobject.EdgeMediaAssets:
+		m.ResetMediaAssets()
+		return nil
+	}
+	return fmt.Errorf("unknown StoredObject edge %s", name)
 }
 
 // TagMutation represents an operation that mutates the Tag nodes in the graph.

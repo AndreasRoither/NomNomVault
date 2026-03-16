@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/household"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/refreshsession"
 	"github.com/AndreasRoither/NomNomVault/backend/internal/ent/generated/user"
 )
@@ -52,6 +53,12 @@ func (_c *RefreshSessionCreate) SetNillableUpdatedAt(v *time.Time) *RefreshSessi
 // SetUserID sets the "user_id" field.
 func (_c *RefreshSessionCreate) SetUserID(v string) *RefreshSessionCreate {
 	_c.mutation.SetUserID(v)
+	return _c
+}
+
+// SetActiveHouseholdID sets the "active_household_id" field.
+func (_c *RefreshSessionCreate) SetActiveHouseholdID(v string) *RefreshSessionCreate {
+	_c.mutation.SetActiveHouseholdID(v)
 	return _c
 }
 
@@ -142,6 +149,11 @@ func (_c *RefreshSessionCreate) SetUser(v *User) *RefreshSessionCreate {
 	return _c.SetUserID(v.ID)
 }
 
+// SetActiveHousehold sets the "active_household" edge to the Household entity.
+func (_c *RefreshSessionCreate) SetActiveHousehold(v *Household) *RefreshSessionCreate {
+	return _c.SetActiveHouseholdID(v.ID)
+}
+
 // Mutation returns the RefreshSessionMutation object of the builder.
 func (_c *RefreshSessionCreate) Mutation() *RefreshSessionMutation {
 	return _c.mutation
@@ -206,6 +218,9 @@ func (_c *RefreshSessionCreate) check() error {
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`generated: missing required field "RefreshSession.user_id"`)}
 	}
+	if _, ok := _c.mutation.ActiveHouseholdID(); !ok {
+		return &ValidationError{Name: "active_household_id", err: errors.New(`generated: missing required field "RefreshSession.active_household_id"`)}
+	}
 	if _, ok := _c.mutation.TokenHash(); !ok {
 		return &ValidationError{Name: "token_hash", err: errors.New(`generated: missing required field "RefreshSession.token_hash"`)}
 	}
@@ -222,6 +237,9 @@ func (_c *RefreshSessionCreate) check() error {
 	}
 	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`generated: missing required edge "RefreshSession.user"`)}
+	}
+	if len(_c.mutation.ActiveHouseholdIDs()) == 0 {
+		return &ValidationError{Name: "active_household", err: errors.New(`generated: missing required edge "RefreshSession.active_household"`)}
 	}
 	return nil
 }
@@ -305,6 +323,23 @@ func (_c *RefreshSessionCreate) createSpec() (*RefreshSession, *sqlgraph.CreateS
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.UserID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ActiveHouseholdIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   refreshsession.ActiveHouseholdTable,
+			Columns: []string{refreshsession.ActiveHouseholdColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(household.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ActiveHouseholdID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
