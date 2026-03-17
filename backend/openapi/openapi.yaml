@@ -139,6 +139,240 @@ paths:
       summary: Fetch the active browser session
       tags:
         - auth
+  /imports:
+    get:
+      description: Return the current household import jobs using cursor pagination
+        and an optional status filter.
+      parameters:
+        - description: Cursor token
+          in: query
+          name: cursor
+          schema:
+            type: string
+        - description: Maximum number of import jobs to return
+          in: query
+          name: limit
+          schema:
+            type: integer
+        - description: Filter by import job status
+          in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.ImportJobListResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: List import jobs
+      tags:
+        - imports
+  "/imports/{jobId}":
+    get:
+      description: Return the detailed import job payload for the requested job ID.
+      parameters:
+        - description: Import job ID
+          in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.ImportJobResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Fetch an import job
+      tags:
+        - imports
+  "/imports/{jobId}/cancel":
+    post:
+      description: Cancel a queued import job for the active household before worker
+        execution starts.
+      parameters:
+        - description: Import job ID
+          in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.ImportJobResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Cancel an import job
+      tags:
+        - imports
+  "/imports/{jobId}/retry":
+    post:
+      description: Queue a new attempt for a finished import job after explicit
+        confirmation.
+      parameters:
+        - description: Import job ID
+          in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/httpapi.RetryImportJobRequest"
+        description: Retry confirmation payload
+        required: true
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.ImportJobResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Retry an import job
+      tags:
+        - imports
+  /imports/url:
+    post:
+      description: Create a source record and a queued URL import job for the active
+        household.
+      parameters:
+        - description: Client-supplied idempotency key
+          in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/httpapi.CreateURLImportRequest"
+        description: URL import payload
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.ImportJobResponse"
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/httpapi.ImportJobResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apicontract.ErrorResponse"
+      summary: Queue a URL import
+      tags:
+        - imports
   "/media/{mediaId}/original":
     get:
       description: Stream the original media bytes for the requested asset.
@@ -234,6 +468,11 @@ paths:
             type: array
             items:
               type: string
+        - description: Include draft recipes alongside published recipes
+          in: query
+          name: draft
+          schema:
+            type: boolean
       responses:
         "200":
           description: OK
@@ -703,6 +942,66 @@ components:
       required:
         - name
       type: object
+    httpapi.CreateURLImportRequest:
+      properties:
+        confirmRestart:
+          type: boolean
+        titleHint:
+          type: string
+        url:
+          type: string
+      required:
+        - url
+      type: object
+    httpapi.ImportJobListResponse:
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/httpapi.ImportJobResponse"
+          type: array
+        page:
+          $ref: "#/components/schemas/apicontract.CursorPageInfo"
+      type: object
+    httpapi.ImportJobResponse:
+      properties:
+        attemptCount:
+          type: integer
+        confidenceScore:
+          type: number
+        conflictState:
+          type: string
+        createdAt:
+          type: string
+        draftRecipeId:
+          type: string
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        finishedAt:
+          type: string
+        id:
+          type: string
+        importKind:
+          type: string
+        matchRecipeId:
+          type: string
+        normalizedPayload:
+          additionalProperties: {}
+          type: object
+        source:
+          $ref: "#/components/schemas/httpapi.SourceRecordSummary"
+        startedAt:
+          type: string
+        status:
+          type: string
+        updatedAt:
+          type: string
+        warnings:
+          items:
+            type: string
+          type: array
+      type: object
     httpapi.RecipeDetailResponse:
       properties:
         ingredients:
@@ -851,6 +1150,8 @@ components:
           type: string
         sourceUrl:
           type: string
+        status:
+          type: string
         title:
           type: string
         version:
@@ -868,6 +1169,34 @@ components:
           type: string
         system:
           type: boolean
+      type: object
+    httpapi.RetryImportJobRequest:
+      properties:
+        confirmFinished:
+          type: boolean
+      type: object
+    httpapi.SourceRecordSummary:
+      properties:
+        canonicalUrl:
+          type: string
+        createdAt:
+          type: string
+        id:
+          type: string
+        importKind:
+          type: string
+        normalizedUrl:
+          type: string
+        retentionState:
+          type: string
+        sourceType:
+          type: string
+        submittedUrl:
+          type: string
+        titleHint:
+          type: string
+        updatedAt:
+          type: string
       type: object
     httpapi.TagListResponse:
       properties:

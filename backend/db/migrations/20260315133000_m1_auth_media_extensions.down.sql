@@ -16,7 +16,7 @@ drop table if exists "stored_objects";
 drop index if exists "refreshsession_active_household_id";
 
 alter table "refresh_sessions"
-  drop constraint if exists "refresh_sessions_households_active_household";
+  drop constraint if exists "refresh_sessions_households_refresh_sessions";
 
 alter table "refresh_sessions"
   drop column if exists "active_household_id";

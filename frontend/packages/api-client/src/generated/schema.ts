@@ -297,6 +297,392 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/imports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List import jobs
+         * @description Return the current household import jobs using cursor pagination and an optional status filter.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Cursor token */
+                    cursor?: string;
+                    /** @description Maximum number of import jobs to return */
+                    limit?: number;
+                    /** @description Filter by import job status */
+                    status?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpapi.ImportJobListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/imports/{jobId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fetch an import job
+         * @description Return the detailed import job payload for the requested job ID.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Import job ID */
+                    jobId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpapi.ImportJobResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/imports/{jobId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel an import job
+         * @description Cancel a queued import job for the active household before worker execution starts.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Import job ID */
+                    jobId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpapi.ImportJobResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/imports/{jobId}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retry an import job
+         * @description Queue a new attempt for a finished import job after explicit confirmation.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Import job ID */
+                    jobId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Retry confirmation payload */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["httpapi.RetryImportJobRequest"];
+                };
+            };
+            responses: {
+                /** @description Accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpapi.ImportJobResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/imports/url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Queue a URL import
+         * @description Create a source record and a queued URL import job for the active household.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description Client-supplied idempotency key */
+                    "Idempotency-Key"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            /** @description URL import payload */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["httpapi.CreateURLImportRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpapi.ImportJobResponse"];
+                    };
+                };
+                /** @description Accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpapi.ImportJobResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apicontract.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/media/{mediaId}/original": {
         parameters: {
             query?: never;
@@ -435,14 +821,12 @@ export interface paths {
                     cursor?: string;
                     /** @description Maximum number of recipes to return */
                     limit?: number;
-                    /** @description Search by title, ingredient, cuisine, or tag */
+                    /** @description Case-insensitive recipe search query */
                     q?: string;
-                    /** @description Filter by meal type */
-                    mealType?: string;
-                    /** @description Filter by region */
-                    region?: string;
-                    /** @description Sort by recent, quick, popular, or newest */
-                    sort?: string;
+                    /** @description Repeatable tag slug filters */
+                    tag?: string[];
+                    /** @description Include draft recipes alongside published recipes */
+                    draft?: boolean;
                 };
                 header?: never;
                 path?: never;
@@ -1084,10 +1468,39 @@ export interface components {
             color?: string;
             name: string;
         };
+        "httpapi.CreateURLImportRequest": {
+            confirmRestart?: boolean;
+            titleHint?: string;
+            url: string;
+        };
+        "httpapi.ImportJobListResponse": {
+            data?: components["schemas"]["httpapi.ImportJobResponse"][];
+            page?: components["schemas"]["apicontract.CursorPageInfo"];
+        };
+        "httpapi.ImportJobResponse": {
+            attemptCount?: number;
+            confidenceScore?: number;
+            conflictState?: string;
+            createdAt?: string;
+            draftRecipeId?: string;
+            errorCode?: string;
+            errorMessage?: string;
+            finishedAt?: string;
+            id?: string;
+            importKind?: string;
+            matchRecipeId?: string;
+            normalizedPayload?: {
+                [key: string]: unknown;
+            };
+            source?: components["schemas"]["httpapi.SourceRecordSummary"];
+            startedAt?: string;
+            status?: string;
+            updatedAt?: string;
+            warnings?: string[];
+        };
         "httpapi.RecipeDetailResponse": {
             ingredients?: components["schemas"]["httpapi.RecipeIngredientItem"][];
             mediaAssets?: components["schemas"]["httpapi.RecipeMediaItem"][];
-            nutritionEntries?: components["schemas"]["httpapi.RecipeNutritionItem"][];
             nutritionEntries?: components["schemas"]["httpapi.RecipeNutritionItem"][];
             recipe?: components["schemas"]["httpapi.RecipeSummary"];
             steps?: components["schemas"]["httpapi.RecipeStepItem"][];
@@ -1107,7 +1520,6 @@ export interface components {
         };
         "httpapi.RecipeMediaItem": {
             altText?: string;
-            altText?: string;
             checksum?: string;
             id?: string;
             mediaType?: string;
@@ -1115,23 +1527,7 @@ export interface components {
             originalFilename?: string;
             sizeBytes?: number;
             sortOrder?: number;
-            sortOrder?: number;
             storedAt?: string;
-            thumbnailUrl?: string;
-            url?: string;
-        };
-        "httpapi.RecipeNutritionItem": {
-            carbohydrates?: number;
-            energyKcal?: number;
-            fat?: number;
-            fiber?: number;
-            id?: string;
-            protein?: number;
-            referenceQuantity?: string;
-            salt?: number;
-            saturatedFat?: number;
-            sodium?: number;
-            sugars?: number;
             thumbnailUrl?: string;
             url?: string;
         };
@@ -1158,26 +1554,20 @@ export interface components {
         "httpapi.RecipeSummary": {
             allergens?: string[];
             caloriesPerServe?: number;
-            allergens?: string[];
-            caloriesPerServe?: number;
             cookMinutes?: number;
-            cuisine?: string;
             cuisine?: string;
             description?: string;
             difficulty?: string;
             galleryMediaIds?: string[];
-            difficulty?: string;
-            galleryMediaIds?: string[];
             id?: string;
-            mealType?: string;
             mealType?: string;
             prepMinutes?: number;
             primaryMediaId?: string;
             region?: string;
-            region?: string;
             servings?: number;
             sourceCapturedAt?: string;
             sourceUrl?: string;
+            status?: string;
             title?: string;
             version?: number;
         };
@@ -1187,6 +1577,21 @@ export interface components {
             name?: string;
             slug?: string;
             system?: boolean;
+        };
+        "httpapi.RetryImportJobRequest": {
+            confirmFinished?: boolean;
+        };
+        "httpapi.SourceRecordSummary": {
+            canonicalUrl?: string;
+            createdAt?: string;
+            id?: string;
+            importKind?: string;
+            normalizedUrl?: string;
+            retentionState?: string;
+            sourceType?: string;
+            submittedUrl?: string;
+            titleHint?: string;
+            updatedAt?: string;
         };
         "httpapi.TagListResponse": {
             data?: components["schemas"]["httpapi.RecipeTagItem"][];

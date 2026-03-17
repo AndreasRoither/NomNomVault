@@ -72,7 +72,7 @@ create table "import_jobs" (
     foreign key ("requested_by_user_id") references "users" ("id") on delete no action
 );
 
-create index "importjob_household_id_requested_by_user_id_import_kind_idempotency_key" on "import_jobs" ("household_id", "requested_by_user_id", "import_kind", "idempotency_key");
+create index "importjob_household_id_request_d1fdc51a9411be21844c964f037857c1" on "import_jobs" ("household_id", "requested_by_user_id", "import_kind", "idempotency_key");
 create index "importjob_household_id_import_kind_fallback_fingerprint" on "import_jobs" ("household_id", "import_kind", "fallback_fingerprint");
 create index "importjob_household_id_status_created_at" on "import_jobs" ("household_id", "status", "created_at");
 create index "importjob_source_record_id_created_at" on "import_jobs" ("source_record_id", "created_at");

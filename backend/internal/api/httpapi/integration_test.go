@@ -495,7 +495,7 @@ func TestMediaDownloadSanitizesFilenameHeader(t *testing.T) {
 	createResponse.Body.Close()
 
 	csrfToken = currentCookieValue(t, client, env.server.URL, "/", authsvc.CSRFCookieName)
-	uploadResponse := doMultipartNamed(t, client, env.server.URL+"/api/v1/recipes/"+createBody.Recipe.ID+"/media", csrfToken, "bad\r\nname\\\".png")
+	uploadResponse := doMultipartNamed(t, client, env.server.URL+"/api/v1/recipes/"+createBody.Recipe.ID+"/media", csrfToken, "safe.png")
 	if uploadResponse.StatusCode != http.StatusCreated {
 		body, _ := io.ReadAll(uploadResponse.Body)
 		t.Fatalf("expected media upload success, got %d body=%s", uploadResponse.StatusCode, string(body))
@@ -508,6 +508,12 @@ func TestMediaDownloadSanitizesFilenameHeader(t *testing.T) {
 		t.Fatalf("decode upload response: %v", err)
 	}
 	uploadResponse.Body.Close()
+
+	if err := env.db.MediaAsset.UpdateOneID(mediaBody.ID).
+		SetOriginalFilename("bad\r\nname/\\\".png").
+		Exec(context.Background()); err != nil {
+		t.Fatalf("set unsafe media filename: %v", err)
+	}
 
 	mediaRequest, err := http.NewRequest(http.MethodGet, env.server.URL+"/api/v1/media/"+mediaBody.ID+"/original", nil)
 	if err != nil {

@@ -17,7 +17,7 @@ alter table "refresh_sessions"
   alter column "active_household_id" set not null;
 
 alter table "refresh_sessions"
-  add constraint "refresh_sessions_households_active_household"
+  add constraint "refresh_sessions_households_refresh_sessions"
   foreign key ("active_household_id") references "households" ("id") on delete no action;
 
 create index "refreshsession_active_household_id" on "refresh_sessions" ("active_household_id");
