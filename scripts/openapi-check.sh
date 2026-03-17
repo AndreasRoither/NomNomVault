@@ -8,7 +8,7 @@ ROOT_DIR="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
 
 require_cmd git
 
-"$SCRIPT_DIR/openapi-generate.sh"
+sh "$SCRIPT_DIR/openapi-generate.sh"
 
 status="$(
   cd "$ROOT_DIR"

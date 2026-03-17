@@ -69,7 +69,7 @@ ent-generate:
 
 # Generate a new golang-migrate migration pair from the current Ent schema.
 db-diff name:
-    @./scripts/db-diff.sh {{ name }}
+    @sh ./scripts/db-diff.sh {{ name }}
 
 # Apply checked-in golang-migrate migrations to the configured database.
 db-apply:
@@ -77,7 +77,7 @@ db-apply:
 
 # Verify golang-migrate migrations and Ent schema drift against a disposable Postgres instance.
 db-verify:
-    @./scripts/db-verify.sh
+    @sh ./scripts/db-verify.sh
 
 # Check backend formatting.
 backend-lint:
@@ -155,11 +155,11 @@ grocery-check:
 
 # Generate the committed OpenAPI spec and TypeScript schema artifacts.
 openapi-generate:
-    @./scripts/openapi-generate.sh
+    @sh ./scripts/openapi-generate.sh
 
 # Regenerate OpenAPI artifacts and fail on drift.
 openapi-check:
-    @./scripts/openapi-check.sh
+    @sh ./scripts/openapi-check.sh
 
 # Start the full local Docker Compose stack.
 compose-up:
