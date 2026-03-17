@@ -32,7 +32,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.5",
+    "@biomejs/biome": "2.4.7",
     "@solidjs/testing-library": "latest",
     "@tanstack/devtools-vite": "latest",
     "jsdom": "latest",

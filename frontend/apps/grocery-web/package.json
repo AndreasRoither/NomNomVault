@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@solidjs/testing-library": "latest",
-    "@biomejs/biome": "2.4.5",
+    "@biomejs/biome": "2.4.7",
     "@tanstack/devtools-vite": "latest",
     "jsdom": "latest",
     "nitro": "latest",
