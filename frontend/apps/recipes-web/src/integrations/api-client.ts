@@ -37,30 +37,18 @@ async function resolveServerRelativeUrl(path: string) {
 		return new URL(path, env.VITE_API_BASE_URL).toString();
 	}
 
-	try {
-		const { getRequest } = await import("@tanstack/solid-start/server");
-		const requestUrl = new URL(getRequest().url);
-		const baseUrl = resolveApiBaseUrlForHost(requestUrl.hostname);
+	if (env.SERVER_URL) {
+		const serverUrl = new URL(env.SERVER_URL);
+		const baseUrl = resolveApiBaseUrlForHost(serverUrl.hostname);
 
 		if (baseUrl.startsWith("http://") || baseUrl.startsWith("https://")) {
 			return new URL(path, baseUrl).toString();
 		}
 
-		return new URL(path, requestUrl.origin).toString();
-	} catch {
-		if (env.SERVER_URL) {
-			const serverUrl = new URL(env.SERVER_URL);
-			const baseUrl = resolveApiBaseUrlForHost(serverUrl.hostname);
-
-			if (baseUrl.startsWith("http://") || baseUrl.startsWith("https://")) {
-				return new URL(path, baseUrl).toString();
-			}
-
-			return new URL(path, serverUrl.origin).toString();
-		}
-
-		return new URL(path, localApiBaseUrl).toString();
+		return new URL(path, serverUrl.origin).toString();
 	}
+
+	return new URL(path, localApiBaseUrl).toString();
 }
 
 const ssrAwareFetch: typeof fetch = async (input, init) => {

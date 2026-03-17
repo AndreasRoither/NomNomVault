@@ -9,6 +9,10 @@ import { mapRecipeDetailToVM } from "../features/recipes/view-models/map-recipe-
 
 export const Route = createFileRoute("/app/recipes/$recipeId")({
 	loader: async ({ context, params }) => {
+		if (context.backendAvailable === false) {
+			return null;
+		}
+
 		try {
 			const response = await context.queryClient.ensureQueryData(
 				recipeDetailQueryOptions(context.apiClient, params.recipeId),
@@ -30,6 +34,10 @@ export const Route = createFileRoute("/app/recipes/$recipeId")({
 
 function RecipeDetailRouteComponent() {
 	const recipe = Route.useLoaderData();
+
+	if (recipe() == null) {
+		return <RecipeDetailError />;
+	}
 
 	onMount(() => {
 		writeRecentRecipeId(recipe().id);

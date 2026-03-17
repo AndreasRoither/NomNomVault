@@ -10,7 +10,7 @@ import type { JSX } from "solid-js";
 import { buildRecipeWorkspaceNav } from "../recipes/config/recipe-nav";
 
 type RecipesAppShellProps = {
-	session: AuthSessionResponse;
+	session?: AuthSessionResponse;
 	children: JSX.Element;
 };
 
@@ -25,10 +25,10 @@ export function RecipesAppShell(props: RecipesAppShellProps) {
 					brandHref="/"
 					brandLabel="NomNomVault"
 					items={nav().items}
-					householdName={props.session.activeHousehold?.name}
+					householdName={props.session?.activeHousehold?.name}
 					secondaryItems={nav().secondaryItems}
-					accountName={props.session.user?.displayName}
-					accountEmail={props.session.user?.email}
+					accountName={props.session?.user?.displayName}
+					accountEmail={props.session?.user?.email}
 					actions={<ThemeToggle />}
 				/>
 			}

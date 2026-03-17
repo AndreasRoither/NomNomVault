@@ -23,6 +23,13 @@ export const Route = createFileRoute("/app/recipes/")({
 		sort: search.sort ?? "recent",
 	}),
 	loader: async ({ context, deps }) => {
+		if (context.backendAvailable === false) {
+			return {
+				cards: [],
+				search: deps,
+			};
+		}
+
 		const response = await context.queryClient.ensureQueryData(
 			recipeListQueryOptions(context.apiClient, {
 				q: deps.q,
@@ -43,8 +50,10 @@ export const Route = createFileRoute("/app/recipes/")({
 });
 
 function RecipesIndexPage() {
+	const context = Route.useRouteContext();
 	const navigate = Route.useNavigate();
 	const data = Route.useLoaderData();
+
 	const controller = createRecipesHomeController({
 		cards: () => data().cards,
 		search: () => data().search,

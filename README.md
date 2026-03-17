@@ -84,12 +84,19 @@ just infra-up
 just db-apply
 ```
 
+Optional: copy the backend env template if you want to override the local defaults:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
 Run the API locally:
 
 ```bash
-cd backend
-go run ./cmd/api
+just backend-dev
 ```
+
+`just backend-dev` loads `.env` and `backend/.env` when present, and falls back to the local PostgreSQL URL used elsewhere in the repo.
 
 Run the worker locally when needed:
 

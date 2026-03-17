@@ -6,6 +6,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	entsql "entgo.io/ent/dialect/sql"
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
 
@@ -39,10 +41,13 @@ func main() {
 		log.Fatalf("load config: %v", err)
 	}
 
-	db, err := ent.Open("pgx", cfg.DatabaseURL)
+	rawDB, err := sql.Open("pgx", cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("open database: %v", err)
 	}
+	defer rawDB.Close()
+
+	db := ent.NewClient(ent.Driver(entsql.OpenDB("postgres", rawDB)))
 	defer db.Close()
 
 	router := gin.New()

@@ -24,6 +24,15 @@ recipes-dev:
 grocery-dev:
     @just --justfile frontend/apps/grocery-web/justfile dev
 
+# Start only the backend API development server.
+backend-dev:
+    @set -a; \
+    if [ -f .env ]; then . ./.env; fi; \
+    if [ -f backend/.env ]; then . ./backend/.env; fi; \
+    set +a; \
+    export DATABASE_URL="$${DATABASE_URL:-{{ default_database_url }}}"; \
+    cd backend && exec go run ./cmd/api
+
 # Start only the local infrastructure needed for development.
 infra-up:
     @docker compose up -d postgres
