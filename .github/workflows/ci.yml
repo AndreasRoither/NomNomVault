@@ -96,7 +96,7 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - uses: taiki-e/install-action@v2.68.34
+      - uses: taiki-e/install-action@v2.69.6
         with:
           tool: just
       - run: pnpm install --frozen-lockfile
@@ -114,7 +114,7 @@ jobs:
           go-version: '1.26.1'
           go-version-file: backend/go.mod
           cache-dependency-path: backend/go.sum
-      - uses: taiki-e/install-action@v2.68.34
+      - uses: taiki-e/install-action@v2.69.6
         with:
           tool: just
       - run: go install -tags "postgres" github.com/golang-migrate/migrate/v4/cmd/migrate@v4.19.1
@@ -144,7 +144,7 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      - uses: taiki-e/install-action@v2.68.34
+      - uses: taiki-e/install-action@v2.69.6
         with:
           tool: just
       - run: pnpm install --frozen-lockfile
