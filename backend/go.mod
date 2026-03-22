@@ -10,7 +10,7 @@ require (
 	github.com/jackc/pgx/v5 v5.9.0
 	golang.org/x/crypto v0.49.0
 	golang.org/x/image v0.37.0
-	modernc.org/sqlite v1.46.2
+	modernc.org/sqlite v1.47.0
 )
 
 require (
